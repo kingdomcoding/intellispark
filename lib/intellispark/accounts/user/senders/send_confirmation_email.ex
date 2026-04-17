@@ -1,10 +1,10 @@
 defmodule Intellispark.Accounts.User.Senders.SendConfirmationEmail do
   use AshAuthentication.Sender
+  use IntellisparkWeb, :verified_routes
 
   import Swoosh.Email
 
   alias Intellispark.Mailer
-  alias IntellisparkWeb.Endpoint
 
   def send(user, token, _opts) do
     new()
@@ -29,6 +29,6 @@ defmodule Intellispark.Accounts.User.Senders.SendConfirmationEmail do
   end
 
   defp confirm_url(token) do
-    Endpoint.url() <> "/auth/user/confirm_new_user?confirm=" <> URI.encode_www_form(token)
+    url(~p"/confirm_new_user/#{token}")
   end
 end

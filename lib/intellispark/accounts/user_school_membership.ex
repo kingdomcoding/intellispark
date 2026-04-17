@@ -47,6 +47,7 @@ defmodule Intellispark.Accounts.UserSchoolMembership do
     defaults [:read, :destroy]
 
     create :create do
+      primary? true
       accept [:user_id, :school_id, :role, :source]
     end
 

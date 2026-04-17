@@ -25,6 +25,7 @@ defmodule Intellispark.Accounts.SchoolTerm do
     defaults [:read, :destroy]
 
     create :create do
+      primary? true
       accept [:name, :starts_on, :ends_on, :is_current?, :school_id]
     end
 

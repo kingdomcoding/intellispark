@@ -1,5 +1,11 @@
 import Config
 
+System.put_env(
+  "TOKEN_SIGNING_SECRET",
+  System.get_env("TOKEN_SIGNING_SECRET") ||
+    "test-token-signing-secret-deterministic-and-not-for-production-use"
+)
+
 config :intellispark, Intellispark.Repo,
   username: System.get_env("POSTGRES_USER", "postgres"),
   password: System.get_env("POSTGRES_PASSWORD", "postgres"),

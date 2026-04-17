@@ -26,6 +26,7 @@ defmodule Intellispark.Accounts.District do
     defaults [:read, :destroy]
 
     create :create do
+      primary? true
       accept [:name, :slug]
     end
 

@@ -1,10 +1,10 @@
 defmodule Intellispark.Accounts.User.Senders.SendPasswordResetEmail do
   use AshAuthentication.Sender
+  use IntellisparkWeb, :verified_routes
 
   import Swoosh.Email
 
   alias Intellispark.Mailer
-  alias IntellisparkWeb.Endpoint
 
   def send(user, token, _opts) do
     new()
@@ -30,7 +30,7 @@ defmodule Intellispark.Accounts.User.Senders.SendPasswordResetEmail do
   end
 
   defp reset_url(token) do
-    Endpoint.url() <> "/auth/user/password/reset?token=" <> URI.encode_www_form(token)
+    url(~p"/password-reset/#{token}")
   end
 
   defp display_name(user) do

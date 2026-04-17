@@ -27,6 +27,7 @@ defmodule Intellispark.Accounts.School do
     defaults [:read, :destroy]
 
     create :create do
+      primary? true
       accept [:name, :slug, :district_id]
     end
 
