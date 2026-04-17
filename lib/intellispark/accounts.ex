@@ -1,8 +1,50 @@
 defmodule Intellispark.Accounts do
-  use Ash.Domain, otp_app: :intellispark
+  use Ash.Domain,
+    otp_app: :intellispark,
+    extensions: [AshAuthentication.Domain]
 
   resources do
-    # Resources added in later phases — each wrapped with a `define` block
-    # that exposes its code interface on the domain (Convention B).
+    resource Intellispark.Accounts.User do
+      define :list_users, action: :read
+      define :get_user_by_id, action: :read, get_by: [:id]
+      define :update_profile, action: :update_profile
+    end
+
+    resource Intellispark.Accounts.Token
+
+    resource Intellispark.Accounts.District do
+      define :create_district, action: :create, args: [:name, :slug]
+      define :list_districts, action: :read
+      define :get_district_by_id, action: :read, get_by: [:id]
+    end
+
+    resource Intellispark.Accounts.School do
+      define :create_school, action: :create, args: [:name, :slug, :district_id]
+      define :list_schools, action: :read
+      define :get_school_by_id, action: :read, get_by: [:id]
+    end
+
+    resource Intellispark.Accounts.SchoolTerm do
+      define :create_term,
+        action: :create,
+        args: [:name, :starts_on, :ends_on, :is_current?, :school_id]
+
+      define :mark_current_term, action: :mark_current
+    end
+
+    resource Intellispark.Accounts.UserSchoolMembership do
+      define :create_membership,
+        action: :create,
+        args: [:user_id, :school_id, :role, :source]
+
+      define :list_memberships_for_user, action: :read
+      define :update_membership_role, action: :update_role
+    end
+
+    resource Intellispark.Accounts.User.Version
+    resource Intellispark.Accounts.District.Version
+    resource Intellispark.Accounts.School.Version
+    resource Intellispark.Accounts.SchoolTerm.Version
+    resource Intellispark.Accounts.UserSchoolMembership.Version
   end
 end

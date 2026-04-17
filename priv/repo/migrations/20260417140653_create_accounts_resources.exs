@@ -121,7 +121,9 @@ defmodule Intellispark.Repo.Migrations.CreateAccountsResources do
           name: "user_school_memberships_user_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(:school_id, :uuid, null: false)
     end
@@ -275,7 +277,9 @@ defmodule Intellispark.Repo.Migrations.CreateAccountsResources do
           name: "school_terms_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
     end
 
     create table(:districts_versions, primary_key: false) do
