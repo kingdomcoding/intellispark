@@ -40,7 +40,7 @@ defmodule IntellisparkWeb.LiveUserAuth do
   defp assign_current_user(socket, session) do
     case session_user(session) do
       {:ok, user} ->
-        user = Ash.load!(user, [:school_memberships], authorize?: false)
+        user = Ash.load!(user, [school_memberships: [:school]], authorize?: false)
         assign(socket, :current_user, user)
 
       :error ->

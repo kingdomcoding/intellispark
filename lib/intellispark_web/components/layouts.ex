@@ -8,6 +8,7 @@ defmodule IntellisparkWeb.Layouts do
 
   attr :flash, :map, required: true
   attr :current_scope, :map, default: nil
+  attr :current_user, :map, default: nil
   attr :current_school, :map, default: nil
   attr :breadcrumb, :map, default: nil
   slot :inner_block, required: true
@@ -30,9 +31,7 @@ defmodule IntellisparkWeb.Layouts do
         </div>
 
         <div class="flex items-center gap-sm">
-          <span :if={@current_school} class="text-azure text-sm">
-            {@current_school.name}
-          </span>
+          <.school_switcher current_user={@current_user} current_school={@current_school} />
           <a href="#" aria-label="Settings" class="text-azure hover:text-abbey">
             <span class="hero-cog-6-tooth"></span>
           </a>
@@ -50,6 +49,69 @@ defmodule IntellisparkWeb.Layouts do
     </main>
     """
   end
+
+  attr :current_user, :map, default: nil
+  attr :current_school, :map, default: nil
+
+  defp school_switcher(%{current_school: nil} = assigns), do: ~H""
+
+  defp school_switcher(assigns) do
+    memberships = (assigns.current_user && assigns.current_user.school_memberships) || []
+    multi? = length(memberships) > 1
+    assigns = assign(assigns, multi?: multi?, memberships: memberships)
+
+    ~H"""
+    <div class="relative">
+      <button
+        :if={@multi?}
+        type="button"
+        phx-click={JS.toggle(to: "#school-switcher-menu")}
+        class="text-azure text-sm hover:text-abbey inline-flex items-center gap-1"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        {@current_school.name}
+        <span class="hero-chevron-down-mini"></span>
+      </button>
+      <span :if={!@multi?} class="text-azure text-sm">{@current_school.name}</span>
+
+      <div
+        :if={@multi?}
+        id="school-switcher-menu"
+        class="hidden absolute right-0 mt-1 w-64 rounded-card bg-white shadow-elevated py-1 z-10"
+        role="menu"
+      >
+        <form
+          :for={membership <- @memberships}
+          action={~p"/set-school"}
+          method="post"
+          class="w-full"
+        >
+          <input
+            type="hidden"
+            name="_csrf_token"
+            value={Plug.CSRFProtection.get_csrf_token()}
+          />
+          <input type="hidden" name="school_id" value={membership.school_id} />
+          <button
+            type="submit"
+            class={[
+              "w-full text-left px-md py-xs text-sm hover:bg-whitesmoke",
+              membership.school_id == @current_school.id && "bg-whitesmoke"
+            ]}
+            role="menuitem"
+          >
+            <span class="block">{membership_label(membership)}</span>
+            <span class="block text-xs text-azure capitalize">{membership.role}</span>
+          </button>
+        </form>
+      </div>
+    </div>
+    """
+  end
+
+  defp membership_label(%{school: %{name: name}}) when is_binary(name), do: name
+  defp membership_label(%{school_id: id}), do: "School #{String.slice(to_string(id), 0..7)}"
 
   attr :flash, :map, required: true
   attr :id, :string, default: "flash-group"
