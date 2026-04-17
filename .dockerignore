@@ -1,0 +1,16 @@
+_build/
+deps/
+.elixir_ls/
+.git/
+.github/
+cover/
+doc/
+docker-compose*.yml
+Dockerfile
+priv/static/assets/
+.DS_Store
+.env
+.envrc
+*.log
+node_modules/
+assets/node_modules/
