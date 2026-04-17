@@ -82,7 +82,7 @@ defmodule IntellisparkWeb do
       use Gettext, backend: IntellisparkWeb.Gettext
 
       import Phoenix.HTML
-      import IntellisparkWeb.CoreComponents
+      import IntellisparkWeb.CoreComponents, except: [button: 1, modal: 1]
       import IntellisparkWeb.BrandComponents
       import IntellisparkWeb.UI.Button
       import IntellisparkWeb.UI.Card
