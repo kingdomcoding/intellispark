@@ -18,10 +18,18 @@ defmodule IntellisparkWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/styleguide", StyleguideLive
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", IntellisparkWeb do
-  #   pipe_through :api
-  # end
+  scope "/", IntellisparkWeb do
+    pipe_through :api
+    get "/healthz", HealthController, :check
+  end
+
+  if Application.compile_env(:intellispark, :dev_routes) do
+    scope "/dev" do
+      pipe_through :browser
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+  end
 end
