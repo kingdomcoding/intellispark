@@ -25,6 +25,8 @@ defmodule Intellispark.Resource do
         change_tracking_mode :snapshot
         store_action_name? true
         ignore_attributes [:inserted_at, :updated_at]
+        version_extensions authorizers: [Ash.Policy.Authorizer]
+        mixin Intellispark.PaperTrail.VersionPolicies
       end
 
       pub_sub do
