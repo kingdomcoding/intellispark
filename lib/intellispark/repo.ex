@@ -1,0 +1,11 @@
+defmodule Intellispark.Repo do
+  use AshPostgres.Repo, otp_app: :intellispark
+
+  def installed_extensions do
+    ["ash-functions", "uuid-ossp", "citext", "pg_trgm"]
+  end
+
+  def min_pg_version do
+    %Version{major: 16, minor: 0, patch: 0}
+  end
+end

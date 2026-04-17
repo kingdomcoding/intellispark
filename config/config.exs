@@ -1,16 +1,26 @@
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Config module.
-#
-# This configuration file is loaded before any dependency and
-# is restricted to this project.
-
-# General application configuration
 import Config
 
 config :intellispark,
-  generators: [timestamp_type: :utc_datetime, binary_id: true]
+  ecto_repos: [Intellispark.Repo],
+  generators: [binary_id: true, timestamp_type: :utc_datetime_usec],
+  ash_domains: [
+    Intellispark.Accounts,
+    Intellispark.Students,
+    Intellispark.Support,
+    Intellispark.Recognition,
+    Intellispark.Assessments,
+    Intellispark.Indicators,
+    Intellispark.Teams,
+    Intellispark.Integrations,
+    Intellispark.Automations
+  ]
 
-# Configure the endpoint
+config :ash, :include_embedded_source_by_default?, false
+config :ash, :default_page_type, :keyset
+config :ash, :policies, no_filter_static_forbidden_reads?: false
+
+config :spark, Spark.Formatter, remove_parens?: true
+
 config :intellispark, IntellisparkWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
@@ -21,7 +31,6 @@ config :intellispark, IntellisparkWeb.Endpoint,
   pubsub_server: Intellispark.PubSub,
   live_view: [signing_salt: "yO1Ofkin"]
 
-# Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
   intellispark: [
@@ -31,7 +40,6 @@ config :esbuild,
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
 
-# Configure tailwind (the version is required)
 config :tailwind,
   version: "4.1.12",
   intellispark: [
@@ -42,14 +50,26 @@ config :tailwind,
     cd: Path.expand("..", __DIR__)
   ]
 
-# Configure Elixir's Logger
+config :intellispark, Oban,
+  engine: Oban.Engines.Basic,
+  notifier: Oban.Notifiers.PG,
+  queues: [
+    default: 10,
+    emails: 20,
+    ingestion: 5,
+    notifications: 20,
+    indicators: 10
+  ],
+  repo: Intellispark.Repo,
+  plugins: [
+    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
+    {Oban.Plugins.Lifeline, rescue_after: :timer.minutes(30)}
+  ]
+
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-# Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
