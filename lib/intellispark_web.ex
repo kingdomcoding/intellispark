@@ -79,19 +79,20 @@ defmodule IntellisparkWeb do
 
   defp html_helpers do
     quote do
-      # Translation
       use Gettext, backend: IntellisparkWeb.Gettext
 
-      # HTML escaping functionality
       import Phoenix.HTML
-      # Core UI components
       import IntellisparkWeb.CoreComponents
+      import IntellisparkWeb.BrandComponents
+      import IntellisparkWeb.UI.Button
+      import IntellisparkWeb.UI.Card
+      import IntellisparkWeb.UI.Chips
+      import IntellisparkWeb.UI.Modal
+      import IntellisparkWeb.UI.Presentational
 
-      # Common modules used in templates
       alias Phoenix.LiveView.JS
       alias IntellisparkWeb.Layouts
 
-      # Routes generation with the ~p sigil
       unquote(verified_routes())
     end
   end
