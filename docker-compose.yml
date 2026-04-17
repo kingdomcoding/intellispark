@@ -1,22 +1,4 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./priv/repo/init:/docker-entrypoint-initdb.d:ro
-    ports:
-      - "127.0.0.1:5432:5432"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   app:
     build:
       context: .
@@ -24,14 +6,11 @@ services:
       target: ${APP_TARGET:-dev}
     image: intellispark:${APP_TARGET:-dev}
     env_file: .env
-    environment:
-      DATABASE_URL: "ecto://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}"
-      POSTGRES_HOST: postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports:
-      - "127.0.0.1:4000:4000"
+    # Share the host's network namespace so the app reaches the shared
+    # host Postgres at localhost:5432 directly (no bridge DNS, no port
+    # publishing). The container effectively IS the host at the network
+    # layer — Phoenix binds to the host's ${PORT:-4800} directly.
+    network_mode: host
     restart: unless-stopped
     volumes:
       - .:/app
@@ -39,14 +18,13 @@ services:
       - build:/app/_build
       - static_assets:/app/priv/static/assets
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:4000/healthz"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:4800/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 30s
 
 volumes:
-  postgres_data:
   deps:
   build:
   static_assets:

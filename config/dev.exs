@@ -12,7 +12,7 @@ config :intellispark, Intellispark.Repo,
 config :intellispark, Intellispark.Mailer, adapter: Swoosh.Adapters.Local
 
 config :intellispark, IntellisparkWeb.Endpoint,
-  http: [ip: {0, 0, 0, 0}, port: 4000],
+  http: [ip: {0, 0, 0, 0}, port: String.to_integer(System.get_env("PORT", "4800"))],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,

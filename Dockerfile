@@ -24,7 +24,7 @@ RUN mix deps.compile
 FROM base AS dev
 
 ENV MIX_ENV=dev
-EXPOSE 4000
+EXPOSE 4800
 CMD ["mix", "phx.server"]
 
 # ----- Stage 3: builder -----
@@ -55,7 +55,7 @@ RUN addgroup -S app && adduser -S -G app app && chown app:app /app
 COPY --from=builder --chown=app:app /app/_build/prod/rel/intellispark ./
 
 USER app
-EXPOSE 4000
+EXPOSE 4800
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["sh", "-c", "/app/bin/intellispark eval 'Intellispark.Release.migrate()' && /app/bin/intellispark start"]

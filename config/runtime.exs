@@ -5,7 +5,7 @@ if System.get_env("PHX_SERVER") do
 end
 
 config :intellispark, IntellisparkWeb.Endpoint,
-  http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+  http: [port: String.to_integer(System.get_env("PORT", "4800"))]
 
 if config_env() == :prod do
   database_url =
@@ -30,7 +30,7 @@ if config_env() == :prod do
       """
 
   host = System.get_env("PHX_HOST") || "example.com"
-  port = String.to_integer(System.get_env("PORT") || "4000")
+  port = String.to_integer(System.get_env("PORT") || "4800")
 
   config :intellispark, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 

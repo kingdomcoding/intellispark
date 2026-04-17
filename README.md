@@ -24,9 +24,9 @@ docker compose exec app mix ash.setup
 ```
 
 Then open:
-- <http://localhost:4000> — placeholder landing page
-- <http://localhost:4000/styleguide> — every design primitive
-- <http://localhost:4000/dev/mailbox> — Swoosh local mailbox preview
+- <http://localhost:4800> — placeholder landing page
+- <http://localhost:4800/styleguide> — every design primitive
+- <http://localhost:4800/dev/mailbox> — Swoosh local mailbox preview
 
 Edit source on the host; the `.:/app` mount + `inotify-tools` in the dev image propagate changes immediately via Phoenix LiveReload.
 
