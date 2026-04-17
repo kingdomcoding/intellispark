@@ -64,6 +64,7 @@ defmodule Intellispark.MixProject do
       {:ash_authentication, "~> 4.13"},
       {:ash_authentication_phoenix, "~> 2.16"},
       {:bcrypt_elixir, "~> 3.1"},
+      {:picosat_elixir, "~> 0.2"},
       {:ash_oban, "~> 0.8"},
       {:ash_paper_trail, "~> 0.5"},
       {:ash_archival, "~> 2.0"},
