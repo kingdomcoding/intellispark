@@ -28,3 +28,5 @@ config :phoenix, :plug_init_mode, :runtime
 config :phoenix_live_view, enable_expensive_runtime_checks: true
 
 config :phoenix, sort_verified_routes_query_params: true
+
+config :intellispark, Oban, testing: :manual
