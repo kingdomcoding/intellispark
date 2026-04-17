@@ -47,8 +47,10 @@ defmodule IntellisparkWeb.UI.Card do
     <button
       class={[
         "inline-flex items-center gap-1 rounded-pill border px-4 py-1.5 text-sm font-medium transition-colors",
-        @variant == :white && "bg-white text-brand border-brand/20 hover:border-brand hover:bg-brand/5",
-        @variant == :navy && "bg-transparent text-white border-white/40 hover:border-white hover:bg-white/10"
+        @variant == :white &&
+          "bg-white text-brand border-brand/20 hover:border-brand hover:bg-brand/5",
+        @variant == :navy &&
+          "bg-transparent text-white border-white/40 hover:border-white hover:bg-white/10"
       ]}
       {@rest}
     >
