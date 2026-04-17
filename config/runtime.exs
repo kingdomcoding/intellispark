@@ -42,6 +42,4 @@ if config_env() == :prod do
   config :intellispark, Intellispark.Mailer,
     adapter: Swoosh.Adapters.Resend,
     api_key: System.get_env("RESEND_API_KEY") || ""
-
-  config :swoosh, :api_client, Swoosh.ApiClient.Finch
 end

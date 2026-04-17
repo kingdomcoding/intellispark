@@ -90,7 +90,8 @@ defmodule Intellispark.MixProject do
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.36", only: :dev, runtime: false},
       {:stream_data, "~> 1.1"},
-      {:mox, "~> 1.2", only: :test}
+      {:mox, "~> 1.2", only: :test},
+      {:sourceror, "~> 1.7", only: [:dev, :test]}
     ]
   end
 

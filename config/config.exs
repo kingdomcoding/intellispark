@@ -72,4 +72,6 @@ config :logger, :default_formatter,
 
 config :phoenix, :json_library, Jason
 
+config :swoosh, :api_client, Swoosh.ApiClient.Finch
+
 import_config "#{config_env()}.exs"
