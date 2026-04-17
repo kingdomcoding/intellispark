@@ -63,6 +63,7 @@ defmodule Intellispark.MixProject do
       # Ash extensions wired up in Phase 0; some start being used in later phases
       {:ash_authentication, "~> 4.13"},
       {:ash_authentication_phoenix, "~> 2.16"},
+      {:bcrypt_elixir, "~> 3.1"},
       {:ash_oban, "~> 0.8"},
       {:ash_paper_trail, "~> 0.5"},
       {:ash_archival, "~> 2.0"},
