@@ -100,7 +100,7 @@ defmodule Intellispark.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ash.setup", "assets.setup", "assets.build"],
-      "ash.setup": ["ash.codegen --dev", "ash.migrate"],
+      "ash.setup": ["ash.codegen --dev", "ash.migrate", "run priv/repo/seeds.exs"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["compile", "tailwind intellispark", "esbuild intellispark"],
       "assets.deploy": [
