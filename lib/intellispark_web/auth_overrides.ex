@@ -11,6 +11,25 @@ defmodule IntellisparkWeb.AuthOverrides do
 
   use AshAuthentication.Phoenix.Overrides
 
+  # ---- Outer LiveView wrappers ----
+  # The *Live modules render an outermost <div> around everything. The default
+  # uses `grid h-screen place-items-center` — place-items-center shrinks the
+  # grid cell content to its intrinsic width, which collapses our w-full card
+  # down to the input's natural width. Neutralize it so our inner
+  # Components.SignIn/Reset/Confirm handle all layout.
+
+  override AshAuthentication.Phoenix.SignInLive do
+    set :root_class, "w-full"
+  end
+
+  override AshAuthentication.Phoenix.ResetLive do
+    set :root_class, "w-full"
+  end
+
+  override AshAuthentication.Phoenix.ConfirmLive do
+    set :root_class, "w-full"
+  end
+
   # Shared class fragments
   @card_class "w-full max-w-md rounded-card bg-white shadow-card p-lg space-y-md"
   @field_class "mb-sm"
@@ -44,7 +63,11 @@ defmodule IntellisparkWeb.AuthOverrides do
     set :image_url, "/images/logo-horizontal.png"
     set :dark_image_url, "/images/logo-horizontal.png"
     set :text, nil
-    set :image_class, "h-12 w-auto mx-auto"
+    # Keep the default visibility gating (block in light, hidden in dark for
+    # light image; inverse for dark image). Tailwind v4's default dark strategy
+    # is prefers-color-scheme, so omitting `dark:hidden` on the light image
+    # makes both logos render when the OS is dark.
+    set :image_class, "h-12 w-auto mx-auto block dark:hidden"
     set :dark_image_class, "h-12 w-auto mx-auto hidden dark:block"
     set :root_class, "w-full flex justify-center"
   end
