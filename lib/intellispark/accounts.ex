@@ -41,10 +41,19 @@ defmodule Intellispark.Accounts do
       define :update_membership_role, action: :update_role
     end
 
+    resource Intellispark.Accounts.SchoolInvitation do
+      define :invite_to_school, action: :invite, args: [:email, :school_id, :role]
+      define :list_school_invitations, action: :read
+      define :get_school_invitation_by_id, action: :read, get_by: [:id]
+      define :accept_school_invitation, action: :accept_by_token
+      define :revoke_school_invitation, action: :revoke
+    end
+
     resource Intellispark.Accounts.User.Version
     resource Intellispark.Accounts.District.Version
     resource Intellispark.Accounts.School.Version
     resource Intellispark.Accounts.SchoolTerm.Version
     resource Intellispark.Accounts.UserSchoolMembership.Version
+    resource Intellispark.Accounts.SchoolInvitation.Version
   end
 end

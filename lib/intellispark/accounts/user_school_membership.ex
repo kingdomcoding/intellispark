@@ -27,7 +27,7 @@ defmodule Intellispark.Accounts.UserSchoolMembership do
     attribute :source, :atom do
       allow_nil? false
       default :manual
-      constraints one_of: [:manual, :roster_auto]
+      constraints one_of: [:manual, :roster_auto, :invitation]
       public? true
     end
 
