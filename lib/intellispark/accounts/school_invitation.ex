@@ -84,7 +84,7 @@ defmodule Intellispark.Accounts.SchoolInvitation do
     end
 
     policy action(:invite) do
-      authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchoolInvitation
+      authorize_if IntellisparkWeb.Policies.DistrictAdminCanInvite
     end
 
     policy action(:revoke) do
