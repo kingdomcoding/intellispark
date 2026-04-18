@@ -171,7 +171,7 @@ defmodule IntellisparkWeb.StyleguideLive do
 
         <section>
           <h2 class="text-display-sm mb-md">Empty States</h2>
-          <div class="space-y-sm max-w-xl">
+          <div class="space-y-sm max-w-[36rem]">
             <.empty_state message="No course roster information added." />
             <.empty_state message="No family members added." icon="hero-user-group" />
           </div>

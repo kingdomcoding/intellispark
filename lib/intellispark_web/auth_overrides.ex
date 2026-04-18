@@ -31,7 +31,7 @@ defmodule IntellisparkWeb.AuthOverrides do
   end
 
   # Shared class fragments
-  @card_class "w-full max-w-md rounded-card bg-white shadow-card p-lg space-y-md"
+  @card_class "w-full max-w-[28rem] rounded-card bg-white shadow-card p-lg space-y-md"
   @field_class "mb-sm"
   @label_class "block text-sm font-medium text-abbey mb-1"
   @input_class "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent"
@@ -47,14 +47,14 @@ defmodule IntellisparkWeb.AuthOverrides do
     set :root_class,
         "min-h-screen bg-whitesmoke flex flex-col items-center justify-center px-xs gap-md"
 
-    set :strategy_class, "w-full max-w-md"
+    set :strategy_class, "w-full max-w-[28rem]"
   end
 
   override AshAuthentication.Phoenix.Components.Reset do
     set :root_class,
         "min-h-screen bg-whitesmoke flex flex-col items-center justify-center px-xs gap-md"
 
-    set :strategy_class, "w-full max-w-md"
+    set :strategy_class, "w-full max-w-[28rem]"
   end
 
   # ---- Banner (Intellispark wordmark) ----
