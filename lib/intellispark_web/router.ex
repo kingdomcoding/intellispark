@@ -55,8 +55,10 @@ defmodule IntellisparkWeb.Router do
     sign_out_route AuthController, "/sign-out",
       overrides: [IntellisparkWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
 
+    # No register_path — account creation is invite-only via /invitations/:token
+    # (see ADR-003). The :register_with_password action on the User resource is
+    # kept for internal use by SchoolInvitation's AcceptInvitation change.
     sign_in_route(
-      register_path: "/register",
       reset_path: "/reset",
       auth_routes_prefix: "/auth",
       on_mount: [{IntellisparkWeb.LiveUserAuth, :live_no_user}],

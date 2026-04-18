@@ -107,6 +107,9 @@ defmodule IntellisparkWeb.AuthOverrides do
     set :interstitial_class, "flex flex-row justify-between items-center gap-sm mt-sm"
     set :toggler_class, @toggler_class
     set :hide_class, "hidden"
+    # Account creation is invite-only (ADR-003) — suppress the "Need an account?"
+    # toggler on the sign-in card.
+    set :register_toggle_text, nil
   end
 
   # ---- Form inputs + submit button (shared by SignInForm, RegisterForm, ResetForm) ----
