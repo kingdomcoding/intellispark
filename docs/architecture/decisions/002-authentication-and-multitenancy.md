@@ -1,6 +1,6 @@
 # ADR 002: Authentication with AshAuthentication + attribute-based multi-tenancy
 
-**Status:** Accepted
+**Status:** Accepted (self-service `/register` superseded by [ADR 003](003-school-invitations.md))
 **Date:** 2026-04-17
 
 ## Context
