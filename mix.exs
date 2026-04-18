@@ -64,7 +64,9 @@ defmodule Intellispark.MixProject do
       {:ash_authentication, "~> 4.13"},
       {:ash_authentication_phoenix, "~> 2.16"},
       {:bcrypt_elixir, "~> 3.1"},
-      {:picosat_elixir, "~> 0.2"},
+      # simple_sat is pure-Elixir; avoids the Alpine/musl build trouble picosat_elixir
+      # has (it includes <sys/unistd.h> which doesn't exist on musl).
+      {:simple_sat, "~> 0.1"},
       {:ash_oban, "~> 0.8"},
       {:ash_paper_trail, "~> 0.5"},
       {:ash_archival, "~> 2.0"},

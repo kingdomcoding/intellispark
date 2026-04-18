@@ -5,7 +5,7 @@ ARG ALPINE_VERSION=3.21.7
 
 FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION} AS base
 
-RUN apk add --no-cache build-base git curl inotify-tools openssl
+RUN apk add --no-cache build-base git curl inotify-tools openssl linux-headers
 
 WORKDIR /app
 RUN mix local.hex --force && mix local.rebar --force
