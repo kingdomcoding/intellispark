@@ -173,19 +173,16 @@ defmodule IntellisparkWeb.InvitationLive.Accept do
                   Accept &amp; create account
                 </.button>
               </.form>
-
             <% {:error, :accepted} -> %>
               <.invitation_error
                 title="Already accepted"
                 message="This invitation has already been used. If you already have an account, sign in instead."
               />
-
             <% {:error, :revoked} -> %>
               <.invitation_error
                 title="Invitation cancelled"
                 message="This invitation was revoked. Contact your administrator for a new invite."
               />
-
             <% _ -> %>
               <.invitation_error
                 title="Link invalid or expired"

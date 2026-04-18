@@ -241,9 +241,7 @@ defmodule Intellispark.Accounts.InvitationTest do
   describe "revoke" do
     test "admin can revoke a pending invite", %{admin: admin, school: school} do
       {:ok, invite} =
-        Accounts.invite_to_school("will-revoke@sandbox.edu", school.id, :teacher,
-          actor: admin
-        )
+        Accounts.invite_to_school("will-revoke@sandbox.edu", school.id, :teacher, actor: admin)
 
       assert {:ok, revoked} = Accounts.revoke_school_invitation(invite, actor: admin)
       assert revoked.status == :revoked
@@ -251,9 +249,7 @@ defmodule Intellispark.Accounts.InvitationTest do
 
     test "non-admin cannot revoke", %{admin: admin, teacher: teacher, school: school} do
       {:ok, invite} =
-        Accounts.invite_to_school("hands-off@sandbox.edu", school.id, :teacher,
-          actor: admin
-        )
+        Accounts.invite_to_school("hands-off@sandbox.edu", school.id, :teacher, actor: admin)
 
       assert {:error, %Ash.Error.Forbidden{}} =
                Accounts.revoke_school_invitation(invite, actor: teacher)

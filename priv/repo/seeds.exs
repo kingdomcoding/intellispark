@@ -109,9 +109,7 @@ if Enum.empty?(existing_invite) do
   {:ok, invitation} =
     Accounts.invite_to_school(demo_invite_email, school.id, :counselor, actor: admin)
 
-  Logger.info(
-    "  pending invite: #{demo_invite_email} as :counselor — email in /dev/mailbox"
-  )
+  Logger.info("  pending invite: #{demo_invite_email} as :counselor — email in /dev/mailbox")
 
   Logger.info("  invitation id: #{invitation.id}")
 end

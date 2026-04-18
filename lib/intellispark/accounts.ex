@@ -52,7 +52,12 @@ defmodule Intellispark.Accounts do
 
       define :accept_school_invitation,
         action: :accept_by_token,
-        args: [:password, :password_confirmation, {:optional, :first_name}, {:optional, :last_name}]
+        args: [
+          :password,
+          :password_confirmation,
+          {:optional, :first_name},
+          {:optional, :last_name}
+        ]
 
       define :revoke_school_invitation, action: :revoke
     end

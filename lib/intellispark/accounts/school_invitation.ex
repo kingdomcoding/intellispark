@@ -1,4 +1,11 @@
 defmodule Intellispark.Accounts.SchoolInvitation do
+  @moduledoc """
+  Admin-authored invitation for a specific email + school + role.
+  The invitation's UUID primary key doubles as the URL token: the accept
+  link is `/invitations/:id`, and status/expiry checks on the row decide
+  whether acceptance proceeds. See ADR-003 for the rationale.
+  """
+
   use Intellispark.Resource, domain: Intellispark.Accounts
 
   postgres do
@@ -48,8 +55,7 @@ defmodule Intellispark.Accounts.SchoolInvitation do
   end
 
   identities do
-    identity :one_pending_per_email_school, [:email, :school_id],
-      where: expr(status == :pending)
+    identity :one_pending_per_email_school, [:email, :school_id], where: expr(status == :pending)
   end
 
   actions do

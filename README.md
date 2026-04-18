@@ -2,19 +2,28 @@
 
 A faithful Phoenix/LiveView/Ash recreation of the Intellispark K-12 student-support platform.
 
-This repository now ships **Phase 1** — authentication and the multi-tenant foundation — on top of the Phase 0 design-system + tooling baseline. See `../phase-1-implementation.md` for the build plan and master checklist; ADRs live under `docs/architecture/decisions/`.
+This repository now ships **Phase 1** — authentication and the multi-tenant foundation — followed by **Phase 1.5** — admin-driven school invitations — on top of the Phase 0 design-system + tooling baseline. See `../phase-1-implementation.md` and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
 
 ## What Phase 1 delivers
 
 - AshAuthentication password strategy with email confirmation + password reset (`require_interaction? true` for the security advisory; `session_identifier :jti`)
-- Branded sign-in / register / reset / confirm LiveViews via `IntellisparkWeb.AuthOverrides`
+- Branded sign-in / reset / confirm / sign-out LiveViews via `IntellisparkWeb.AuthOverrides`
 - District → School → SchoolTerm hierarchy + UserSchoolMembership join with role + source enums
 - `Intellispark.Tenancy.to_tenant/1` helper — Phase 2+ resources will be tenant-scoped on `school_id` and forgetting tenant raises
 - FilterCheck policies (`DistrictAdminOfUser`, `…OfSchool`, `…OfSchoolTerm`, `…OfMembership`) so reads filter rows rather than gating actions
 - AshPaperTrail on every Accounts resource, `hashed_password` excluded from snapshots, deny-all policies on auto-generated `.Version` resources via `Intellispark.PaperTrail.VersionPolicies` mixin
 - School switcher dropdown in the app header (only renders when the user has more than one membership)
-- Idempotent dev seed: `admin@sandboxhigh.edu` (district admin) and `curtis.murphy@sandboxhigh.edu` (teacher), both `phase1-demo-pass`
-- 29 tests, 0 failures across policy / paper-trail / tenancy / auth-flow suites
+
+## What Phase 1.5 delivers
+
+- `Intellispark.Accounts.SchoolInvitation` resource — email + role + status + expires_at, paper-trailed, with a partial unique index blocking duplicate pending invites per (email, school) pair
+- `:invite` create action with a `DistrictAdminCanInvite` SimpleCheck policy; `:accept_by_token` update action with a transactional `AcceptInvitation` change that upserts User + UserSchoolMembership (`source: :invitation`); `:revoke` update action
+- Branded invitation email via `EmailLayout.wrap/1` linking to `/invitations/:id` (the invitation's UUID primary key *is* the token — see ADR-003)
+- Public `IntellisparkWeb.InvitationLive.Accept` LiveView with four states: pending/ready, accepted, revoked, invalid; on success redirects into AshAuthentication's `sign_in_with_token` flow so the invitee lands signed-in
+- AshAdmin wired at `/admin` gated to district admins via a new `:require_district_admin` on_mount hook — provides the MVP invite-creation UI
+- Self-service `/register` removed and the "Need an account?" toggler suppressed — account creation is strictly invite-only now
+- Idempotent dev seed includes one pending invitation (`newcoach@sandboxhigh.edu` → `:counselor`) so `/admin` has data on a fresh boot and `/dev/mailbox` has a click-through URL
+- 49 tests, 0 failures across all suites
 
 ## What Phase 0 still delivers
 
