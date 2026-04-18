@@ -1,7 +1,11 @@
 defmodule Intellispark.Accounts do
   use Ash.Domain,
     otp_app: :intellispark,
-    extensions: [AshAuthentication.Domain]
+    extensions: [AshAuthentication.Domain, AshAdmin.Domain]
+
+  admin do
+    show? true
+  end
 
   resources do
     resource Intellispark.Accounts.User do

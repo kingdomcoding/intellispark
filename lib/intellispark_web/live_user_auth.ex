@@ -37,6 +37,26 @@ defmodule IntellisparkWeb.LiveUserAuth do
     end
   end
 
+  def on_mount(:require_district_admin, _params, _session, socket) do
+    user = socket.assigns[:current_user]
+
+    if district_admin?(user) do
+      {:cont, socket}
+    else
+      {:halt,
+       socket
+       |> Phoenix.LiveView.put_flash(:error, "Admin access required.")
+       |> Phoenix.LiveView.redirect(to: ~p"/")}
+    end
+  end
+
+  defp district_admin?(nil), do: false
+
+  defp district_admin?(user) do
+    user.district_id != nil and
+      Enum.any?(user.school_memberships || [], &(&1.role == :admin))
+  end
+
   defp assign_current_user(socket, session) do
     case session_user(session) do
       {:ok, user} ->

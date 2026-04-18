@@ -2,6 +2,8 @@ defmodule IntellisparkWeb.Router do
   use IntellisparkWeb, :router
   use AshAuthentication.Phoenix.Router
 
+  import AshAdmin.Router
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -25,6 +27,16 @@ defmodule IntellisparkWeb.Router do
       on_mount: {IntellisparkWeb.LiveUserAuth, :live_user_required} do
       post "/set-school", SchoolController, :set_active
     end
+  end
+
+  scope "/" do
+    pipe_through [:browser]
+
+    ash_admin "/admin",
+      on_mount: [
+        {IntellisparkWeb.LiveUserAuth, :live_user_required},
+        {IntellisparkWeb.LiveUserAuth, :require_district_admin}
+      ]
   end
 
   scope "/", IntellisparkWeb do
