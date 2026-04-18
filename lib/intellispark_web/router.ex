@@ -35,6 +35,7 @@ defmodule IntellisparkWeb.Router do
     ash_authentication_live_session :maybe_user,
       on_mount: {IntellisparkWeb.LiveUserAuth, :live_user_optional} do
       live "/styleguide", StyleguideLive
+      live "/invitations/:token", InvitationLive.Accept
     end
 
     auth_routes AuthController, Intellispark.Accounts.User, path: "/auth"
