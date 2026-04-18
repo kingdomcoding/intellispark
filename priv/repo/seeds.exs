@@ -3,7 +3,15 @@ require Logger
 require Ash.Query
 
 alias Intellispark.Accounts
-alias Intellispark.Accounts.{District, School, SchoolTerm, User, UserSchoolMembership}
+
+alias Intellispark.Accounts.{
+  District,
+  School,
+  SchoolInvitation,
+  SchoolTerm,
+  User,
+  UserSchoolMembership
+}
 
 Logger.info("Seeding Sandbox district + schools + users…")
 
@@ -83,8 +91,30 @@ ensure_user = fn email, role ->
   user
 end
 
-ensure_user.("admin@sandboxhigh.edu", :admin)
-ensure_user.("curtis.murphy@sandboxhigh.edu", :teacher)
+admin = ensure_user.("admin@sandboxhigh.edu", :admin)
+_teacher = ensure_user.("curtis.murphy@sandboxhigh.edu", :teacher)
+
+# Seed one pending invitation so /admin has something to show on a fresh boot
+# and the accept flow has a ready-made demo URL in /dev/mailbox.
+demo_invite_email = "newcoach@sandboxhigh.edu"
+
+existing_invite =
+  SchoolInvitation
+  |> Ash.Query.filter(email == ^demo_invite_email and school_id == ^school.id)
+  |> Ash.read!(authorize?: false)
+
+if Enum.empty?(existing_invite) do
+  admin = Ash.load!(admin, [:school_memberships], authorize?: false)
+
+  {:ok, invitation} =
+    Accounts.invite_to_school(demo_invite_email, school.id, :counselor, actor: admin)
+
+  Logger.info(
+    "  pending invite: #{demo_invite_email} as :counselor — email in /dev/mailbox"
+  )
+
+  Logger.info("  invitation id: #{invitation.id}")
+end
 
 Logger.info("Seed complete.")
 Logger.info("  admin login:   admin@sandboxhigh.edu / phase1-demo-pass")
