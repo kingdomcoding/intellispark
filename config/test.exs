@@ -10,7 +10,10 @@ config :intellispark, Intellispark.Repo,
   username: System.get_env("POSTGRES_USER", "postgres"),
   password: System.get_env("POSTGRES_PASSWORD", "postgres"),
   hostname: System.get_env("POSTGRES_HOST", "postgres"),
-  database: System.get_env("POSTGRES_DB", "intellispark_test"),
+  # Force the test database regardless of POSTGRES_DB in the environment.
+  # The dev .env sets POSTGRES_DB=intellispark_dev for the running server;
+  # tests must never touch that.
+  database: "intellispark_test",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 

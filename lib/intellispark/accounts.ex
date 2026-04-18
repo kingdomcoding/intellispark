@@ -45,7 +45,11 @@ defmodule Intellispark.Accounts do
       define :invite_to_school, action: :invite, args: [:email, :school_id, :role]
       define :list_school_invitations, action: :read
       define :get_school_invitation_by_id, action: :read, get_by: [:id]
-      define :accept_school_invitation, action: :accept_by_token
+
+      define :accept_school_invitation,
+        action: :accept_by_token,
+        args: [:password, :password_confirmation, {:optional, :first_name}, {:optional, :last_name}]
+
       define :revoke_school_invitation, action: :revoke
     end
 

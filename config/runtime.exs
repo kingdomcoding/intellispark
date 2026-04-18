@@ -1,11 +1,13 @@
 import Config
 
-if System.get_env("PHX_SERVER") do
-  config :intellispark, IntellisparkWeb.Endpoint, server: true
-end
+if config_env() != :test do
+  if System.get_env("PHX_SERVER") do
+    config :intellispark, IntellisparkWeb.Endpoint, server: true
+  end
 
-config :intellispark, IntellisparkWeb.Endpoint,
-  http: [port: String.to_integer(System.get_env("PORT", "4800"))]
+  config :intellispark, IntellisparkWeb.Endpoint,
+    http: [port: String.to_integer(System.get_env("PORT", "4800"))]
+end
 
 if config_env() == :prod do
   database_url =

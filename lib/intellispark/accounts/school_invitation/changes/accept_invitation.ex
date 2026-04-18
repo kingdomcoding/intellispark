@@ -10,6 +10,8 @@ defmodule Intellispark.Accounts.SchoolInvitation.Changes.AcceptInvitation do
 
   use Ash.Resource.Change
 
+  require Ash.Query
+
   alias Intellispark.Accounts.{User, UserSchoolMembership}
 
   @impl true
@@ -52,7 +54,12 @@ defmodule Intellispark.Accounts.SchoolInvitation.Changes.AcceptInvitation do
   end
 
   defp find_or_register_user(email, changeset) do
-    case Ash.read_one(User, filter: [email: email], authorize?: false) do
+    result =
+      User
+      |> Ash.Query.filter(email == ^email)
+      |> Ash.read_one(authorize?: false)
+
+    case result do
       {:ok, %User{} = user} ->
         {:ok, user}
 
@@ -95,11 +102,9 @@ defmodule Intellispark.Accounts.SchoolInvitation.Changes.AcceptInvitation do
 
   defp ensure_membership(user, invitation) do
     existing =
-      Ash.read_one(
-        UserSchoolMembership,
-        filter: [user_id: user.id, school_id: invitation.school_id],
-        authorize?: false
-      )
+      UserSchoolMembership
+      |> Ash.Query.filter(user_id == ^user.id and school_id == ^invitation.school_id)
+      |> Ash.read_one(authorize?: false)
 
     case existing do
       {:ok, %UserSchoolMembership{} = membership} ->
