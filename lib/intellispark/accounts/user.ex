@@ -49,12 +49,11 @@ defmodule Intellispark.Accounts.User do
   end
 
   authentication do
-    session_identifier :jti
-
     tokens do
       enabled? true
       token_resource Intellispark.Accounts.Token
       signing_secret Intellispark.Accounts.Secrets
+      store_all_tokens? true
       require_token_presence_for_authentication? true
     end
 

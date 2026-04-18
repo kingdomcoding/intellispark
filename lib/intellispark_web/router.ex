@@ -10,6 +10,7 @@ defmodule IntellisparkWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :load_from_session
+    plug IntellisparkWeb.Plugs.AssignCurrentSchool
   end
 
   pipeline :api do
@@ -37,7 +38,9 @@ defmodule IntellisparkWeb.Router do
     end
 
     auth_routes AuthController, Intellispark.Accounts.User, path: "/auth"
-    sign_out_route AuthController
+
+    sign_out_route AuthController, "/sign-out",
+      overrides: [IntellisparkWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
 
     sign_in_route(
       register_path: "/register",
