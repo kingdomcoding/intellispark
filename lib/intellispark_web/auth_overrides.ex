@@ -30,6 +30,11 @@ defmodule IntellisparkWeb.AuthOverrides do
     set :root_class, "w-full"
   end
 
+  override AshAuthentication.Phoenix.SignOutLive do
+    set :root_class,
+        "min-h-screen bg-whitesmoke flex flex-col items-center justify-center px-xs"
+  end
+
   # Shared class fragments
   @card_class "w-full max-w-[28rem] rounded-card bg-white shadow-card p-lg space-y-md"
   @field_class "mb-sm"
@@ -55,6 +60,29 @@ defmodule IntellisparkWeb.AuthOverrides do
         "min-h-screen bg-whitesmoke flex flex-col items-center justify-center px-xs gap-md"
 
     set :strategy_class, "w-full max-w-[28rem]"
+  end
+
+  override AshAuthentication.Phoenix.Components.SignOut do
+    set :root_class, @card_class
+    set :h2_class, "text-display-sm mb-sm"
+    set :h2_text, "Sign out"
+    set :info_text, "Are you sure you want to sign out?"
+    set :info_text_class, "text-abbey mb-md"
+    set :form_class, nil
+    set :button_text, "Sign out"
+    set :button_class, @submit_class
+  end
+
+  override AshAuthentication.Phoenix.Components.Confirm do
+    set :root_class,
+        "min-h-screen bg-whitesmoke flex flex-col items-center justify-center px-xs gap-md"
+
+    set :strategy_class, "w-full max-w-[28rem]"
+    set :show_banner, true
+  end
+
+  override AshAuthentication.Phoenix.Components.Confirm.Input do
+    set :submit_class, @submit_class
   end
 
   # ---- Banner (Intellispark wordmark) ----
