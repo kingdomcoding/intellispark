@@ -4,6 +4,19 @@ defmodule IntellisparkWeb.Router do
 
   import AshAdmin.Router
 
+  @doc """
+  Session hook passed to the `ash_admin` macro. AshAdmin's router builds its
+  own live_session dict from scratch (via `AshAdmin.Router.__session__/3`) and
+  does not forward the Plug session, so our `:live_user_required` on_mount
+  can't see the signed-in user. This hook ferries `user_token` across.
+  """
+  def admin_auth_session(conn) do
+    case Plug.Conn.get_session(conn, "user_token") do
+      nil -> %{}
+      token -> %{"user_token" => token}
+    end
+  end
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -33,6 +46,7 @@ defmodule IntellisparkWeb.Router do
     pipe_through [:browser]
 
     ash_admin "/admin",
+      session: [{IntellisparkWeb.Router, :admin_auth_session, []}],
       on_mount: [
         {IntellisparkWeb.LiveUserAuth, :live_user_required},
         {IntellisparkWeb.LiveUserAuth, :require_district_admin}
