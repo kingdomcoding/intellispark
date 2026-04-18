@@ -60,7 +60,7 @@ defmodule IntellisparkWeb.InvitationLive.Accept do
         {:noreply,
          socket
          |> put_flash(:error, humanize_error(error))
-         |> assign(form: to_form(params))}
+         |> assign(form: to_form(params, as: :user))}
     end
   end
 
@@ -113,12 +113,15 @@ defmodule IntellisparkWeb.InvitationLive.Accept do
   defp nil_if_blank(value) when is_binary(value), do: String.trim(value)
 
   defp empty_form do
-    to_form(%{
-      "first_name" => "",
-      "last_name" => "",
-      "password" => "",
-      "password_confirmation" => ""
-    })
+    to_form(
+      %{
+        "first_name" => "",
+        "last_name" => "",
+        "password" => "",
+        "password_confirmation" => ""
+      },
+      as: :user
+    )
   end
 
   @impl true
