@@ -12,6 +12,11 @@ config :intellispark, Intellispark.Repo,
 config :intellispark, Intellispark.Mailer, adapter: Swoosh.Adapters.Local
 
 config :intellispark, IntellisparkWeb.Endpoint,
+  url: [
+    host: System.get_env("PHX_HOST", "localhost"),
+    scheme: System.get_env("PHX_URL_SCHEME", "http"),
+    port: String.to_integer(System.get_env("PHX_URL_PORT", "4800"))
+  ],
   http: [ip: {0, 0, 0, 0}, port: String.to_integer(System.get_env("PORT", "4800"))],
   check_origin: false,
   code_reloader: true,
