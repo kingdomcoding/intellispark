@@ -57,6 +57,14 @@ defmodule IntellisparkWeb.AuthOverrides do
     set :strategy_class, "w-full max-w-[28rem]"
   end
 
+  # AshAuth Phoenix injects its own live layout that renders Components.Flash
+  # ABOVE our @inner_content. Hide its output (flash map is still set) so the
+  # branded <.flash_group> in root.html.heex is the single visible renderer.
+  override AshAuthentication.Phoenix.Components.Flash do
+    set :message_class_info, "hidden"
+    set :message_class_error, "hidden"
+  end
+
   override AshAuthentication.Phoenix.Components.Confirm do
     set :root_class,
         "min-h-screen bg-whitesmoke flex flex-col items-center justify-center px-xs gap-md"
