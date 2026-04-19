@@ -85,15 +85,29 @@ defmodule Intellispark.Accounts.SchoolInvitation.Changes.AcceptInvitation do
                  Ash.Changeset.get_argument(changeset, :password_confirmation)
              },
              action: :register_with_password,
-             authorize?: false
+             authorize?: false,
+             # Ask AshAuthentication's GenerateTokenChange to emit a short-lived
+             # sign-in token (purpose: "sign_in") rather than the default
+             # session token (purpose: "user"). The caller hands this to
+             # /auth/user/password/sign_in_with_token to establish the session.
+             context: %{token_type: :sign_in}
            ) do
       if first_name || last_name do
-        Ash.update(
-          user,
-          %{first_name: first_name, last_name: last_name},
-          action: :update_profile,
-          authorize?: false
-        )
+        # :update_profile returns a fresh struct that drops __metadata__.token;
+        # copy the sign-in token forward so the LiveView can redirect into
+        # sign_in_with_token.
+        case Ash.update(
+               user,
+               %{first_name: first_name, last_name: last_name},
+               action: :update_profile,
+               authorize?: false
+             ) do
+          {:ok, updated} ->
+            {:ok, %{updated | __metadata__: Map.merge(updated.__metadata__, user.__metadata__)}}
+
+          other ->
+            other
+        end
       else
         {:ok, user}
       end
