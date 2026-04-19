@@ -85,6 +85,13 @@ defmodule Intellispark.Accounts.User do
         confirm_on_update? false
         require_interaction? true
         sender Intellispark.Accounts.User.Senders.SendConfirmationEmail
+
+        # Invitation acceptance goes through :register_with_password, but the
+        # invite link itself already proves the email is theirs. Auto-confirm
+        # those creations and skip the redundant confirmation email.
+        # `/register` is removed (ADR-003), so this action isn't reachable
+        # from any public path.
+        auto_confirm_actions [:register_with_password]
       end
     end
   end

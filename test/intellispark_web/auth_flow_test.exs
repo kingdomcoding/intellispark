@@ -8,8 +8,12 @@ defmodule IntellisparkWeb.AuthFlowTest do
     :ok
   end
 
-  describe "register → confirm → sign in (via Ash actions, not the LiveView)" do
-    test "happy path issues a confirmation email and lets the user sign in" do
+  describe "register → sign in (via Ash actions)" do
+    # :register_with_password is internal-only now (no /register route — see
+    # ADR-003). It's auto-confirmed because invitation acceptance already
+    # proved email ownership, so no confirmation email is sent and the new
+    # user can sign in immediately.
+    test "register auto-confirms and lets the user sign in" do
       email = "newuser-#{System.unique_integer([:positive])}@sandboxhigh.edu"
       password = "brand-new-pass"
 
@@ -21,16 +25,8 @@ defmodule IntellisparkWeb.AuthFlowTest do
           authorize?: false
         )
 
-      assert user.confirmed_at == nil
-
-      assert_received {:email, %Swoosh.Email{} = confirmation_email}
-      token = extract_confirm_token(confirmation_email)
-      assert is_binary(token)
-
-      {:ok, confirmed} =
-        Ash.update(user, %{confirm: token}, action: :confirm, authorize?: false)
-
-      refute is_nil(confirmed.confirmed_at)
+      refute is_nil(user.confirmed_at)
+      refute_received {:email, _}
 
       assert {:ok, [signed_in]} = sign_in(email, password)
       assert signed_in.id == user.id
@@ -54,7 +50,6 @@ defmodule IntellisparkWeb.AuthFlowTest do
         |> Ash.Query.for_read(:request_password_reset_with_password, %{email: email})
         |> Ash.read(authorize?: false)
 
-      assert_received {:email, %Swoosh.Email{} = _confirm_email}
       assert_received {:email, %Swoosh.Email{} = reset_email}
       reset_token = extract_reset_token(reset_email)
       assert is_binary(reset_token)
@@ -89,13 +84,6 @@ defmodule IntellisparkWeb.AuthFlowTest do
     User
     |> Ash.Query.for_read(:sign_in_with_password, %{email: email, password: password})
     |> Ash.read(authorize?: false)
-  end
-
-  defp extract_confirm_token(%Swoosh.Email{text_body: body}) do
-    case Regex.run(~r|/confirm_new_user/([^\s"]+)|, body) do
-      [_, token] -> token
-      _ -> nil
-    end
   end
 
   defp extract_reset_token(%Swoosh.Email{text_body: body}) do
