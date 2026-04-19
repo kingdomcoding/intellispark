@@ -3,7 +3,11 @@ defmodule Intellispark.Accounts.User do
     domain: Intellispark.Accounts,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshAuthentication, AshPaperTrail.Resource]
+    extensions: [AshAuthentication, AshPaperTrail.Resource, AshAdmin.Resource]
+
+  admin do
+    actor? true
+  end
 
   paper_trail do
     change_tracking_mode :snapshot
