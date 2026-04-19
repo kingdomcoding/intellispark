@@ -120,7 +120,7 @@ defmodule IntellisparkWeb.Layouts do
 
   defp user_menu(assigns) do
     ~H"""
-    <div class="relative">
+    <div class="relative flex items-center">
       <button
         type="button"
         phx-click={JS.toggle(to: "#user-menu-panel")}
