@@ -7,6 +7,10 @@ defmodule Intellispark.Accounts.User do
 
   admin do
     actor? true
+    # Preload the fields our policies (DistrictAdminOfUser,
+    # DistrictAdminOfSchool, etc.) iterate to decide authorization. Without
+    # this the policy check crashes with KeyError on a %Ash.NotLoaded{}.
+    actor_load [:school_memberships]
   end
 
   paper_trail do
