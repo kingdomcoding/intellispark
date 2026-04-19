@@ -11,31 +11,9 @@ defmodule IntellisparkWeb.Router do
   can't see the signed-in user. This hook ferries `user_token` across.
   """
   def admin_auth_session(conn) do
-    base =
-      case Plug.Conn.get_session(conn, "user_token") do
-        nil -> %{}
-        token -> %{"user_token" => token}
-      end
-
-    # Auto-set AshAdmin's actor session based on the signed-in user so actions
-    # invoked via /admin (like SchoolInvitation.invite) see the admin as actor
-    # without the user having to click "Set as actor" on their row first.
-    case conn.assigns[:current_user] do
-      %Intellispark.Accounts.User{id: id} ->
-        # All five keys MUST be present — AshAdmin.ActorPlug.Plug.actor_from_session
-        # pattern-matches the whole map including "actor_tenant".
-        Map.merge(base, %{
-          "actor_resource" => "User",
-          "actor_domain" => "Accounts",
-          "actor_action" => "read",
-          "actor_primary_key" => id,
-          "actor_tenant" => nil,
-          "actor_authorizing" => "true",
-          "actor_paused" => "false"
-        })
-
-      _ ->
-        base
+    case Plug.Conn.get_session(conn, "user_token") do
+      nil -> %{}
+      token -> %{"user_token" => token}
     end
   end
 
@@ -48,6 +26,7 @@ defmodule IntellisparkWeb.Router do
     plug :put_secure_browser_headers
     plug :load_from_session
     plug IntellisparkWeb.Plugs.AssignCurrentSchool
+    plug IntellisparkWeb.Plugs.SetAdminActorCookies
   end
 
   pipeline :api do
