@@ -215,8 +215,8 @@ defmodule IntellisparkWeb.CoreComponents do
       end)
 
     ~H"""
-    <div class="fieldset mb-2">
-      <label for={@id}>
+    <div class="mb-sm">
+      <label for={@id} class="inline-flex items-center gap-2 text-sm text-abbey">
         <input
           type="hidden"
           name={@name}
@@ -224,17 +224,16 @@ defmodule IntellisparkWeb.CoreComponents do
           disabled={@rest[:disabled]}
           form={@rest[:form]}
         />
-        <span class="label">
-          <input
-            type="checkbox"
-            id={@id}
-            name={@name}
-            value="true"
-            checked={@checked}
-            class={@class || "checkbox checkbox-sm"}
-            {@rest}
-          />{@label}
-        </span>
+        <input
+          type="checkbox"
+          id={@id}
+          name={@name}
+          value="true"
+          checked={@checked}
+          class={@class || "size-4 rounded border-abbey/30 text-chocolate focus:ring-chocolate"}
+          {@rest}
+        />
+        {@label}
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -243,13 +242,15 @@ defmodule IntellisparkWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-sm">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class={"block text-sm font-medium text-abbey mb-1"}>{@label}</span>
         <select
           id={@id}
           name={@name}
-          class={[@class || "w-full select", @errors != [] && (@error_class || "select-error")]}
+          class={[
+            @class || (if @errors == [], do: "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent", else: "w-full rounded-lg border border-chocolate px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate")
+          ]}
           multiple={@multiple}
           {@rest}
         >
@@ -264,15 +265,14 @@ defmodule IntellisparkWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-sm">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class={"block text-sm font-medium text-abbey mb-1"}>{@label}</span>
         <textarea
           id={@id}
           name={@name}
           class={[
-            @class || "w-full textarea",
-            @errors != [] && (@error_class || "textarea-error")
+            @class || (if @errors == [], do: "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent", else: "w-full rounded-lg border border-chocolate px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate")
           ]}
           {@rest}
         >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
@@ -285,17 +285,16 @@ defmodule IntellisparkWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-sm">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class={"block text-sm font-medium text-abbey mb-1"}>{@label}</span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
-            @class || "w-full input",
-            @errors != [] && (@error_class || "input-error")
+            @class || (if @errors == [], do: "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent", else: "w-full rounded-lg border border-chocolate px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate")
           ]}
           {@rest}
         />
@@ -308,8 +307,8 @@ defmodule IntellisparkWeb.CoreComponents do
   # Helper used by inputs to generate form errors
   defp error(assigns) do
     ~H"""
-    <p class="mt-1.5 flex gap-2 items-center text-sm text-error">
-      <.icon name="hero-exclamation-circle" class="size-5" />
+    <p class="mt-1 flex gap-1 items-center text-sm text-chocolate">
+      <.icon name="hero-exclamation-circle" class="size-4" />
       {render_slot(@inner_block)}
     </p>
     """
