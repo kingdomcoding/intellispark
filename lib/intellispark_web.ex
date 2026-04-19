@@ -82,7 +82,10 @@ defmodule IntellisparkWeb do
       use Gettext, backend: IntellisparkWeb.Gettext
 
       import Phoenix.HTML
-      import IntellisparkWeb.CoreComponents, except: [button: 1, modal: 1]
+      # Brand-matching Button + Modal live in IntellisparkWeb.UI.*; CoreComponents
+      # no longer defines its own versions (the DaisyUI generator defaults were
+      # removed).
+      import IntellisparkWeb.CoreComponents
       import IntellisparkWeb.BrandComponents
       import IntellisparkWeb.UI.Button
       import IntellisparkWeb.UI.Card
