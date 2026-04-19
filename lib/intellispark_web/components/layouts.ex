@@ -79,7 +79,7 @@ defmodule IntellisparkWeb.Layouts do
       <div
         :if={@multi?}
         id="school-switcher-menu"
-        class="hidden absolute right-0 mt-1 w-64 rounded-card bg-white shadow-elevated py-1 z-10"
+        class="hidden absolute right-0 top-full mt-1 w-64 rounded-card bg-white shadow-elevated py-1 z-10"
         role="menu"
       >
         <form
@@ -133,7 +133,7 @@ defmodule IntellisparkWeb.Layouts do
 
       <div
         id="user-menu-panel"
-        class="hidden absolute right-0 mt-1 w-64 rounded-card bg-white shadow-elevated py-1 z-10"
+        class="hidden absolute right-0 top-full mt-1 w-64 rounded-card bg-white shadow-elevated py-1 z-10"
         role="menu"
         phx-click-away={JS.hide(to: "#user-menu-panel")}
       >
