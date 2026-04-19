@@ -56,25 +56,35 @@ defmodule IntellisparkWeb.CoreComponents do
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
-      class="toast toast-top toast-end z-50"
+      class={[
+        "fixed top-sm right-sm z-50 w-[min(92vw,24rem)] rounded-card bg-white shadow-elevated",
+        "p-sm flex items-start gap-sm cursor-pointer",
+        @kind == :info && "border-l-4 border-brand",
+        @kind == :error && "border-l-4 border-chocolate"
+      ]}
       {@rest}
     >
-      <div class={[
-        "alert w-80 sm:w-96 max-w-80 sm:max-w-96 text-wrap",
-        @kind == :info && "alert-info",
-        @kind == :error && "alert-error"
-      ]}>
-        <.icon :if={@kind == :info} name="hero-information-circle" class="size-5 shrink-0" />
-        <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5 shrink-0" />
-        <div>
-          <p :if={@title} class="font-semibold">{@title}</p>
-          <p>{msg}</p>
-        </div>
-        <div class="flex-1" />
-        <button type="button" class="group self-start cursor-pointer" aria-label={gettext("close")}>
-          <.icon name="hero-x-mark" class="size-5 opacity-40 group-hover:opacity-70" />
-        </button>
+      <.icon
+        :if={@kind == :info}
+        name="hero-information-circle"
+        class="size-5 shrink-0 mt-0.5 text-brand"
+      />
+      <.icon
+        :if={@kind == :error}
+        name="hero-exclamation-circle"
+        class="size-5 shrink-0 mt-0.5 text-chocolate"
+      />
+      <div class="flex-1 text-sm text-abbey">
+        <p :if={@title} class="font-semibold text-navy">{@title}</p>
+        <p>{msg}</p>
       </div>
+      <button
+        type="button"
+        class="text-azure hover:text-abbey shrink-0"
+        aria-label={gettext("close")}
+      >
+        <.icon name="hero-x-mark" class="size-4" />
+      </button>
     </div>
     """
   end
