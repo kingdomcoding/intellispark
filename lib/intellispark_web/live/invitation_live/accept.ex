@@ -127,7 +127,7 @@ defmodule IntellisparkWeb.InvitationLive.Accept do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app>
       <section class="min-h-[calc(100vh-4rem)] flex justify-center items-start pt-xl px-xs">
         <div class="w-full max-w-[28rem] rounded-card bg-white shadow-card p-lg space-y-md">
           <%= case @state do %>

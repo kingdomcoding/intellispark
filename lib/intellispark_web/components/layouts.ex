@@ -6,7 +6,6 @@ defmodule IntellisparkWeb.Layouts do
 
   embed_templates "layouts/*"
 
-  attr :flash, :map, required: true
   attr :current_scope, :map, default: nil
   attr :current_user, :map, default: nil
   attr :current_school, :map, default: nil
@@ -47,7 +46,6 @@ defmodule IntellisparkWeb.Layouts do
     </header>
 
     <main class="min-h-[calc(100vh-4rem)] bg-whitesmoke">
-      <.flash_group flash={@flash} />
       {render_slot(@inner_block)}
     </main>
     """
