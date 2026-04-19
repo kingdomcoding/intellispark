@@ -7,7 +7,7 @@ defmodule IntellisparkWeb.StyleguideLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app>
+    <Layouts.app current_user={@current_user} current_school={@current_school}>
       <div class="container-lg py-xxl space-y-xxl">
         <header>
           <h1 class="text-display-md">
