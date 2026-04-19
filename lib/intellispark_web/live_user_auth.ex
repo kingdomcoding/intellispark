@@ -74,15 +74,13 @@ defmodule IntellisparkWeb.LiveUserAuth do
         Map.get(session, :user_token) ||
         get_in(session, ["user", "user_token"])
 
-    case token do
-      nil ->
-        :error
-
-      _ ->
-        case AshAuthentication.subject_to_user(token, Accounts.User) do
-          {:ok, user} -> {:ok, user}
-          _ -> :error
-        end
+    with token when is_binary(token) <- token,
+         {:ok, %{"sub" => subject}, _resource} <-
+           AshAuthentication.Jwt.verify(token, :intellispark),
+         {:ok, user} <- AshAuthentication.subject_to_user(subject, Accounts.User) do
+      {:ok, user}
+    else
+      _ -> :error
     end
   end
 
