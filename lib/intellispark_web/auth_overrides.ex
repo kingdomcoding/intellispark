@@ -57,12 +57,16 @@ defmodule IntellisparkWeb.AuthOverrides do
     set :strategy_class, "w-full max-w-[28rem]"
   end
 
-  # AshAuth Phoenix injects its own live layout that renders Components.Flash
-  # ABOVE our @inner_content. Hide its output (flash map is still set) so the
-  # branded <.flash_group> in root.html.heex is the single visible renderer.
+  # AshAuth Phoenix injects Components.Flash into its own live template, which
+  # re-renders on every LiveView update (unlike our root layout, which renders
+  # once per HTTP request). Paint its flash divs with our brand tokens instead
+  # of hiding them — that's the simplest way to get post-submit flashes to show
+  # up styled without introducing a parallel live layout.
+  @flash_toast_base "fixed top-sm right-sm z-50 w-[min(92vw,24rem)] rounded-card bg-white shadow-elevated p-md cursor-pointer text-sm text-abbey"
+
   override AshAuthentication.Phoenix.Components.Flash do
-    set :message_class_info, "hidden"
-    set :message_class_error, "hidden"
+    set :message_class_info, "#{@flash_toast_base} border-l-4 border-brand"
+    set :message_class_error, "#{@flash_toast_base} border-l-4 border-chocolate"
   end
 
   override AshAuthentication.Phoenix.Components.Confirm do
