@@ -32,6 +32,7 @@ defmodule IntellisparkWeb.Layouts do
         <div class="flex items-center gap-sm">
           <.school_switcher current_user={@current_user} current_school={@current_school} />
           <a
+            :if={@current_user}
             href="#"
             aria-label="Settings"
             title="Settings (coming soon)"
@@ -116,7 +117,16 @@ defmodule IntellisparkWeb.Layouts do
 
   attr :current_user, :map, default: nil
 
-  defp user_menu(%{current_user: nil} = assigns), do: ~H""
+  defp user_menu(%{current_user: nil} = assigns) do
+    ~H"""
+    <.link
+      navigate={~p"/sign-in"}
+      class="text-sm font-medium text-brand hover:text-brand-700"
+    >
+      Sign in
+    </.link>
+    """
+  end
 
   defp user_menu(assigns) do
     ~H"""
