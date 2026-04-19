@@ -1,6 +1,10 @@
 defmodule Intellispark.Accounts.School do
   use Intellispark.Resource, domain: Intellispark.Accounts
 
+  admin do
+    label_field :name
+  end
+
   postgres do
     table "schools"
     repo Intellispark.Repo

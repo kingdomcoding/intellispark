@@ -17,7 +17,8 @@ defmodule Intellispark.Resource do
         extensions: [
           AshPaperTrail.Resource,
           AshArchival.Resource,
-          AshOban
+          AshOban,
+          AshAdmin.Resource
         ],
         notifiers: [Ash.Notifier.PubSub]
 
