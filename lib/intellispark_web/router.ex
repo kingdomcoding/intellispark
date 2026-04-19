@@ -22,11 +22,14 @@ defmodule IntellisparkWeb.Router do
     # without the user having to click "Set as actor" on their row first.
     case conn.assigns[:current_user] do
       %Intellispark.Accounts.User{id: id} ->
+        # All five keys MUST be present — AshAdmin.ActorPlug.Plug.actor_from_session
+        # pattern-matches the whole map including "actor_tenant".
         Map.merge(base, %{
           "actor_resource" => "User",
           "actor_domain" => "Accounts",
           "actor_action" => "read",
           "actor_primary_key" => id,
+          "actor_tenant" => nil,
           "actor_authorizing" => "true",
           "actor_paused" => "false"
         })
