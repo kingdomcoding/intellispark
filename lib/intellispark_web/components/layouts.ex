@@ -32,12 +32,15 @@ defmodule IntellisparkWeb.Layouts do
 
         <div class="flex items-center gap-sm">
           <.school_switcher current_user={@current_user} current_school={@current_school} />
-          <a href="#" aria-label="Settings" class="text-azure hover:text-abbey">
+          <a
+            href="#"
+            aria-label="Settings"
+            title="Settings (coming soon)"
+            class="text-azure hover:text-abbey cursor-default"
+          >
             <span class="hero-cog-6-tooth"></span>
           </a>
-          <a href="#" aria-label="Your profile" class="text-azure hover:text-abbey">
-            <span class="hero-user-circle"></span>
-          </a>
+          <.user_menu current_user={@current_user} />
         </div>
       </div>
       <div class="intellispark-accent-bar"></div>
@@ -112,6 +115,54 @@ defmodule IntellisparkWeb.Layouts do
 
   defp membership_label(%{school: %{name: name}}) when is_binary(name), do: name
   defp membership_label(%{school_id: id}), do: "School #{String.slice(to_string(id), 0..7)}"
+
+  attr :current_user, :map, default: nil
+
+  defp user_menu(%{current_user: nil} = assigns), do: ~H""
+
+  defp user_menu(assigns) do
+    ~H"""
+    <div class="relative">
+      <button
+        type="button"
+        phx-click={JS.toggle(to: "#user-menu-panel")}
+        aria-label="Your account"
+        aria-haspopup="true"
+        class="text-azure hover:text-abbey inline-flex items-center"
+      >
+        <span class="hero-user-circle"></span>
+      </button>
+
+      <div
+        id="user-menu-panel"
+        class="hidden absolute right-0 mt-1 w-64 rounded-card bg-white shadow-elevated py-1 z-10"
+        role="menu"
+        phx-click-away={JS.hide(to: "#user-menu-panel")}
+      >
+        <div class="px-md py-sm border-b border-abbey/10">
+          <p class="text-sm font-medium text-abbey truncate">{display_name(@current_user)}</p>
+          <p class="text-xs text-azure truncate">{to_string(@current_user.email)}</p>
+        </div>
+
+        <.link
+          href={~p"/sign-out"}
+          method="delete"
+          role="menuitem"
+          class="block px-md py-sm text-sm text-abbey hover:bg-whitesmoke"
+        >
+          Sign out
+        </.link>
+      </div>
+    </div>
+    """
+  end
+
+  defp display_name(%{first_name: f, last_name: l}) when is_binary(f) and is_binary(l),
+    do: "#{f} #{l}"
+
+  defp display_name(%{first_name: f}) when is_binary(f), do: f
+  defp display_name(%{last_name: l}) when is_binary(l), do: l
+  defp display_name(user), do: to_string(user.email)
 
   attr :flash, :map, required: true
   attr :id, :string, default: "flash-group"

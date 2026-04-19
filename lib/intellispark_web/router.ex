@@ -66,8 +66,10 @@ defmodule IntellisparkWeb.Router do
 
     auth_routes AuthController, Intellispark.Accounts.User, path: "/auth"
 
-    sign_out_route AuthController, "/sign-out",
-      overrides: [IntellisparkWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+    # One-click sign-out from the header dropdown — no intermediate confirmation
+    # LiveView. DELETE is CSRF-protected by :protect_from_forgery in the
+    # :browser pipeline and invoked via <.link method="delete">.
+    delete "/sign-out", AuthController, :sign_out
 
     # No register_path — account creation is invite-only via /invitations/:token
     # (see ADR-003). The :register_with_password action on the User resource is
