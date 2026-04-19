@@ -16,7 +16,13 @@ defmodule IntellisparkWeb.Policies.DistrictAdminCanInvite do
   def match?(nil, _context, _opts), do: false
 
   def match?(actor, %{changeset: %Ash.Changeset{} = changeset}, _opts) do
-    authorized?(actor, Ash.Changeset.get_attribute(changeset, :school_id))
+    # school_id arrives as an action argument (via `manage_relationship`),
+    # not a direct attribute; fall back to the attribute for older callers.
+    school_id =
+      Ash.Changeset.get_argument(changeset, :school_id) ||
+        Ash.Changeset.get_attribute(changeset, :school_id)
+
+    authorized?(actor, school_id)
   end
 
   def match?(actor, %{resource: _, subject: %{data: %{school_id: school_id}}}, _opts) do

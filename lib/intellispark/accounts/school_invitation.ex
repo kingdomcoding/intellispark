@@ -62,7 +62,14 @@ defmodule Intellispark.Accounts.SchoolInvitation do
     defaults [:read]
 
     create :invite do
-      accept [:email, :school_id, :role]
+      accept [:email, :role]
+
+      argument :school_id, :uuid, allow_nil?: false
+
+      # Bind the argument to the :school belongs_to so AshAdmin's form
+      # generator recognises it and renders a dropdown populated from
+      # Ash.read(School, ...) instead of a raw UUID text input.
+      change manage_relationship(:school_id, :school, type: :append_and_remove)
 
       change Intellispark.Accounts.SchoolInvitation.Changes.PrepareInvite
       change Intellispark.Accounts.SchoolInvitation.Changes.SendInvitationEmail
