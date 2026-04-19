@@ -26,7 +26,7 @@ defmodule IntellisparkWeb.Plugs.AssignCurrentSchool do
       true ->
         user =
           current_user
-          |> Ash.load!([:school_memberships], authorize?: false)
+          |> Ash.load!([school_memberships: [:school]], authorize?: false)
 
         school_id = get_session(conn, :current_school_id)
 
