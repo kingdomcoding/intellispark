@@ -184,22 +184,21 @@ ensure_status = fn name, color, position ->
 end
 
 ensure_student_tag = fn student, tag ->
-  case StudentTag
-       |> Ash.Query.filter(student_id == ^student.id and tag_id == ^tag.id)
-       |> Ash.Query.set_tenant(school.id)
-       |> Ash.read_one(authorize?: false) do
-    {:ok, %StudentTag{}} ->
-      :ok
-
-    {:ok, nil} ->
-      {:ok, _} =
-        Ash.create(StudentTag, %{student_id: student.id, tag_id: tag.id},
-          tenant: school.id,
-          actor: admin,
-          authorize?: false
-        )
-
-      :ok
+  case Ash.create(StudentTag, %{student_id: student.id, tag_id: tag.id},
+         tenant: school.id,
+         actor: admin,
+         authorize?: false
+       ) do
+    {:ok, _} -> :ok
+    # Race-safe idempotency: the unique (school_id, student_id, tag_id)
+    # index catches the re-seed case even when the pre-check read missed
+    # the row (archival filter, replication lag, etc.).
+    {:error, %{errors: [%{private_vars: vars} | _]}} ->
+      if Keyword.get(vars || [], :constraint_type) == :unique do
+        :ok
+      else
+        raise "unexpected ensure_student_tag error"
+      end
   end
 end
 
@@ -316,9 +315,9 @@ ensure_status_for.(noah, active)
 # Give Ava a seeded photo so the hub's <img> branch is exercised on a
 # fresh boot. The demo silhouette ships under priv/static/images/ so
 # this path is stable across environments.
-if is_nil(ava.photo_url) do
+if is_nil(ava.photo_url) or ava.photo_url == "/images/demo-student.png" do
   {:ok, _} =
-    Ash.update(ava, %{photo_url: "/images/demo-student.png"},
+    Ash.update(ava, %{photo_url: "/images/demo-student.svg"},
       action: :update,
       tenant: school.id,
       actor: admin,
