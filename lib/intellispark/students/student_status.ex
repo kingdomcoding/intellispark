@@ -11,6 +11,13 @@ defmodule Intellispark.Students.StudentStatus do
     attributes_as_attributes [:school_id]
   end
 
+  pub_sub do
+    module IntellisparkWeb.Endpoint
+    prefix "students:school"
+    publish_all :create, [:school_id]
+    publish_all :update, [:school_id]
+  end
+
   postgres do
     table "student_statuses"
     repo Intellispark.Repo

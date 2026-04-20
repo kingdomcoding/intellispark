@@ -118,6 +118,10 @@ defmodule IntellisparkWeb.StudentLive.Index do
   end
 
   @impl true
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "students:school:" <> _}, socket) do
+    {:noreply, assign_students(socket)}
+  end
+
   def handle_info(%Ash.Notifier.Notification{}, socket) do
     {:noreply, assign_students(socket)}
   end

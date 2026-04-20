@@ -53,4 +53,19 @@ defmodule IntellisparkWeb.BulkTagTest do
     assert Enum.all?(rows, &(&1.applied_by_id == admin.id))
     assert MapSet.new(Enum.map(rows, & &1.student_id)) == MapSet.new([s1.id, s2.id])
   end
+
+  test "PubSub: StudentTag create reaches another /students subscriber", %{
+    school: school,
+    admin: admin
+  } do
+    student = create_student!(school, %{first_name: "Pub", last_name: "Sub"})
+    tag = create_tag!(school, %{name: "LiveTag"})
+
+    Phoenix.PubSub.subscribe(Intellispark.PubSub, "students:school:#{school.id}")
+
+    apply_tag!(admin, school, student, tag)
+
+    assert_receive %Phoenix.Socket.Broadcast{topic: topic}, 500
+    assert topic == "students:school:#{school.id}"
+  end
 end
