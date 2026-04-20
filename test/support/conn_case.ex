@@ -34,4 +34,17 @@ defmodule IntellisparkWeb.ConnCase do
   setup _tags do
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  @doc """
+  Puts a signed-in `user_token` on the connection's session so LiveViews
+  under `ash_authentication_live_session :authenticated_user` see a
+  current_user. Mirrors the shape `LiveUserAuth.session_user/1` reads.
+  """
+  def log_in_user(conn, user) do
+    {:ok, token, _claims} = AshAuthentication.Jwt.token_for_user(user)
+
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> Plug.Conn.put_session("user_token", token)
+  end
 end

@@ -124,7 +124,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
 
     students =
       Student
-      |> Ash.Query.load([:current_status, tags: [:id, :name, :color]])
+      |> Ash.Query.load([:display_name, :current_status, tags: [:id, :name, :color]])
       |> maybe_apply_search(search)
       |> Ash.Query.sort([:last_name, :first_name])
       |> Ash.read!(actor: actor, tenant: school.id)
