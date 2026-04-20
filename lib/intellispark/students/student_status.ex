@@ -8,7 +8,7 @@ defmodule Intellispark.Students.StudentStatus do
   use Intellispark.Resource, domain: Intellispark.Students
 
   paper_trail do
-    attributes_as_attributes [:school_id]
+    attributes_as_attributes [:school_id, :student_id]
   end
 
   pub_sub do
