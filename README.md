@@ -2,7 +2,22 @@
 
 A faithful Phoenix/LiveView/Ash recreation of the Intellispark K-12 student-support platform.
 
-This repository now ships **Phase 2** — the Student domain, per-school Tags, Status ledger, and saved CustomLists with a branded `/students` + `/lists` UI — on top of **Phase 1.5** (admin invitations), **Phase 1** (auth + multi-tenancy), and the Phase 0 design-system + tooling baseline. See `../phase-2-students-tags-lists.md`, `../phase-1-implementation.md`, and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+This repository now ships **Phase 3** — the Student Hub at `/students/:id` — on top of **Phase 2** (Students / Tags / Status / CustomLists), **Phase 1.5** (admin invitations), **Phase 1** (auth + multi-tenancy), and the Phase 0 design-system + tooling baseline. See `../phase-3-student-hub.md`, `../phase-2-students-tags-lists.md`, `../phase-1-implementation.md`, and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+
+## What Phase 3 delivers
+
+- `/students/:id` **Student Hub** with a two-column grid (header card + sidebar + main-column panels + activity timeline)
+- **Header card**: avatar (photo or initials fallback), display_name, grade, external_id, current status chip, inline tag chips, three count badges (High-5s / Flags / Supports — all `0` until Phases 4/5/6), "Edit profile" button
+- **Inline tag editor** as a LiveComponent — `<details>` dropdown lists the school's un-applied tags; picking one calls `Students.apply_tag_to_students/2` and reloads the student without a page refresh; `×` on a chip destroys the StudentTag via a new `Student.remove_tag` action
+- **Inline status editor** as a LiveComponent — `<select>` cycles through the school's Statuses; picking one routes through `Student.set_status`; `Clear` button flips to `Student.clear_status` which nils `current_status_id` and stamps `cleared_at` on the active StudentStatus ledger row
+- **Demographics edit modal** driven by `AshPhoenix.Form.for_update/2` — validates inline (grade_level enum, enrollment_status enum), submits via `AshPhoenix.Form.submit/2`, closes modal + re-reads student on success
+- **Photo upload** end-to-end: `allow_upload(:photo, ...)` + `<.live_file_input>` + `consume_uploaded_entries/3` piped through `Student.upload_photo` which validates MIME + size and copies the file into `priv/static/uploads/students/<id>/<uuid>.<ext>`. `uploads` added to `IntellisparkWeb.static_paths/0` so the file serves at `/uploads/students/...` via `Plug.Static`.
+- **Activity timeline** assembled from `Student.Version` + `StudentTag.Version` + `StudentStatus.Version` rows (join tables now carry `:student_id` via `paper_trail attributes_as_attributes`), sorted newest-first, capped at 20, rendered as an `<ol>` with icons + summaries + hand-rolled relative timestamps
+- **Placeholder panels** for Flags / High-5s / Supports / Notes — real `<.empty_state>` components with disabled `+ New X` buttons and hover tooltips naming the arrival phase (4 / 5 / 6 / 8)
+- **Two PubSub topics**: `students:school:<school_id>` (inherited from Phase 2 for the list view) + `students:<id>` (new, narrow) — the Hub subscribes to both so it updates on any change to its own student within ~100ms across tabs
+- **New Ash actions** on `Student`: `:clear_status`, `:upload_photo`, `:remove_tag` (plus the `:age_in_years` calculation for the sidebar fact sheet). All require_atomic? false, all paper-trailed, all exposed in AshAdmin for free via the existing `use AshAdmin.Resource` on `Intellispark.Resource`.
+- **20 new tests** — 10 unit tests exercise the new actions + calculations + paper-trail student_id propagation, 8 LiveView integration tests cover rendering, modal validate + save, inline tag + status, PubSub broadcast-driven reload, and 2 timeline tests exercise the merged-feed + empty states. Total: **111 tests, 0 failures** (was 91 at end of Phase 2).
+- ADR-005 captures the `AshPhoenix.Form` default / inline-vs-modal heuristic / version-row timeline / local-disk photo storage / narrow-topic PubSub decisions
 
 ## What Phase 2 delivers
 
@@ -116,4 +131,4 @@ mix sobelow --config
 
 ## Roadmap
 
-Phase 0 (foundations), Phase 1 (auth + multi-tenancy), Phase 1.5 (school invitations), and Phase 2 (Students + Tags + Custom Lists) are complete. Next up: **Phase 3** — the Student Hub, where the row-click target grows real content. See `../build-plan-ash.md` for the full 20-phase roadmap.
+Phases 0 through 3 are complete. Next up: **Phase 4** — Flags (with AshStateMachine + AshOban for auto-close + follow-up notifiers). See `../build-plan-ash.md` for the full 20-phase roadmap.
