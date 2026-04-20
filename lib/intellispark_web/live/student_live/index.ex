@@ -209,8 +209,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
               <tr
                 :for={s <- @students}
                 id={"student-#{s.id}"}
-                phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
-                class="hover:bg-whitesmoke/40 cursor-pointer"
+                class="hover:bg-whitesmoke/40"
               >
                 <td class="px-md py-sm">
                   <input
@@ -218,10 +217,12 @@ defmodule IntellisparkWeb.StudentLive.Index do
                     checked={MapSet.member?(@selected, s.id)}
                     phx-click="toggle_select"
                     phx-value-id={s.id}
-                    onclick="event.stopPropagation()"
                   />
                 </td>
-                <td class="px-md py-sm">
+                <td
+                  class="px-md py-sm cursor-pointer"
+                  phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
+                >
                   <.link
                     navigate={~p"/students/#{s.id}?return_to=/students"}
                     class="text-brand hover:text-brand-700"
@@ -229,19 +230,34 @@ defmodule IntellisparkWeb.StudentLive.Index do
                     {s.display_name}
                   </.link>
                 </td>
-                <td class="px-md py-sm text-center">
+                <td
+                  class="px-md py-sm text-center cursor-pointer"
+                  phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
+                >
                   <.count_badge value={0} variant={:high_fives} />
                 </td>
-                <td class="px-md py-sm text-center">
+                <td
+                  class="px-md py-sm text-center cursor-pointer"
+                  phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
+                >
                   <.count_badge value={0} variant={:flags} />
                 </td>
-                <td class="px-md py-sm text-center">
+                <td
+                  class="px-md py-sm text-center cursor-pointer"
+                  phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
+                >
                   <.status_chip_for_status :if={s.current_status} status={s.current_status} />
                 </td>
-                <td class="px-md py-sm text-center">
+                <td
+                  class="px-md py-sm text-center cursor-pointer"
+                  phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
+                >
                   <.count_badge value={0} variant={:supports} />
                 </td>
-                <td class="px-md py-sm">
+                <td
+                  class="px-md py-sm cursor-pointer"
+                  phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
+                >
                   <.tag_chip_row tags={s.tags || []} max_visible={2} />
                 </td>
               </tr>
