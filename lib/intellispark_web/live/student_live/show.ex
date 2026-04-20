@@ -278,6 +278,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
         :initials,
         :age_in_years,
         :current_status,
+        :open_flags_count,
         tags: [:id, :name, :color]
       ],
       actor: actor,
@@ -620,7 +621,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
             <span class="text-azure text-xs">High-5s</span>
           </div>
           <div class="flex items-center gap-sm">
-            <.count_badge value={0} variant={:flags} />
+            <.count_badge value={@student.open_flags_count} variant={:flags} />
             <span class="text-azure text-xs">Flags</span>
           </div>
           <div class="flex items-center gap-sm">
