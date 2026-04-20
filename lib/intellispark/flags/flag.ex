@@ -7,7 +7,10 @@ defmodule Intellispark.Flags.Flag do
   past their auto_close_at.
   """
 
-  use Intellispark.Resource, domain: Intellispark.Flags, extensions: [AshStateMachine]
+  use Intellispark.Resource,
+    domain: Intellispark.Flags,
+    extensions: [AshStateMachine],
+    notifiers: [Intellispark.Flags.Notifiers.Emails]
 
   admin do
     label_field :short_description
