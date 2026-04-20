@@ -30,6 +30,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
          statuses: Students.list_statuses!(actor: actor, tenant: school.id),
          timeline: load_timeline(student, school),
          flags: load_flags(student, actor, school),
+         flag_types: Intellispark.Flags.list_flag_types!(actor: actor, tenant: school.id),
+         staff: load_staff(school),
          edit_modal_open?: false,
          edit_form: nil,
          new_flag_open?: false,
@@ -180,6 +182,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, reload_student(socket)}
   end
 
+  def handle_info({IntellisparkWeb.StudentLive.NewFlagModal, :flag_opened}, socket) do
+    {:noreply,
+     socket
+     |> assign(new_flag_open?: false)
+     |> put_flash(:info, "Flag opened.")
+     |> reload_student()}
+  end
+
   def handle_info(%Phoenix.Socket.Broadcast{topic: "students:" <> _}, socket) do
     {:noreply, reload_student(socket)}
   end
@@ -210,6 +220,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
       _ ->
         socket
     end
+  end
+
+  defp load_staff(school) do
+    Intellispark.Accounts.UserSchoolMembership
+    |> Ash.Query.filter(school_id == ^school.id)
+    |> Ash.Query.load(:user)
+    |> Ash.read!(authorize?: false)
+    |> Enum.map(& &1.user)
+    |> Enum.uniq_by(& &1.id)
   end
 
   defp load_flags(student, actor, school) do
@@ -379,6 +398,17 @@ defmodule IntellisparkWeb.StudentLive.Show do
           </div>
         </.form>
       </.modal>
+
+      <.live_component
+        :if={@new_flag_open?}
+        module={IntellisparkWeb.StudentLive.NewFlagModal}
+        id="new-flag-modal"
+        student={@student}
+        actor={@current_user}
+        flag_types={@flag_types}
+        staff={@staff}
+        error_message={nil}
+      />
     </Layouts.app>
     """
   end
