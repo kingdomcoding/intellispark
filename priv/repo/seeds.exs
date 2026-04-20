@@ -423,6 +423,121 @@ ensure_flag_for.(
   pending_followup?: true
 )
 
+Logger.info("Seeding Phase 5 actions + supports + notes…")
+
+alias Intellispark.Support
+alias Intellispark.Support.{Action, Note}
+alias Intellispark.Support.Support, as: SupportPlan
+
+ensure_action_for = fn student, assignee, desc, due_on ->
+  case Action
+       |> Ash.Query.filter(student_id == ^student.id and description == ^desc)
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, %Action{}} ->
+      :ok
+
+    {:ok, nil} ->
+      attrs = %{
+        student_id: student.id,
+        assignee_id: assignee.id,
+        description: desc,
+        due_on: due_on
+      }
+
+      {:ok, _} =
+        Action
+        |> Ash.Changeset.for_create(:create, attrs, tenant: school.id, actor: admin)
+        |> Ash.create(authorize?: false)
+
+      :ok
+  end
+end
+
+ensure_action_for.(
+  marcus,
+  admin,
+  "Check in on tutoring support",
+  Date.add(Date.utc_today(), 7)
+)
+
+ensure_action_for.(
+  elena,
+  admin,
+  "Schedule attendance meeting with parents",
+  Date.utc_today()
+)
+
+ensure_support_for = fn student, title, desc, days_out ->
+  case SupportPlan
+       |> Ash.Query.filter(student_id == ^student.id and title == ^title)
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, %SupportPlan{}} ->
+      :ok
+
+    {:ok, nil} ->
+      attrs = %{
+        student_id: student.id,
+        title: title,
+        description: desc,
+        starts_at: Date.utc_today(),
+        ends_at: Date.add(Date.utc_today(), days_out)
+      }
+
+      {:ok, _} =
+        SupportPlan
+        |> Ash.Changeset.for_create(:create, attrs, tenant: school.id, actor: admin)
+        |> Ash.create(authorize?: false)
+
+      :ok
+  end
+end
+
+ensure_support_for.(ava, "Academic Focus Plan", "Weekly check-ins + tutoring", 30)
+ensure_support_for.(marcus, "Flex Time Pass", nil, 14)
+
+ensure_note_for = fn student, body, pinned? ->
+  case Note
+       |> Ash.Query.filter(student_id == ^student.id and body == ^body)
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, %Note{}} ->
+      :ok
+
+    {:ok, nil} ->
+      {:ok, note} =
+        Support.create_note(student.id, body,
+          actor: admin,
+          tenant: school.id,
+          authorize?: false
+        )
+
+      if pinned? do
+        {:ok, _} =
+          Support.pin_note(note,
+            actor: admin,
+            tenant: school.id,
+            authorize?: false
+          )
+      end
+
+      :ok
+  end
+end
+
+ensure_note_for.(
+  marcus,
+  "Met with parents on 4/19. Signed off on the tutoring plan.",
+  true
+)
+
+ensure_note_for.(
+  marcus,
+  "Homework showing up more consistently this week.",
+  false
+)
+
 Logger.info("Seed complete.")
 Logger.info("  admin login:   admin@sandboxhigh.edu / phase1-demo-pass")
 Logger.info("  teacher login: curtis.murphy@sandboxhigh.edu / phase1-demo-pass")
