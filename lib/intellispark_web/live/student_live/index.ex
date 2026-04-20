@@ -212,12 +212,13 @@ defmodule IntellisparkWeb.StudentLive.Index do
                 phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
                 class="hover:bg-whitesmoke/40 cursor-pointer"
               >
-                <td class="px-md py-sm" onclick="event.stopPropagation()">
+                <td class="px-md py-sm">
                   <input
                     type="checkbox"
                     checked={MapSet.member?(@selected, s.id)}
                     phx-click="toggle_select"
                     phx-value-id={s.id}
+                    onclick="event.stopPropagation()"
                   />
                 </td>
                 <td class="px-md py-sm">
