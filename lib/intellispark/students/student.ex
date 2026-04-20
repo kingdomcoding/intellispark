@@ -95,11 +95,19 @@ defmodule Intellispark.Students.Student do
     end
 
     has_many :flags, Intellispark.Flags.Flag
+    has_many :actions, Intellispark.Support.Action
+    has_many :supports, Intellispark.Support.Support
+    has_many :notes, Intellispark.Support.Note
   end
 
   aggregates do
     count :open_flags_count, :flags do
       filter expr(status != :closed)
+      public? true
+    end
+
+    count :open_supports_count, :supports do
+      filter expr(status in [:offered, :in_progress])
       public? true
     end
   end

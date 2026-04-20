@@ -17,7 +17,13 @@ defmodule IntellisparkWeb.CustomListLive.Show do
       students =
         Ash.load!(
           students,
-          [:display_name, :current_status, :open_flags_count, tags: [:id, :name, :color]],
+          [
+            :display_name,
+            :current_status,
+            :open_flags_count,
+            :open_supports_count,
+            tags: [:id, :name, :color]
+          ],
           actor: actor,
           tenant: school.id
         )
@@ -89,7 +95,7 @@ defmodule IntellisparkWeb.CustomListLive.Show do
                   <.status_chip_for_status :if={s.current_status} status={s.current_status} />
                 </td>
                 <td class="px-md py-sm text-center">
-                  <.count_badge value={0} variant={:supports} />
+                  <.count_badge value={s.open_supports_count} variant={:supports} />
                 </td>
                 <td class="px-md py-sm">
                   <.tag_chip_row tags={s.tags || []} max_visible={2} />
