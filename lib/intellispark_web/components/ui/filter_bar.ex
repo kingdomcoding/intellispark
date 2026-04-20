@@ -16,7 +16,7 @@ defmodule IntellisparkWeb.UI.FilterBar do
         <span class="hero-funnel-mini"></span> Filters
       </button>
 
-      <form phx-change={@on_search} class="relative flex-1 max-w-md">
+      <form phx-change={@on_search} class="relative flex-1 max-w-[28rem]">
         <span class="hero-magnifying-glass-mini absolute left-3 top-1/2 -translate-y-1/2 text-azure">
         </span>
         <input

@@ -85,14 +85,14 @@ defmodule IntellisparkWeb.StyleguideLive do
           <h2 class="text-display-sm mb-md">
             Level Indicators <span class="text-base text-azure">(Insights style &mdash; filled)</span>
           </h2>
-          <div class="grid grid-cols-3 gap-md max-w-2xl">
+          <div class="grid grid-cols-3 gap-md max-w-[42rem]">
             <.level_indicator level={:low} />
             <.level_indicator level={:moderate} />
             <.level_indicator level={:high} />
           </div>
 
           <h3 class="text-lg font-semibold mt-md mb-sm">Student Hub style &mdash; outlined</h3>
-          <div class="grid grid-cols-3 gap-md max-w-2xl">
+          <div class="grid grid-cols-3 gap-md max-w-[42rem]">
             <.level_indicator level={:low} filled={false} />
             <.level_indicator level={:moderate} filled={false} />
             <.level_indicator level={:high} filled={false} />
