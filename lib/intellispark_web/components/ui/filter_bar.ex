@@ -11,7 +11,7 @@ defmodule IntellisparkWeb.UI.FilterBar do
       <button
         type="button"
         phx-click={@on_toggle_filters}
-        class="inline-flex items-center gap-1 rounded-pill border border-abbey/20 bg-white px-md py-xs text-sm font-medium text-brand hover:bg-whitesmoke"
+        class="inline-flex items-center gap-1 rounded-pill border border-abbey/20 bg-white px-md py-2 text-sm font-medium text-brand hover:bg-whitesmoke"
       >
         <span class="hero-funnel-mini"></span> Filters
       </button>
