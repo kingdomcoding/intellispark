@@ -75,14 +75,16 @@ defmodule Intellispark.Students.CustomList do
       authorize_if IntellisparkWeb.Policies.StaffEditsStudentsInSchool
     end
 
-    policy action_type([:create, :update, :destroy]) do
+    policy action_type(:create) do
+      authorize_if IntellisparkWeb.Policies.ActorBelongsToTenantSchool
+    end
+
+    policy action_type([:update, :destroy]) do
       authorize_if expr(owner_id == ^actor(:id))
     end
 
     policy action(:run) do
-      authorize_if expr(owner_id == ^actor(:id))
-      authorize_if expr(shared? == true)
-      authorize_if IntellisparkWeb.Policies.StaffEditsStudentsInSchool
+      authorize_if IntellisparkWeb.Policies.ActorBelongsToTenantSchool
     end
   end
 end
