@@ -7,7 +7,7 @@ defmodule Intellispark.Flags.Flag do
   past their auto_close_at.
   """
 
-  use Intellispark.Resource, domain: Intellispark.Flags
+  use Intellispark.Resource, domain: Intellispark.Flags, extensions: [AshStateMachine]
 
   admin do
     label_field :short_description
@@ -25,6 +25,32 @@ defmodule Intellispark.Flags.Flag do
     publish_all :update, ["flags:student", :student_id]
     publish_all :destroy, ["flags:school", :school_id]
     publish_all :destroy, ["flags:student", :student_id]
+  end
+
+  state_machine do
+    state_attribute :status
+    initial_states [:draft]
+    default_initial_state :draft
+
+    transitions do
+      transition :open_flag, from: [:draft, :reopened], to: :open
+      transition :assign, from: [:open, :assigned, :under_review], to: :assigned
+      transition :move_to_review, from: [:open, :assigned], to: :under_review
+
+      transition :set_followup,
+        from: [:open, :assigned, :under_review],
+        to: :pending_followup
+
+      transition :close_with_resolution,
+        from: [:open, :assigned, :under_review, :pending_followup],
+        to: :closed
+
+      transition :auto_close,
+        from: [:open, :assigned, :under_review, :pending_followup],
+        to: :closed
+
+      transition :reopen, from: [:closed], to: :reopened
+    end
   end
 
   postgres do
@@ -105,6 +131,56 @@ defmodule Intellispark.Flags.Flag do
       change Intellispark.Flags.Changes.InheritSensitivityFromType
       change Intellispark.Flags.Changes.SetShortDescription
       change Intellispark.Flags.Changes.DefaultAutoCloseAt
+    end
+
+    update :open_flag do
+      argument :assignee_ids, {:array, :uuid}, allow_nil?: false
+      require_atomic? false
+
+      change transition_state(:open)
+      change Intellispark.Flags.Changes.SyncAssignments
+    end
+
+    update :assign do
+      argument :assignee_ids, {:array, :uuid}, allow_nil?: false
+      require_atomic? false
+
+      change transition_state(:assigned)
+      change Intellispark.Flags.Changes.SyncAssignments
+    end
+
+    update :move_to_review do
+      require_atomic? false
+      change transition_state(:under_review)
+    end
+
+    update :set_followup do
+      argument :followup_at, :date, allow_nil?: false
+      require_atomic? false
+
+      change set_attribute(:followup_at, arg(:followup_at))
+      change transition_state(:pending_followup)
+    end
+
+    update :close_with_resolution do
+      argument :resolution_note, :string, allow_nil?: false
+      require_atomic? false
+
+      change set_attribute(:resolution_note, arg(:resolution_note))
+      change Intellispark.Flags.Changes.StampClosedBy
+      change transition_state(:closed)
+    end
+
+    update :auto_close do
+      require_atomic? false
+      change set_attribute(:resolution_note, "Auto-closed: no activity for 30 days.")
+      change transition_state(:closed)
+    end
+
+    update :reopen do
+      require_atomic? false
+      change Intellispark.Flags.Changes.ClearResolution
+      change transition_state(:reopened)
     end
   end
 

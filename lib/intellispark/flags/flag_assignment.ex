@@ -59,6 +59,12 @@ defmodule Intellispark.Flags.FlagAssignment do
       accept []
       change set_attribute(:cleared_at, &DateTime.utc_now/0)
     end
+
+    update :reactivate do
+      accept []
+      change set_attribute(:cleared_at, nil)
+      change set_attribute(:assigned_at, &DateTime.utc_now/0)
+    end
   end
 
   policies do

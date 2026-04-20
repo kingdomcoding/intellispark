@@ -8,19 +8,26 @@ defmodule Intellispark.Resource do
 
   defmacro __using__(opts) do
     domain = Keyword.fetch!(opts, :domain)
+    extra_extensions = Keyword.get(opts, :extensions, [])
+    extra_notifiers = Keyword.get(opts, :notifiers, [])
+
+    extensions =
+      [
+        AshPaperTrail.Resource,
+        AshArchival.Resource,
+        AshOban,
+        AshAdmin.Resource
+      ] ++ extra_extensions
+
+    notifiers = [Ash.Notifier.PubSub] ++ extra_notifiers
 
     quote do
       use Ash.Resource,
         domain: unquote(domain),
         data_layer: AshPostgres.DataLayer,
         authorizers: [Ash.Policy.Authorizer],
-        extensions: [
-          AshPaperTrail.Resource,
-          AshArchival.Resource,
-          AshOban,
-          AshAdmin.Resource
-        ],
-        notifiers: [Ash.Notifier.PubSub]
+        extensions: unquote(extensions),
+        notifiers: unquote(notifiers)
 
       paper_trail do
         change_tracking_mode :snapshot
