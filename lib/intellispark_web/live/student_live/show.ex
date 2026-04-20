@@ -141,6 +141,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, reload_student(socket)}
   end
 
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "students:" <> _}, socket) do
+    {:noreply, reload_student(socket)}
+  end
+
+  def handle_info(%Ash.Notifier.Notification{}, socket) do
+    {:noreply, reload_student(socket)}
+  end
+
   def handle_info(_other, socket), do: {:noreply, socket}
 
   defp reload_student(socket) do
