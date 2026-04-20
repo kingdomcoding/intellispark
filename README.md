@@ -2,7 +2,23 @@
 
 A faithful Phoenix/LiveView/Ash recreation of the Intellispark K-12 student-support platform.
 
-This repository now ships **Phase 1** — authentication and the multi-tenant foundation — followed by **Phase 1.5** — admin-driven school invitations — on top of the Phase 0 design-system + tooling baseline. See `../phase-1-implementation.md` and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+This repository now ships **Phase 2** — the Student domain, per-school Tags, Status ledger, and saved CustomLists with a branded `/students` + `/lists` UI — on top of **Phase 1.5** (admin invitations), **Phase 1** (auth + multi-tenancy), and the Phase 0 design-system + tooling baseline. See `../phase-2-students-tags-lists.md`, `../phase-1-implementation.md`, and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+
+## What Phase 2 delivers
+
+- `Intellispark.Students` domain with six resources — Student, Tag, StudentTag, Status, StudentStatus, CustomList — each tenant-scoped on `school_id` with `global?: false` so forgetting tenant raises rather than silently leaking cross-school data
+- `Student` with `:display_name` + `:initials` calculations, a `:set_status` update action that maintains a paper-trailed StudentStatus ledger (append-only; denormalized pointer on Student), and partial unique identity on `(school_id, external_id) WHERE external_id IS NOT NULL` for SIS round-trip
+- `Tag.apply_to_students` bulk action — `Ash.bulk_create` with `upsert?: true, stop_on_error?: false, return_errors?: true` so 30-student bulk-apply survives partial failure and surfaces a count via the LiveView flash (see ADR-004)
+- `CustomList.filters` as an embedded `FilterSpec` Ash resource (tag_ids, status_ids, grade_levels, enrollment_statuses, name_contains) + a generic `:run` action that composes `Ash.Query.filter` clauses — new filter dimensions need no migration
+- Per-action policy split between `StaffReadsStudentsInSchool` / `StaffEditsStudentsInSchool` (FilterCheck for read/update/destroy) and `ActorBelongsToTenantSchool` (SimpleCheck for create + generic actions), because FilterCheck can't authorize a create
+- `/students` LiveView — brand-blue title, filter bar, 7-column table (Student(N) | High-5s | Flags | Status | Supports | Tags), inline status chips + tag chips with "+ N more" overflow, per-row and select-all checkboxes, white-bg bulk toolbar with 6 icons + charcoal tooltips, apply-tag modal wired through `Tag.apply_to_students`
+- `/lists` LiveView — card grid of the user's own lists + shared lists in the school + a built-in "All Students" card linking to `/students`; `/lists/:id` renders the same 6-column table filtered through the saved FilterSpec
+- `/students/:id` stub that 302s to a placeholder hub page (real hub lands in Phase 3) so row clicks don't 404
+- School-scoped PubSub: Student create/update/destroy broadcasts to `students:school:<school_id>` and `/students` subscribes; bulk-tag applies surface in other tabs immediately
+- `SetAdminActorCookies` auto-seeds the AshAdmin `tenant` session cookie from `current_school` so admins land in the right tenant on `/admin` without picking manually
+- Seeds include 5 demo students (Ava/Marcus/Ling/Elena/Noah), 3 tags (IEP, 1st Gen, Academic Focus), 3 statuses (Active, Watch, Withdrawn), and 2 CustomLists (shared "At-risk (IEP)" + private "Seniors graduating") — all idempotent
+- 88 tests, 0 failures — unit coverage for resources + policies + bulk, plus LiveView acceptance for signed-out redirect, tenant isolation, search, bulk-tag, and private-list visibility
+- ADR-004 captures the tenant-scope / policy-split / bulk-apply / FilterSpec decisions
 
 ## What Phase 1 delivers
 
@@ -100,4 +116,4 @@ mix sobelow --config
 
 ## Roadmap
 
-Phase 0 (foundations) and Phase 1 (auth + multi-tenancy) are complete. Next up: **Phase 2** — Tags, Custom Lists, and the Student list view, where multi-tenancy starts paying for itself. See `../build-plan-ash.md` for the full 20-phase roadmap.
+Phase 0 (foundations), Phase 1 (auth + multi-tenancy), Phase 1.5 (school invitations), and Phase 2 (Students + Tags + Custom Lists) are complete. Next up: **Phase 3** — the Student Hub, where the row-click target grows real content. See `../build-plan-ash.md` for the full 20-phase roadmap.
