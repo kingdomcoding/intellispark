@@ -37,19 +37,19 @@ defmodule Intellispark.Flags.Flag do
 
     transitions do
       transition :open_flag, from: [:draft, :reopened], to: :open
-      transition :assign, from: [:open, :assigned, :under_review], to: :assigned
-      transition :move_to_review, from: [:open, :assigned], to: :under_review
+      transition :assign, from: [:open, :assigned, :under_review, :reopened], to: :assigned
+      transition :move_to_review, from: [:open, :assigned, :reopened], to: :under_review
 
       transition :set_followup,
-        from: [:open, :assigned, :under_review],
+        from: [:open, :assigned, :under_review, :reopened],
         to: :pending_followup
 
       transition :close_with_resolution,
-        from: [:open, :assigned, :under_review, :pending_followup],
+        from: [:open, :assigned, :under_review, :pending_followup, :reopened],
         to: :closed
 
       transition :auto_close,
-        from: [:open, :assigned, :under_review, :pending_followup],
+        from: [:open, :assigned, :under_review, :pending_followup, :reopened],
         to: :closed
 
       transition :reopen, from: [:closed], to: :reopened
@@ -195,6 +195,7 @@ defmodule Intellispark.Flags.Flag do
         scheduler_cron "0 * * * *"
         worker_module_name Intellispark.Flags.Flag.AshOban.Worker.AutoCloseStaleFlags
         scheduler_module_name Intellispark.Flags.Flag.AshOban.Scheduler.AutoCloseStaleFlags
+        list_tenants &Intellispark.Flags.Flag.list_school_tenants/0
 
         where expr(
                 auto_close_at <= now() and
@@ -202,6 +203,13 @@ defmodule Intellispark.Flags.Flag do
               )
       end
     end
+  end
+
+  @doc false
+  def list_school_tenants do
+    Intellispark.Accounts.School
+    |> Ash.read!(authorize?: false)
+    |> Enum.map(& &1.id)
   end
 
   policies do
