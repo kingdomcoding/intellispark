@@ -312,12 +312,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       breadcrumb={@breadcrumb}
     >
       <section class="container-lg py-xl space-y-md">
-        <.header_card
-          student={@student}
-          tags={@tags}
-          actor={@current_user}
-          uploads={@uploads}
-        />
+        <.header_card student={@student} uploads={@uploads} />
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
           <div class="md:col-span-2 space-y-md">
@@ -353,6 +348,17 @@ defmodule IntellisparkWeb.StudentLive.Show do
                 id="inline-status-editor"
                 student={@student}
                 statuses={@statuses}
+                actor={@current_user}
+              />
+            </div>
+
+            <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+              <h2 class="text-sm font-semibold text-abbey">Tags</h2>
+              <.live_component
+                module={IntellisparkWeb.StudentLive.InlineTagEditor}
+                id="inline-tag-editor"
+                student={@student}
+                tags={@tags}
                 actor={@current_user}
               />
             </div>
@@ -559,8 +565,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   attr :student, :map, required: true
-  attr :tags, :list, required: true
-  attr :actor, :map, required: true
   attr :uploads, :map, required: true
 
   defp header_card(assigns) do
@@ -606,13 +610,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
         <div class="flex items-center gap-sm flex-wrap">
           <.status_chip_for_status :if={@student.current_status} status={@student.current_status} />
-          <.live_component
-            module={IntellisparkWeb.StudentLive.InlineTagEditor}
-            id="inline-tag-editor"
-            student={@student}
-            tags={@tags}
-            actor={@actor}
-          />
+          <.tag_chip :for={tag <- @student.tags || []} label={tag.name} />
         </div>
 
         <div class="flex gap-lg pt-sm border-t border-abbey/10">
