@@ -71,7 +71,9 @@ defmodule Intellispark.Repo.Migrations.AddActions do
           name: "actions_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :student_id,
@@ -80,7 +82,9 @@ defmodule Intellispark.Repo.Migrations.AddActions do
           name: "actions_student_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :assignee_id,
@@ -89,7 +93,9 @@ defmodule Intellispark.Repo.Migrations.AddActions do
           name: "actions_assignee_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :opened_by_id,
@@ -98,7 +104,9 @@ defmodule Intellispark.Repo.Migrations.AddActions do
           name: "actions_opened_by_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :completed_by_id,

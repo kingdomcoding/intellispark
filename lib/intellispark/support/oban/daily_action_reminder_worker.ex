@@ -23,9 +23,7 @@ defmodule Intellispark.Support.Oban.DailyActionReminderWorker do
     actions =
       Enum.flat_map(schools, fn school ->
         Action
-        |> Ash.Query.filter(
-          status == :pending and not is_nil(due_on) and due_on <= ^today
-        )
+        |> Ash.Query.filter(status == :pending and not is_nil(due_on) and due_on <= ^today)
         |> Ash.Query.load([
           :assignee,
           :student,

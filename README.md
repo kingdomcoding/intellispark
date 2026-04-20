@@ -2,7 +2,23 @@
 
 A faithful Phoenix/LiveView/Ash recreation of the Intellispark K-12 student-support platform.
 
-This repository now ships **Phase 4** — the Flag workflow (seven-state AshStateMachine + AshOban triggers + Swoosh emails + sidebar panel on the Hub) — on top of **Phase 3** (Student Hub), **Phase 2** (Students / Tags / Status / CustomLists), **Phase 1.5** (admin invitations), **Phase 1** (auth + multi-tenancy), and the Phase 0 design-system + tooling baseline. See `../phase-4-flags.md`, `../phase-3-student-hub.md`, `../phase-2-students-tags-lists.md`, `../phase-1-implementation.md`, and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+This repository now ships **Phase 5** — Actions / Supports / Notes (three new resources with two state machines, pin/unpin, paper-trailed edits, sensitive-gated reads, two daily digest Oban workers, and three new Student Hub panels) — on top of **Phase 4** (Flag workflow), **Phase 3** (Student Hub), **Phase 2** (Students / Tags / Status / CustomLists), **Phase 1.5** (admin invitations), **Phase 1** (auth + multi-tenancy), and the Phase 0 design-system + tooling baseline. See `../phase-5-actions-supports-notes.md`, `../phase-4-flags.md`, `../phase-3-student-hub.md`, `../phase-2-students-tags-lists.md`, `../phase-1-implementation.md`, and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+
+## What Phase 5 delivers
+
+- `Intellispark.Support` domain now holds three new resources — **Action** (two-state machine `:pending → :completed / :cancelled`), **Support** (four-state `:offered → :in_progress → :completed / :declined`), **Note** (plain-text case note with pin/unpin + paper-trailed edits). All tenant-scoped on `school_id` with `global?: false`.
+- **Five new policies** — `AssigneeOrOpenerOrAdminForAction`, `AssigneeOrAdminForAction`, `ProviderOrClinicalActorForSupport`, `StaffReadsNotesForStudent` (FilterCheck copying the Flag pattern for sensitive gating), `AuthorOrAdminForNote`.
+- **Two new Oban digest workers**: `DailyActionReminderWorker` (7:00 cron, groups due + overdue pending Actions by assignee) and `SupportExpirationReminderWorker` (7:05 cron, groups in-progress Supports ending within 3 days by provider) — each sends one digest email per recipient via `ActionDigest` / `SupportExpiring` Swoosh senders.
+- **`Student.open_supports_count` aggregate** — populates the blue Supports chip on `/students` + `/lists/:id` rows; Phase 3 placed a `0` placeholder, Phase 5 makes it real.
+- **Actions panel** (sidebar, below Flags) with checkbox-to-complete, assignee + description + due-date rendering, empty state, and a "View completed actions" link that flashes a Phase-12 pointer.
+- **Supports panel** (sidebar, below Actions) with title + colored status pill + date range + description line-clamp; rows open a slide-over **Support detail sheet** with state-conditional Accept / Decline / Complete buttons and a mini paper-trail timeline.
+- **Notes panel** (main column) with an inline composer (plain text, newline-preserving, optional sensitive checkbox), a pinned-first feed, per-card pin/unpin + inline edit for the author, "edited" badge from the virtual `edited?` calc, and a chocolate "sensitive" badge.
+- **New-action modal** and **New-support modal** built with `AshPhoenix.Form.for_create` — description + assignee + due date for Actions; title + description + provider + start/end for Supports.
+- **Activity timeline extended** — merges `Note.Version` rows as `:note_event` entries; Action / Support transitions stay on their own panels (timeline is narrative-only).
+- **PubSub topics** — `actions:student:<id>`, `supports:student:<id>`, `notes:student:<id>`. The hub reloads the affected panel only on scoped broadcasts.
+- Seeded 2 actions (due today + due in 7 days), 2 supports (Academic Focus Plan 30-day + Flex Time Pass 14-day), and 2 notes (1 pinned + 1 unpinned) for demo purposes.
+- **51 new tests** — resource actions, paper trail, state-machine rejections, policy matrix across all three resources, both Oban workers + no-op cases, LiveView panel empty/populated states + complete/pin/sensitive-gate flows. Total: **185 tests, 0 failures** (was 134 at end of Phase 4).
+- **ADR-007** captures the nine decisions — single `Support` domain over three, state-machine shapes, plain text over ProseMirror, pin as action-not-state, sensitive FilterCheck copy, custom Oban digests, sidebar-vs-main layout, timeline scope.
 
 ## What Phase 4 delivers
 

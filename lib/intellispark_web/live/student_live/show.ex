@@ -120,8 +120,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   def handle_event("open_completed_actions", _params, socket) do
-    {:noreply,
-     put_flash(socket, :info, "Completed action review lands in Phase 12.")}
+    {:noreply, put_flash(socket, :info, "Completed action review lands in Phase 12.")}
   end
 
   def handle_event("open_new_support_modal", _params, socket) do
@@ -440,9 +439,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   defp has_completed_actions?(student, actor, school) do
     case Action
-         |> Ash.Query.filter(
-           student_id == ^student.id and status in [:completed, :cancelled]
-         )
+         |> Ash.Query.filter(student_id == ^student.id and status in [:completed, :cancelled])
          |> Ash.Query.set_tenant(school.id)
          |> Ash.count(actor: actor) do
       {:ok, n} -> n > 0
@@ -1037,8 +1034,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
           />
           <div class="flex-1 min-w-0 space-y-0.5">
             <p class="text-sm text-abbey">
-              <strong>{action.assignee.email}</strong>
-              has been asked to {action.description}
+              <strong>{action.assignee.email}</strong> has been asked to {action.description}
             </p>
             <p
               :if={action.due_on}

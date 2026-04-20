@@ -69,7 +69,9 @@ defmodule Intellispark.Repo.Migrations.AddNotes do
           name: "notes_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :student_id,
@@ -78,7 +80,9 @@ defmodule Intellispark.Repo.Migrations.AddNotes do
           name: "notes_student_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :author_id,
@@ -87,7 +91,9 @@ defmodule Intellispark.Repo.Migrations.AddNotes do
           name: "notes_author_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
     end
   end
 

@@ -36,7 +36,9 @@ defmodule Intellispark.Repo.Migrations.AddSupports do
           name: "supports_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :student_id,
@@ -45,7 +47,9 @@ defmodule Intellispark.Repo.Migrations.AddSupports do
           name: "supports_student_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :offered_by_id,
@@ -54,7 +58,9 @@ defmodule Intellispark.Repo.Migrations.AddSupports do
           name: "supports_offered_by_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :provider_staff_id,
@@ -82,7 +88,9 @@ defmodule Intellispark.Repo.Migrations.AddSupports do
           name: "supports_versions_version_source_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(:changes, :map)
 
