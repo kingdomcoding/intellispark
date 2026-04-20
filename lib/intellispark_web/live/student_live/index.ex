@@ -209,9 +209,10 @@ defmodule IntellisparkWeb.StudentLive.Index do
               <tr
                 :for={s <- @students}
                 id={"student-#{s.id}"}
-                class="hover:bg-whitesmoke/40"
+                phx-click={JS.navigate(~p"/students/#{s.id}")}
+                class="hover:bg-whitesmoke/40 cursor-pointer"
               >
-                <td class="px-md py-sm">
+                <td class="px-md py-sm" onclick="event.stopPropagation()">
                   <input
                     type="checkbox"
                     checked={MapSet.member?(@selected, s.id)}
