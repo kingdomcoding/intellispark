@@ -64,6 +64,14 @@ defmodule Intellispark.Students.Student do
 
   relationships do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
+
+    has_many :student_tags, Intellispark.Students.StudentTag
+
+    many_to_many :tags, Intellispark.Students.Tag do
+      through Intellispark.Students.StudentTag
+      source_attribute_on_join_resource :student_id
+      destination_attribute_on_join_resource :tag_id
+    end
   end
 
   calculations do
