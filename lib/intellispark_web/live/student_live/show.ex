@@ -77,24 +77,46 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   def handle_event("save_photo", _params, socket), do: {:noreply, socket}
 
+  @allowed_mime ~w(image/png image/jpeg image/webp)
+  @ext_of %{"image/png" => "png", "image/jpeg" => "jpg", "image/webp" => "webp"}
+
   defp handle_photo_progress(:photo, entry, socket) do
     if entry.done? do
       %{current_user: actor, current_school: school, student: student} = socket.assigns
 
-      photo =
-        consume_uploaded_entry(socket, entry, fn %{path: tmp} ->
-          {:ok,
-           %{
-             path: tmp,
-             content_type: entry.client_type,
-             filename: entry.client_name
-           }}
-        end)
+      result =
+        if entry.client_type in @allowed_mime do
+          ext = Map.fetch!(@ext_of, entry.client_type)
+          basename = "#{Ash.UUID.generate()}.#{ext}"
 
-      case Students.upload_student_photo(student, photo,
-             actor: actor,
-             tenant: school.id
-           ) do
+          dir =
+            Path.join([
+              :code.priv_dir(:intellispark),
+              "static",
+              "uploads",
+              "students",
+              student.id
+            ])
+
+          File.mkdir_p!(dir)
+          dest = Path.join(dir, basename)
+
+          consume_uploaded_entry(socket, entry, fn %{path: tmp} ->
+            File.cp!(tmp, dest)
+            {:ok, "/uploads/students/#{student.id}/#{basename}"}
+          end)
+          |> then(fn url ->
+            Ash.update(student, %{photo_url: url},
+              action: :update,
+              actor: actor,
+              tenant: school.id
+            )
+          end)
+        else
+          {:error, :unsupported_mime}
+        end
+
+      case result do
         {:ok, _updated} ->
           {:noreply,
            socket
