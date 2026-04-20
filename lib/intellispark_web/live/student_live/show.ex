@@ -87,9 +87,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       breadcrumb={@breadcrumb}
     >
       <section class="container-lg py-xl space-y-md">
-        <div class="bg-white rounded-card shadow-card p-lg">
-          <p class="text-azure text-sm">Header placeholder — filled in Phase E</p>
-        </div>
+        <.header_card student={@student} />
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
           <div class="md:col-span-2 space-y-md">
@@ -121,6 +119,52 @@ defmodule IntellisparkWeb.StudentLive.Show do
       <h2 class="text-sm font-semibold text-abbey">{@title}</h2>
       <p class="text-xs text-azure mt-xs">Placeholder — filled in {@phase}.</p>
     </div>
+    """
+  end
+
+  attr :student, :map, required: true
+
+  defp header_card(assigns) do
+    ~H"""
+    <section class="bg-white rounded-card shadow-card p-lg flex flex-wrap gap-md">
+      <.avatar
+        name={to_string(@student.display_name)}
+        image_url={@student.photo_url}
+        size={:lg}
+      />
+
+      <div class="flex-1 min-w-[20rem] space-y-sm">
+        <div class="flex items-start justify-between gap-sm">
+          <div>
+            <h1 class="text-display-sm text-brand">{@student.display_name}</h1>
+            <p class="text-azure text-sm">
+              Grade {@student.grade_level}<span :if={@student.external_id}> · {@student.external_id}</span>
+            </p>
+          </div>
+          <.button variant={:ghost} phx-click="open_edit_modal">Edit profile</.button>
+        </div>
+
+        <div class="flex items-center gap-sm flex-wrap">
+          <.status_chip_for_status :if={@student.current_status} status={@student.current_status} />
+          <.tag_chip :for={tag <- @student.tags || []} label={tag.name} />
+        </div>
+
+        <div class="flex gap-lg pt-sm border-t border-abbey/10">
+          <div class="flex items-center gap-sm">
+            <.count_badge value={0} variant={:high_fives} />
+            <span class="text-azure text-xs">High-5s</span>
+          </div>
+          <div class="flex items-center gap-sm">
+            <.count_badge value={0} variant={:flags} />
+            <span class="text-azure text-xs">Flags</span>
+          </div>
+          <div class="flex items-center gap-sm">
+            <.count_badge value={0} variant={:supports} />
+            <span class="text-azure text-xs">Supports</span>
+          </div>
+        </div>
+      </div>
+    </section>
     """
   end
 end
