@@ -33,6 +33,10 @@ defmodule Intellispark.Students do
       define :create_tag, action: :create, args: [:name, :color]
       define :update_tag, action: :update
       define :archive_tag, action: :destroy
+
+      define :apply_tag_to_students,
+        action: :apply_to_students,
+        args: [:student_ids]
     end
 
     resource Intellispark.Students.StudentTag do

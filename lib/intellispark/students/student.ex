@@ -18,6 +18,17 @@ defmodule Intellispark.Students.Student do
     attributes_as_attributes [:school_id]
   end
 
+  # Override the base macro's generic pub_sub so LiveViews can subscribe
+  # to school-scoped topics (students:school:<school_id>) instead of
+  # filtering broadcasts client-side.
+  pub_sub do
+    module IntellisparkWeb.Endpoint
+    prefix "students:school"
+    publish_all :create, [:school_id]
+    publish_all :update, [:school_id]
+    publish_all :destroy, [:school_id]
+  end
+
   postgres do
     table "students"
     repo Intellispark.Repo

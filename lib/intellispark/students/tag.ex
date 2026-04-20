@@ -55,6 +55,12 @@ defmodule Intellispark.Students.Tag do
       accept [:name, :color, :description]
       require_atomic? false
     end
+
+    update :apply_to_students do
+      argument :student_ids, {:array, :uuid}, allow_nil?: false
+      require_atomic? false
+      change Intellispark.Students.Changes.BulkApplyTag
+    end
   end
 
   policies do
