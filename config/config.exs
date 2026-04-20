@@ -64,7 +64,11 @@ config :intellispark, Oban,
   repo: Intellispark.Repo,
   plugins: [
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
-    {Oban.Plugins.Lifeline, rescue_after: :timer.minutes(30)}
+    {Oban.Plugins.Lifeline, rescue_after: :timer.minutes(30)},
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"0 8 * * *", Intellispark.Flags.Oban.DailyFollowupReminderWorker}
+     ]}
   ]
 
 config :logger, :default_formatter,

@@ -187,6 +187,23 @@ defmodule Intellispark.Flags.Flag do
     end
   end
 
+  oban do
+    triggers do
+      trigger :auto_close_stale_flags do
+        action :auto_close
+        queue :notifications
+        scheduler_cron "0 * * * *"
+        worker_module_name Intellispark.Flags.Flag.AshOban.Worker.AutoCloseStaleFlags
+        scheduler_module_name Intellispark.Flags.Flag.AshOban.Scheduler.AutoCloseStaleFlags
+
+        where expr(
+                auto_close_at <= now() and
+                  status in [:open, :assigned, :under_review, :pending_followup]
+              )
+      end
+    end
+  end
+
   policies do
     policy action_type(:read) do
       authorize_if IntellisparkWeb.Policies.StaffReadsFlagsForStudent
