@@ -286,9 +286,25 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailSheet do
     %{flag: flag, actor: actor, tenant: tenant} = socket.assigns
 
     case fun.(flag, actor, tenant) do
-      {:ok, _updated} ->
+      {:ok, updated} ->
         send(self(), {__MODULE__, :flag_changed})
-        {:noreply, assign(socket, close_form_open?: false, followup_form_open?: false)}
+
+        reloaded =
+          Ash.load!(
+            updated,
+            [:flag_type, :opened_by, :closed_by, assignments: [:user]],
+            actor: actor,
+            tenant: tenant,
+            authorize?: false
+          )
+
+        {:noreply,
+         assign(socket,
+           flag: reloaded,
+           timeline: load_flag_timeline(reloaded, tenant),
+           close_form_open?: false,
+           followup_form_open?: false
+         )}
 
       {:error, _err} ->
         {:noreply, socket}
