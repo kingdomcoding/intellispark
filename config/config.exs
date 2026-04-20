@@ -67,7 +67,9 @@ config :intellispark, Oban,
     {Oban.Plugins.Lifeline, rescue_after: :timer.minutes(30)},
     {Oban.Plugins.Cron,
      crontab: [
-       {"0 8 * * *", Intellispark.Flags.Oban.DailyFollowupReminderWorker}
+       {"0 8 * * *", Intellispark.Flags.Oban.DailyFollowupReminderWorker},
+       {"0 7 * * *", Intellispark.Support.Oban.DailyActionReminderWorker},
+       {"5 7 * * *", Intellispark.Support.Oban.SupportExpirationReminderWorker}
      ]}
   ]
 
