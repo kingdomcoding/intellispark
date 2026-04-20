@@ -2,6 +2,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   @moduledoc false
   use IntellisparkWeb, :live_view
 
+  alias Intellispark.Flags.Flag
   alias Intellispark.Students
   alias Intellispark.Students.{Student, StudentStatus, StudentTag}
 
@@ -16,6 +17,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       if connected?(socket) do
         Phoenix.PubSub.subscribe(Intellispark.PubSub, "students:school:#{school.id}")
         Phoenix.PubSub.subscribe(Intellispark.PubSub, "students:#{student.id}")
+        Phoenix.PubSub.subscribe(Intellispark.PubSub, "flags:student:#{student.id}")
       end
 
       {:ok,
@@ -27,8 +29,12 @@ defmodule IntellisparkWeb.StudentLive.Show do
          tags: Students.list_tags!(actor: actor, tenant: school.id),
          statuses: Students.list_statuses!(actor: actor, tenant: school.id),
          timeline: load_timeline(student, school),
+         flags: load_flags(student, actor, school),
          edit_modal_open?: false,
-         edit_form: nil
+         edit_form: nil,
+         new_flag_open?: false,
+         active_flag_id: nil,
+         flag_detail_open?: false
        )
        |> allow_upload(:photo,
          accept: ~w(.png .jpg .jpeg .webp),
@@ -54,6 +60,22 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   def handle_event("close_edit_modal", _params, socket) do
     {:noreply, assign(socket, edit_modal_open?: false, edit_form: nil)}
+  end
+
+  def handle_event("open_new_flag_modal", _params, socket) do
+    {:noreply, assign(socket, new_flag_open?: true)}
+  end
+
+  def handle_event("close_new_flag_modal", _params, socket) do
+    {:noreply, assign(socket, new_flag_open?: false)}
+  end
+
+  def handle_event("open_flag_sheet", %{"id" => id}, socket) do
+    {:noreply, assign(socket, active_flag_id: id, flag_detail_open?: true)}
+  end
+
+  def handle_event("close_flag_sheet", _params, socket) do
+    {:noreply, assign(socket, flag_detail_open?: false, active_flag_id: nil)}
   end
 
   def handle_event("validate_profile", %{"form" => params}, socket) do
@@ -162,6 +184,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, reload_student(socket)}
   end
 
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "flags:" <> _}, socket) do
+    {:noreply, reload_student(socket)}
+  end
+
   def handle_info(%Ash.Notifier.Notification{}, socket) do
     {:noreply, reload_student(socket)}
   end
@@ -174,11 +200,27 @@ defmodule IntellisparkWeb.StudentLive.Show do
     case Students.get_student(student.id, actor: actor, tenant: school.id) do
       {:ok, fresh} ->
         {:ok, loaded} = load_student(fresh, actor, school)
-        assign(socket, student: loaded, timeline: load_timeline(loaded, school))
+
+        assign(socket,
+          student: loaded,
+          timeline: load_timeline(loaded, school),
+          flags: load_flags(loaded, actor, school)
+        )
 
       _ ->
         socket
     end
+  end
+
+  defp load_flags(student, actor, school) do
+    Flag
+    |> Ash.Query.filter(
+      student_id == ^student.id and status not in [:closed, :reopened, :draft]
+    )
+    |> Ash.Query.load([:flag_type, :assignee_count, :comment_count])
+    |> Ash.Query.set_tenant(school.id)
+    |> Ash.Query.sort([{:inserted_at, :desc}])
+    |> Ash.read!(actor: actor)
   end
 
   defp load_timeline(student, school) do
@@ -259,12 +301,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
         <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
           <div class="md:col-span-2 space-y-md">
             <.future_panel
-              title="Flags"
-              icon="hero-flag"
-              phase="Phase 4"
-              message="This panel will show open + closed flags, assignees, and follow-up dates."
-            />
-            <.future_panel
               title="High-5s"
               icon="hero-hand-raised"
               phase="Phase 5"
@@ -286,6 +322,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
           <div class="space-y-md">
             <.profile_card student={@student} />
+
+            <.flags_panel flags={@flags} />
 
             <div class="bg-white rounded-card shadow-card p-md space-y-sm">
               <h2 class="text-sm font-semibold text-abbey">Status</h2>
@@ -555,4 +593,95 @@ defmodule IntellisparkWeb.StudentLive.Show do
     </section>
     """
   end
+
+  attr :flags, :list, required: true
+
+  defp flags_panel(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-abbey">
+          Flags ({length(@flags)})
+        </h2>
+        <button
+          type="button"
+          phx-click="open_new_flag_modal"
+          class="text-xs text-brand underline hover:text-brand-700"
+        >
+          + New flag
+        </button>
+      </div>
+
+      <ol :if={@flags != []} class="space-y-xs">
+        <li
+          :for={flag <- @flags}
+          id={"flag-#{flag.id}"}
+          phx-click="open_flag_sheet"
+          phx-value-id={flag.id}
+          class="cursor-pointer flex items-start gap-sm p-xs rounded hover:bg-whitesmoke"
+        >
+          <span
+            class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full mt-1"
+            style={"background: #{flag.flag_type.color}; opacity: 0.2"}
+          >
+            <span class="hero-flag size-3.5 text-abbey"></span>
+          </span>
+          <div class="flex-1 min-w-0 space-y-0.5">
+            <p class="text-sm font-medium text-abbey truncate">{flag.flag_type.name}</p>
+            <p class="text-xs text-azure line-clamp-2">{flag.short_description}</p>
+            <div class="flex items-center gap-xs pt-0.5">
+              <.flag_status_pill status={flag.status} />
+              <span class="text-[0.6875rem] text-azure">
+                {flag.assignee_count} assignee<span :if={flag.assignee_count != 1}>s</span>
+              </span>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <.empty_state
+        :if={@flags == []}
+        icon="hero-flag"
+        message="No open flags for this student."
+      />
+    </div>
+    """
+  end
+
+  attr :status, :atom, required: true
+
+  defp flag_status_pill(assigns) do
+    ~H"""
+    <span class={[
+      "inline-flex items-center rounded-pill border px-2 py-0.5 text-[0.6875rem] font-medium",
+      status_pill_classes(@status)
+    ]}>
+      {status_label(@status)}
+    </span>
+    """
+  end
+
+  defp status_pill_classes(:draft), do: "border-abbey/30 text-abbey bg-white"
+  defp status_pill_classes(:open), do: "border-brand text-brand bg-white"
+  defp status_pill_classes(:assigned), do: "border-brand-700 text-brand-700 bg-brand/5"
+
+  defp status_pill_classes(:under_review),
+    do: "border-chocolate text-chocolate bg-chocolate/5"
+
+  defp status_pill_classes(:pending_followup),
+    do: "border-status-followup-border text-status-followup-text bg-white"
+
+  defp status_pill_classes(:closed),
+    do: "border-status-resolved-border text-status-resolved-text bg-white"
+
+  defp status_pill_classes(:reopened),
+    do: "border-status-active-border text-status-active-text bg-white"
+
+  defp status_label(:draft), do: "Draft"
+  defp status_label(:open), do: "Open"
+  defp status_label(:assigned), do: "Assigned"
+  defp status_label(:under_review), do: "Under review"
+  defp status_label(:pending_followup), do: "Pending follow-up"
+  defp status_label(:closed), do: "Closed"
+  defp status_label(:reopened), do: "Reopened"
 end
