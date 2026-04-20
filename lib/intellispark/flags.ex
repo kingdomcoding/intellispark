@@ -15,5 +15,14 @@ defmodule Intellispark.Flags do
   end
 
   resources do
+    resource Intellispark.Flags.FlagType do
+      define :list_flag_types, action: :read
+      define :get_flag_type, action: :read, get_by: [:id]
+      define :create_flag_type, action: :create, args: [:name, :color]
+      define :update_flag_type, action: :update
+      define :archive_flag_type, action: :destroy
+    end
+
+    resource Intellispark.Flags.FlagType.Version
   end
 end
