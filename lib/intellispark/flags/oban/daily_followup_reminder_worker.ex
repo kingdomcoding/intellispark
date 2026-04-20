@@ -18,16 +18,23 @@ defmodule Intellispark.Flags.Oban.DailyFollowupReminderWorker do
   def perform(_job) do
     today = Date.utc_today()
 
-    flags =
-      Flag
-      |> Ash.Query.filter(followup_at == ^today and status == :pending_followup)
-      |> Ash.Query.load([
-        :student,
-        :flag_type,
-        student: [:display_name],
-        assignments: [:user]
-      ])
+    schools =
+      Intellispark.Accounts.School
       |> Ash.read!(authorize?: false)
+
+    flags =
+      Enum.flat_map(schools, fn school ->
+        Flag
+        |> Ash.Query.filter(followup_at == ^today and status == :pending_followup)
+        |> Ash.Query.load([
+          :student,
+          :flag_type,
+          student: [:display_name],
+          assignments: [:user]
+        ])
+        |> Ash.Query.set_tenant(school.id)
+        |> Ash.read!(authorize?: false)
+      end)
 
     flags
     |> Enum.flat_map(fn flag ->

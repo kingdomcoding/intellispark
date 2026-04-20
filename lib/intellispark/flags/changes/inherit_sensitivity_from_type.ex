@@ -4,14 +4,18 @@ defmodule Intellispark.Flags.Changes.InheritSensitivityFromType do
 
   @impl true
   def change(changeset, _opts, _context) do
-    case Ash.Changeset.get_attribute(changeset, :sensitive?) do
-      nil ->
-        maybe_inherit(changeset)
-
-      _explicit ->
-        changeset
+    if explicitly_provided?(changeset) do
+      changeset
+    else
+      maybe_inherit(changeset)
     end
   end
+
+  defp explicitly_provided?(%{params: params}) when is_map(params) do
+    Map.has_key?(params, "sensitive?") or Map.has_key?(params, :sensitive?)
+  end
+
+  defp explicitly_provided?(_), do: false
 
   defp maybe_inherit(changeset) do
     type_id = Ash.Changeset.get_attribute(changeset, :flag_type_id)
