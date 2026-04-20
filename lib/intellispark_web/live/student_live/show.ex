@@ -476,15 +476,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
         phx-submit="save_photo"
         class="flex flex-col items-center gap-xs"
       >
-        <label class="block cursor-pointer">
+        <label class="flex flex-col items-center gap-xs cursor-pointer">
           <.live_file_input upload={@uploads.photo} class="hidden" />
           <.avatar
             name={to_string(@student.display_name)}
             image_url={@student.photo_url}
             size={:xl}
           />
+          <span class="text-xs text-brand underline">Change photo</span>
         </label>
-        <span class="text-xs text-brand underline">Change photo</span>
         <p
           :for={err <- upload_errors(@uploads.photo)}
           class="text-xs text-chocolate"
