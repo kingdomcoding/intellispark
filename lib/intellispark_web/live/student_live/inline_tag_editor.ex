@@ -13,6 +13,11 @@ defmodule IntellisparkWeb.StudentLive.InlineTagEditor do
   alias Intellispark.Students
 
   @impl true
+  def update(assigns, socket) do
+    {:ok, socket |> assign(assigns) |> assign_new(:open?, fn -> false end)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="flex items-center gap-xs flex-wrap">
@@ -24,39 +29,57 @@ defmodule IntellisparkWeb.StudentLive.InlineTagEditor do
         value={tag.id}
       />
 
-      <details id={"add-tag-details-#{@id}"} class="relative">
-        <summary class="cursor-pointer text-xs text-brand underline list-none">
+      <div class="relative">
+        <button
+          type="button"
+          phx-click="toggle_dropdown"
+          phx-target={@myself}
+          class="cursor-pointer text-xs text-brand underline"
+        >
           + Add tag
-        </summary>
-        <ul
-          :if={unpicked(@student, @tags) != []}
+        </button>
+
+        <div
+          :if={@open?}
+          phx-click-away="close_dropdown"
+          phx-target={@myself}
           class="absolute left-0 mt-1 w-56 bg-white shadow-elevated rounded-card py-1 z-10"
         >
-          <li :for={tag <- unpicked(@student, @tags)}>
-            <button
-              type="button"
-              phx-click="add_tag"
-              phx-value-tag_id={tag.id}
-              phx-target={@myself}
-              class="w-full flex items-center gap-xs px-sm py-xs hover:bg-whitesmoke text-left text-sm"
-            >
-              <span class="inline-block size-3 rounded" style={"background: #{tag.color}"}></span>
-              {tag.name}
-            </button>
-          </li>
-        </ul>
-        <p
-          :if={unpicked(@student, @tags) == []}
-          class="absolute left-0 mt-1 w-56 bg-white shadow-elevated rounded-card py-1 z-10 px-sm py-xs text-sm text-azure italic"
-        >
-          All tags applied.
-        </p>
-      </details>
+          <ul :if={unpicked(@student, @tags) != []}>
+            <li :for={tag <- unpicked(@student, @tags)}>
+              <button
+                type="button"
+                phx-click="add_tag"
+                phx-value-tag_id={tag.id}
+                phx-target={@myself}
+                class="w-full flex items-center gap-xs px-sm py-xs hover:bg-whitesmoke text-left text-sm"
+              >
+                <span class="inline-block size-3 rounded" style={"background: #{tag.color}"}></span>
+                {tag.name}
+              </button>
+            </li>
+          </ul>
+          <p
+            :if={unpicked(@student, @tags) == []}
+            class="px-sm py-xs text-sm text-azure italic"
+          >
+            All tags applied.
+          </p>
+        </div>
+      </div>
     </div>
     """
   end
 
   @impl true
+  def handle_event("toggle_dropdown", _params, socket) do
+    {:noreply, update(socket, :open?, &(!&1))}
+  end
+
+  def handle_event("close_dropdown", _params, socket) do
+    {:noreply, assign(socket, open?: false)}
+  end
+
   def handle_event("add_tag", %{"tag_id" => tag_id}, socket) do
     %{student: student, actor: actor} = socket.assigns
 
@@ -67,7 +90,7 @@ defmodule IntellisparkWeb.StudentLive.InlineTagEditor do
       )
 
     send(self(), {__MODULE__, {:tags_changed, student.id}})
-    {:noreply, socket}
+    {:noreply, assign(socket, open?: false)}
   end
 
   def handle_event("remove_tag", %{"id" => tag_id}, socket) do

@@ -281,16 +281,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
               />
             </div>
 
-            <div class="bg-white rounded-card shadow-card p-md space-y-sm">
-              <h2 class="text-sm font-semibold text-abbey">Tags</h2>
-              <.live_component
-                module={IntellisparkWeb.StudentLive.InlineTagEditor}
-                id="sidebar-tag-editor"
-                student={@student}
-                tags={@tags}
-                actor={@current_user}
-              />
-            </div>
           </div>
         </div>
 
@@ -491,7 +481,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
           <.avatar
             name={to_string(@student.display_name)}
             image_url={@student.photo_url}
-            size={:lg}
+            size={:xl}
           />
         </label>
         <span class="text-xs text-brand underline">Change photo</span>

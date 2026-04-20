@@ -111,15 +111,15 @@ defmodule IntellisparkWeb.StudentShowTest do
 
       {:ok, lv, _html} = conn |> log_in_user(admin) |> live(~p"/students/#{student.id}")
 
-      html =
-        lv
-        |> element(
-          "#add-tag-details-inline-tag-editor button[phx-value-tag_id=\"#{tag.id}\"]",
-          tag.name
-        )
-        |> render_click()
+      lv
+      |> element("button[phx-click=\"toggle_dropdown\"]", "+ Add tag")
+      |> render_click()
 
-      assert html =~ "LiveAddTag"
+      lv
+      |> element("button[phx-click=\"add_tag\"][phx-value-tag_id=\"#{tag.id}\"]")
+      |> render_click()
+
+      assert render(lv) =~ "LiveAddTag"
 
       count =
         StudentTag
