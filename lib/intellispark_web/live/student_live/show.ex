@@ -517,7 +517,13 @@ defmodule IntellisparkWeb.StudentLive.Show do
               Grade {@student.grade_level}<span :if={@student.external_id}> · {@student.external_id}</span>
             </p>
           </div>
-          <.button variant={:ghost} phx-click="open_edit_modal">Edit profile</.button>
+          <button
+            type="button"
+            phx-click="open_edit_modal"
+            class="text-sm text-brand underline hover:text-brand-700"
+          >
+            Edit profile
+          </button>
         </div>
 
         <div class="flex items-center gap-sm flex-wrap">
