@@ -72,6 +72,13 @@ defmodule Intellispark.Students.Student do
       source_attribute_on_join_resource :student_id
       destination_attribute_on_join_resource :tag_id
     end
+
+    has_many :student_statuses, Intellispark.Students.StudentStatus
+
+    belongs_to :current_status, Intellispark.Students.Status do
+      attribute_writable? true
+      public? true
+    end
   end
 
   calculations do
@@ -130,6 +137,12 @@ defmodule Intellispark.Students.Student do
       ]
 
       require_atomic? false
+    end
+
+    update :set_status do
+      argument :status_id, :uuid, allow_nil?: false
+      require_atomic? false
+      change Intellispark.Students.Changes.SetStudentStatus
     end
   end
 

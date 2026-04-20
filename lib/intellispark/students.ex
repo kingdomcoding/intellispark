@@ -23,6 +23,8 @@ defmodule Intellispark.Students do
 
       define :update_student, action: :update
       define :archive_student, action: :destroy
+
+      define :set_student_status, action: :set_status, args: [:status_id]
     end
 
     resource Intellispark.Students.Tag do
@@ -39,8 +41,22 @@ defmodule Intellispark.Students do
       define :remove_student_tag, action: :destroy
     end
 
+    resource Intellispark.Students.Status do
+      define :list_statuses, action: :read
+      define :get_status, action: :read, get_by: [:id]
+      define :create_status, action: :create, args: [:name, :color, :position]
+      define :update_status, action: :update
+      define :archive_status, action: :destroy
+    end
+
+    resource Intellispark.Students.StudentStatus do
+      define :list_student_statuses, action: :read
+    end
+
     resource Intellispark.Students.Student.Version
     resource Intellispark.Students.Tag.Version
     resource Intellispark.Students.StudentTag.Version
+    resource Intellispark.Students.Status.Version
+    resource Intellispark.Students.StudentStatus.Version
   end
 end
