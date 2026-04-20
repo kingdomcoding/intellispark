@@ -504,7 +504,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
       |> Ash.read!(authorize?: false)
       |> Enum.map(&Map.put(&1, :__kind__, :status_event))
 
-    (student_versions ++ tag_versions ++ status_versions)
+    note_versions =
+      Note.Version
+      |> Ash.Query.filter(student_id == ^student.id)
+      |> Ash.Query.set_tenant(school.id)
+      |> Ash.read!(authorize?: false)
+      |> Enum.map(&Map.put(&1, :__kind__, :note_event))
+
+    (student_versions ++ tag_versions ++ status_versions ++ note_versions)
     |> Enum.sort_by(& &1.version_inserted_at, {:desc, DateTime})
     |> Enum.take(20)
   end
@@ -742,6 +749,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp icon_for(:student_event), do: "hero-pencil"
   defp icon_for(:tag_event), do: "hero-tag"
   defp icon_for(:status_event), do: "hero-chart-bar"
+  defp icon_for(:note_event), do: "hero-document-text"
 
   defp summarise(%{__kind__: :student_event, version_action_name: name}) do
     case name do
@@ -762,6 +770,13 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp summarise(%{__kind__: :status_event, version_action_name: :create}), do: "Status set"
   defp summarise(%{__kind__: :status_event, version_action_name: :clear}), do: "Status cleared"
   defp summarise(%{__kind__: :status_event}), do: "Status change"
+
+  defp summarise(%{__kind__: :note_event, version_action_name: :create}), do: "Posted a note"
+  defp summarise(%{__kind__: :note_event, version_action_name: :update}), do: "Edited a note"
+  defp summarise(%{__kind__: :note_event, version_action_name: :pin}), do: "Pinned a note"
+  defp summarise(%{__kind__: :note_event, version_action_name: :unpin}), do: "Unpinned a note"
+  defp summarise(%{__kind__: :note_event, version_action_name: :destroy}), do: "Note removed"
+  defp summarise(%{__kind__: :note_event}), do: "Note change"
 
   defp relative_time(%DateTime{} = ts) do
     diff = DateTime.diff(DateTime.utc_now(), ts, :second)
