@@ -34,7 +34,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
          accept: ~w(.png .jpg .jpeg .webp),
          max_entries: 1,
          max_file_size: 5_000_000,
-         auto_upload: true
+         auto_upload: true,
+         progress: &handle_photo_progress/3
        )}
     else
       _ ->
@@ -74,46 +75,38 @@ defmodule IntellisparkWeb.StudentLive.Show do
     end
   end
 
-  def handle_event("save_photo", _params, socket) do
-    %{current_user: actor, current_school: school, student: student} = socket.assigns
+  def handle_event("save_photo", _params, socket), do: {:noreply, socket}
 
-    {completed, in_progress} = uploaded_entries(socket, :photo)
+  defp handle_photo_progress(:photo, entry, socket) do
+    if entry.done? do
+      %{current_user: actor, current_school: school, student: student} = socket.assigns
 
-    cond do
-      # phx-change fires repeatedly during the auto-upload lifecycle; only
-      # attempt to consume when there are done entries AND none still in
-      # flight (consume_uploaded_entries raises otherwise).
-      in_progress != [] ->
-        {:noreply, socket}
+      photo =
+        consume_uploaded_entry(socket, entry, fn %{path: tmp} ->
+          {:ok,
+           %{
+             path: tmp,
+             content_type: entry.client_type,
+             filename: entry.client_name
+           }}
+        end)
 
-      completed == [] ->
-        {:noreply, socket}
+      case Students.upload_student_photo(student, photo,
+             actor: actor,
+             tenant: school.id
+           ) do
+        {:ok, _updated} ->
+          {:noreply,
+           socket
+           |> put_flash(:info, "Photo updated.")
+           |> reload_student()}
 
-      true ->
-        [photo] =
-          consume_uploaded_entries(socket, :photo, fn %{path: tmp}, entry ->
-            {:ok,
-             %{
-               path: tmp,
-               content_type: entry.client_type,
-               filename: entry.client_name
-             }}
-          end)
-
-        case Students.upload_student_photo(student, photo,
-               actor: actor,
-               tenant: school.id
-             ) do
-          {:ok, _updated} ->
-            {:noreply,
-             socket
-             |> put_flash(:info, "Photo updated.")
-             |> reload_student()}
-
-          {:error, err} ->
-            IO.inspect(err, label: "upload_student_photo error")
-            {:noreply, put_flash(socket, :error, "Could not upload photo.")}
-        end
+        {:error, err} ->
+          IO.inspect(err, label: "upload_student_photo error")
+          {:noreply, put_flash(socket, :error, "Could not upload photo.")}
+      end
+    else
+      {:noreply, socket}
     end
   end
 
