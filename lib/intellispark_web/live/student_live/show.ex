@@ -233,10 +233,30 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
           <div class="md:col-span-2 space-y-md">
-            <.placeholder_card title="Flags" phase="Phase 4" />
-            <.placeholder_card title="High-5s" phase="Phase 5" />
-            <.placeholder_card title="Supports" phase="Phase 6" />
-            <.placeholder_card title="Notes" phase="Phase 8" />
+            <.future_panel
+              title="Flags"
+              icon="hero-flag"
+              phase="Phase 4"
+              message="This panel will show open + closed flags, assignees, and follow-up dates."
+            />
+            <.future_panel
+              title="High-5s"
+              icon="hero-hand-raised"
+              phase="Phase 5"
+              message="High-5s — quick positive acknowledgements — arrive in Phase 5."
+            />
+            <.future_panel
+              title="Supports"
+              icon="hero-heart"
+              phase="Phase 6"
+              message="Structured support plans + intervention tracking arrive in Phase 6."
+            />
+            <.future_panel
+              title="Notes"
+              icon="hero-document-text"
+              phase="Phase 8"
+              message="Case notes arrive in Phase 8."
+            />
           </div>
 
           <div class="space-y-md">
@@ -311,16 +331,30 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   attr :title, :string, required: true
+  attr :icon, :string, required: true
   attr :phase, :string, required: true
+  attr :message, :string, required: true
 
-  defp placeholder_card(assigns) do
+  defp future_panel(assigns) do
     ~H"""
-    <div class="bg-white rounded-card shadow-card p-md">
-      <h2 class="text-sm font-semibold text-abbey">{@title}</h2>
-      <p class="text-xs text-azure mt-xs">Placeholder — filled in {@phase}.</p>
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-abbey">{@title}</h2>
+        <button
+          type="button"
+          disabled
+          title={"Arrives in #{@phase}"}
+          aria-disabled="true"
+          class="inline-flex items-center gap-1 rounded-pill border border-abbey/20 bg-lightgrey px-md py-1 text-xs font-medium text-azure cursor-not-allowed"
+        >
+          + New {@title |> String.downcase() |> String.trim_trailing("s")}
+        </button>
+      </div>
+      <.empty_state icon={@icon} message={@message} />
     </div>
     """
   end
+
 
   attr :timeline, :list, required: true
 
