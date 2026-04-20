@@ -30,5 +30,22 @@ defmodule Intellispark.Support do
     end
 
     resource Intellispark.Support.Action.Version
+
+    resource Intellispark.Support.Support do
+      define :list_supports, action: :read
+      define :get_support, action: :read, get_by: [:id]
+
+      define :create_support,
+        action: :create,
+        args: [:student_id, :title]
+
+      define :update_support, action: :update
+      define :accept_support, action: :accept
+      define :decline_support, action: :decline
+      define :complete_support, action: :complete
+      define :archive_support, action: :destroy
+    end
+
+    resource Intellispark.Support.Support.Version
   end
 end
