@@ -28,6 +28,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   def render(assigns) do
     ~H"""
     <Layouts.app
+      flash={@flash}
       current_user={@current_user}
       current_school={@current_school}
       breadcrumb={%{label: "Back to All Students", path: ~p"/students"}}

@@ -10,6 +10,7 @@ defmodule IntellisparkWeb.Layouts do
   attr :current_user, :map, default: nil
   attr :current_school, :map, default: nil
   attr :breadcrumb, :map, default: nil
+  attr :flash, :map, default: %{}
   slot :inner_block, required: true
 
   def app(assigns) do
@@ -45,6 +46,8 @@ defmodule IntellisparkWeb.Layouts do
       </div>
       <div class="intellispark-accent-bar"></div>
     </header>
+
+    <.live_flash_group flash={@flash} />
 
     <main class="min-h-[calc(100vh-4rem)] bg-whitesmoke">
       {render_slot(@inner_block)}
@@ -206,6 +209,24 @@ defmodule IntellisparkWeb.Layouts do
         {gettext("Attempting to reconnect")}
         <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
+    </div>
+    """
+  end
+
+  @doc """
+  LiveView-scoped flash group for `:info` and `:error` messages put via
+  `put_flash/3` inside `handle_event` / `handle_info`. The connectivity
+  flashes (client-error / server-error) live in the root layout instead,
+  so they survive a disconnected socket.
+  """
+  attr :flash, :map, required: true
+  attr :id, :string, default: "live-flash-group"
+
+  def live_flash_group(assigns) do
+    ~H"""
+    <div id={@id} aria-live="polite">
+      <.flash kind={:info} flash={@flash} id="live-flash-info" />
+      <.flash kind={:error} flash={@flash} id="live-flash-error" />
     </div>
     """
   end
