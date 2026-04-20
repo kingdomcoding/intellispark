@@ -27,21 +27,21 @@ district =
       d
   end
 
-school =
+ensure_school = fn name, slug ->
   case School
-       |> Ash.Query.filter(district_id == ^district.id and slug == "sandbox-high")
+       |> Ash.Query.filter(district_id == ^district.id and slug == ^slug)
        |> Ash.read_one(authorize?: false) do
     {:ok, %School{} = s} ->
       s
 
     {:ok, nil} ->
-      {:ok, s} =
-        Accounts.create_school("Sandbox High School", "sandbox-high", district.id,
-          authorize?: false
-        )
-
+      {:ok, s} = Accounts.create_school(name, slug, district.id, authorize?: false)
       s
   end
+end
+
+school = ensure_school.("Sandbox High School", "sandbox-high")
+middle_school = ensure_school.("Sandbox Middle School", "sandbox-middle")
 
 unless SchoolTerm
        |> Ash.Query.filter(school_id == ^school.id and name == "2026 Spring")
@@ -57,7 +57,18 @@ unless SchoolTerm
     )
 end
 
-ensure_user = fn email, role ->
+ensure_membership = fn user, school_row, role ->
+  unless UserSchoolMembership
+         |> Ash.Query.filter(user_id == ^user.id and school_id == ^school_row.id)
+         |> Ash.read_one!(authorize?: false) do
+    {:ok, _} =
+      Accounts.create_membership(user.id, school_row.id, role, :manual, authorize?: false)
+  end
+
+  :ok
+end
+
+ensure_user = fn email, memberships ->
   user =
     case User
          |> Ash.Query.filter(email == ^email)
@@ -81,18 +92,22 @@ ensure_user = fn email, role ->
         Ash.update!(u, %{district_id: district.id}, action: :set_district, authorize?: false)
     end
 
-  unless UserSchoolMembership
-         |> Ash.Query.filter(user_id == ^user.id and school_id == ^school.id)
-         |> Ash.read_one!(authorize?: false) do
-    {:ok, _} =
-      Accounts.create_membership(user.id, school.id, role, :manual, authorize?: false)
-  end
+  Enum.each(memberships, fn {school_row, role} ->
+    ensure_membership.(user, school_row, role)
+  end)
 
   user
 end
 
-admin = ensure_user.("admin@sandboxhigh.edu", :admin)
-_teacher = ensure_user.("curtis.murphy@sandboxhigh.edu", :teacher)
+# Admin has memberships at BOTH schools so the header school-switcher
+# dropdown is exercised on a fresh boot without manual SQL.
+admin =
+  ensure_user.("admin@sandboxhigh.edu", [
+    {school, :admin},
+    {middle_school, :admin}
+  ])
+
+_teacher = ensure_user.("curtis.murphy@sandboxhigh.edu", [{school, :teacher}])
 
 # Seed one pending invitation so /admin has something to show on a fresh boot
 # and the accept flow has a ready-made demo URL in /dev/mailbox.
