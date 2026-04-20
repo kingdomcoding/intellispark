@@ -33,7 +33,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
        |> allow_upload(:photo,
          accept: ~w(.png .jpg .jpeg .webp),
          max_entries: 1,
-         max_file_size: 5_000_000
+         max_file_size: 5_000_000,
+         auto_upload: true
        )}
     else
       _ ->
@@ -73,35 +74,18 @@ defmodule IntellisparkWeb.StudentLive.Show do
     end
   end
 
-  def handle_event("validate_photo", _params, socket), do: {:noreply, socket}
-
   def handle_event("save_photo", _params, socket) do
     %{current_user: actor, current_school: school, student: student} = socket.assigns
 
-    case consume_photo(socket) do
-      {:ok, photo} ->
-        case Students.upload_student_photo(student, photo,
-               actor: actor,
-               tenant: school.id
-             ) do
-          {:ok, _updated} ->
-            {:noreply,
-             socket
-             |> put_flash(:info, "Photo updated.")
-             |> reload_student()}
+    {completed, _in_progress} = uploaded_entries(socket, :photo)
 
-          {:error, _} ->
-            {:noreply, put_flash(socket, :error, "Could not upload photo.")}
-        end
-
-      :no_upload ->
+    case completed do
+      [] ->
+        # phx-change fires on every file-input change; only the second
+        # call (after auto_upload finishes) has a completed entry.
         {:noreply, socket}
-    end
-  end
 
-  defp consume_photo(socket) do
-    case uploaded_entries(socket, :photo) do
-      {[_ | _], _} ->
+      [_ | _] ->
         [photo] =
           consume_uploaded_entries(socket, :photo, fn %{path: tmp}, entry ->
             {:ok,
@@ -112,11 +96,25 @@ defmodule IntellisparkWeb.StudentLive.Show do
              }}
           end)
 
-        {:ok, photo}
+        case Students.upload_student_photo(student, photo,
+               actor: actor,
+               tenant: school.id
+             ) do
+          {:ok, _updated} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Photo updated.")
+             |> reload_student()}
 
-      _ ->
-        :no_upload
+          {:error, err} ->
+            IO.inspect(err, label: "upload_student_photo error")
+            {:noreply, put_flash(socket, :error, "Could not upload photo.")}
+        end
     end
+  end
+
+  defp uploading?(upload_config) do
+    Enum.any?(upload_config.entries, fn entry -> entry.progress < 100 end)
   end
 
   defp build_edit_form(%{student: student, current_user: actor, current_school: school}) do
@@ -471,11 +469,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp header_card(assigns) do
     ~H"""
     <section class="bg-white rounded-card shadow-card p-lg flex flex-wrap gap-md">
-      <form
-        phx-change="validate_photo"
-        phx-submit="save_photo"
-        class="flex flex-col items-center gap-xs"
-      >
+      <form phx-change="save_photo" class="flex flex-col items-center gap-xs">
         <label class="flex flex-col items-center gap-xs cursor-pointer">
           <.live_file_input upload={@uploads.photo} class="hidden" />
           <.avatar
@@ -491,14 +485,9 @@ defmodule IntellisparkWeb.StudentLive.Show do
         >
           {format_upload_error(err)}
         </p>
-        <.button
-          :if={Enum.any?(@uploads.photo.entries)}
-          type="submit"
-          variant={:primary}
-          size={:sm}
-        >
-          Upload
-        </.button>
+        <p :if={uploading?(@uploads.photo)} class="text-xs text-azure">
+          Uploading…
+        </p>
       </form>
 
       <div class="flex-1 min-w-[20rem] space-y-sm">
