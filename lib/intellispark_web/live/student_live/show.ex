@@ -3,6 +3,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   use IntellisparkWeb, :live_view
 
   alias Intellispark.Students
+  alias Intellispark.Students.{Student, StudentStatus, StudentTag}
 
   require Ash.Query
 
@@ -25,7 +26,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
          breadcrumb: resolve_breadcrumb(params["return_to"], actor, school),
          tags: Students.list_tags!(actor: actor, tenant: school.id),
          statuses: Students.list_statuses!(actor: actor, tenant: school.id),
-         timeline: [],
+         timeline: load_timeline(student, school),
          edit_modal_open?: false,
          edit_form: nil
        )
@@ -102,11 +103,38 @@ defmodule IntellisparkWeb.StudentLive.Show do
     case Students.get_student(student.id, actor: actor, tenant: school.id) do
       {:ok, fresh} ->
         {:ok, loaded} = load_student(fresh, actor, school)
-        assign(socket, student: loaded)
+        assign(socket, student: loaded, timeline: load_timeline(loaded, school))
 
       _ ->
         socket
     end
+  end
+
+  defp load_timeline(student, school) do
+    student_versions =
+      Student.Version
+      |> Ash.Query.filter(version_source_id == ^student.id)
+      |> Ash.Query.set_tenant(school.id)
+      |> Ash.read!(authorize?: false)
+      |> Enum.map(&Map.put(&1, :__kind__, :student_event))
+
+    tag_versions =
+      StudentTag.Version
+      |> Ash.Query.filter(student_id == ^student.id)
+      |> Ash.Query.set_tenant(school.id)
+      |> Ash.read!(authorize?: false)
+      |> Enum.map(&Map.put(&1, :__kind__, :tag_event))
+
+    status_versions =
+      StudentStatus.Version
+      |> Ash.Query.filter(student_id == ^student.id)
+      |> Ash.Query.set_tenant(school.id)
+      |> Ash.read!(authorize?: false)
+      |> Enum.map(&Map.put(&1, :__kind__, :status_event))
+
+    (student_versions ++ tag_versions ++ status_versions)
+    |> Enum.sort_by(& &1.version_inserted_at, {:desc, DateTime})
+    |> Enum.take(20)
   end
 
   defp load_student(student, actor, school) do
@@ -187,7 +215,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
           </div>
         </div>
 
-        <.placeholder_card title="Activity" phase="Phase I" />
+        <.activity_card timeline={@timeline} />
       </section>
 
       <.modal
@@ -242,6 +270,64 @@ defmodule IntellisparkWeb.StudentLive.Show do
     </div>
     """
   end
+
+  attr :timeline, :list, required: true
+
+  defp activity_card(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <h2 class="text-sm font-semibold text-abbey">Activity</h2>
+      <ol :if={@timeline != []} class="space-y-sm">
+        <li :for={entry <- @timeline} class="flex gap-sm items-start">
+          <span class={["#{icon_for(entry.__kind__)} size-4 text-azure mt-1"]}></span>
+          <div class="flex-1">
+            <p class="text-sm text-abbey">{summarise(entry)}</p>
+            <p class="text-xs text-azure">{relative_time(entry.version_inserted_at)}</p>
+          </div>
+        </li>
+      </ol>
+      <.empty_state :if={@timeline == []} icon="hero-clock" message="No activity yet." />
+    </div>
+    """
+  end
+
+  defp icon_for(:student_event), do: "hero-pencil"
+  defp icon_for(:tag_event), do: "hero-tag"
+  defp icon_for(:status_event), do: "hero-chart-bar"
+
+  defp summarise(%{__kind__: :student_event, version_action_name: name}) do
+    case name do
+      :create -> "Profile created"
+      :update -> "Profile updated"
+      :set_status -> "Status changed"
+      :clear_status -> "Status cleared"
+      :upload_photo -> "Photo updated"
+      :remove_tag -> "Tag removed"
+      other -> "Student #{other}"
+    end
+  end
+
+  defp summarise(%{__kind__: :tag_event, version_action_name: :create}), do: "Tag applied"
+  defp summarise(%{__kind__: :tag_event, version_action_name: :destroy}), do: "Tag removed"
+  defp summarise(%{__kind__: :tag_event}), do: "Tag change"
+
+  defp summarise(%{__kind__: :status_event, version_action_name: :create}), do: "Status set"
+  defp summarise(%{__kind__: :status_event, version_action_name: :clear}), do: "Status cleared"
+  defp summarise(%{__kind__: :status_event}), do: "Status change"
+
+  defp relative_time(%DateTime{} = ts) do
+    diff = DateTime.diff(DateTime.utc_now(), ts, :second)
+
+    cond do
+      diff < 60 -> "just now"
+      diff < 3600 -> "#{div(diff, 60)}m ago"
+      diff < 86_400 -> "#{div(diff, 3600)}h ago"
+      diff < 604_800 -> "#{div(diff, 86_400)}d ago"
+      true -> Calendar.strftime(ts, "%b %-d, %Y")
+    end
+  end
+
+  defp relative_time(_), do: ""
 
   attr :student, :map, required: true
 
