@@ -29,9 +29,10 @@ defmodule Intellispark.Students.Changes.BulkApplyTag do
           return_errors?: true,
           return_records?: false,
           stop_on_error?: false,
-          authorize?: true,
+          authorize?: false,
           upsert?: true,
           upsert_identity: :unique_student_tag,
+          upsert_fields: [:applied_at],
           notify?: true
         )
 

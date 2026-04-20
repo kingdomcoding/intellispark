@@ -48,7 +48,13 @@ defmodule Intellispark.Students.StudentTag do
     create :create do
       primary? true
       accept [:student_id, :tag_id]
-      change relate_actor(:applied_by)
+
+      change fn changeset, context ->
+        case context.actor do
+          %{id: id} -> Ash.Changeset.force_change_attribute(changeset, :applied_by_id, id)
+          _ -> changeset
+        end
+      end
     end
   end
 
