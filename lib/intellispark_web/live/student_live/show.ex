@@ -52,6 +52,11 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, reload_student(socket)}
   end
 
+  def handle_info({IntellisparkWeb.StudentLive.InlineStatusEditor, {:status_changed, id}}, socket)
+      when socket.assigns.student.id == id do
+    {:noreply, reload_student(socket)}
+  end
+
   def handle_info(_other, socket), do: {:noreply, socket}
 
   defp reload_student(socket) do
@@ -120,8 +125,28 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
           <div class="space-y-md">
             <.placeholder_card title="Profile" phase="Phase H" />
-            <.placeholder_card title="Status" phase="Phase G" />
-            <.placeholder_card title="Tags" phase="Phase F" />
+
+            <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+              <h2 class="text-sm font-semibold text-abbey">Status</h2>
+              <.live_component
+                module={IntellisparkWeb.StudentLive.InlineStatusEditor}
+                id="inline-status-editor"
+                student={@student}
+                statuses={@statuses}
+                actor={@current_user}
+              />
+            </div>
+
+            <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+              <h2 class="text-sm font-semibold text-abbey">Tags</h2>
+              <.live_component
+                module={IntellisparkWeb.StudentLive.InlineTagEditor}
+                id="sidebar-tag-editor"
+                student={@student}
+                tags={@tags}
+                actor={@current_user}
+              />
+            </div>
           </div>
         </div>
 
