@@ -2,7 +2,25 @@
 
 A faithful Phoenix/LiveView/Ash recreation of the Intellispark K-12 student-support platform.
 
-This repository now ships **Phase 3** — the Student Hub at `/students/:id` — on top of **Phase 2** (Students / Tags / Status / CustomLists), **Phase 1.5** (admin invitations), **Phase 1** (auth + multi-tenancy), and the Phase 0 design-system + tooling baseline. See `../phase-3-student-hub.md`, `../phase-2-students-tags-lists.md`, `../phase-1-implementation.md`, and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+This repository now ships **Phase 4** — the Flag workflow (seven-state AshStateMachine + AshOban triggers + Swoosh emails + sidebar panel on the Hub) — on top of **Phase 3** (Student Hub), **Phase 2** (Students / Tags / Status / CustomLists), **Phase 1.5** (admin invitations), **Phase 1** (auth + multi-tenancy), and the Phase 0 design-system + tooling baseline. See `../phase-4-flags.md`, `../phase-3-student-hub.md`, `../phase-2-students-tags-lists.md`, `../phase-1-implementation.md`, and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+
+## What Phase 4 delivers
+
+- `Intellispark.Flags` domain with four resources — **FlagType** (per-school category), **Flag** (seven-state machine), **FlagAssignment** (Flag ↔ User join with paper-trail), and **FlagComment** (schema-only; UI lands in Phase 13). All tenant-scoped on `school_id` with `global?: false`.
+- **AshStateMachine** on Flag — states: `:draft`, `:open`, `:assigned`, `:under_review`, `:pending_followup`, `:closed`, `:reopened`. Seven transition actions (`:open_flag`, `:assign`, `:move_to_review`, `:set_followup`, `:close_with_resolution`, `:auto_close`, `:reopen`), each with its own `accept`, arguments, and per-action policy. Invalid transitions raise at the resource layer.
+- **Policies** split by action type: reads use a new `StaffReadsFlagsForStudent` FilterCheck that gates `sensitive? == true` flags behind clinical roles (`:admin`, `:counselor`, `:clinician`, `:social_worker`); close uses `AssigneeOrClinicalActorForFlag` (SimpleCheck); reopen uses `OpenerOrAdminForFlag`.
+- **AshOban background jobs**:
+  - `:auto_close_stale_flags` — hourly trigger on Flag that calls `:auto_close` for any flag past its `auto_close_at`; the email notifier follows up.
+  - `DailyFollowupReminderWorker` — custom Oban worker that groups today's `:pending_followup` flags by assignee and sends exactly one digest email per user (not one per flag).
+- **Three Swoosh email senders** (`FlagAssigned`, `FlagAutoClosed`, `FollowupDigest`) dispatched by a dedicated notifier module so action definitions stay mailer-free.
+- **Two PubSub topics** — `flags:school:<school_id>` and `flags:student:<student_id>`. The Student Hub subscribes to the narrow topic and re-renders the Flags panel on any transition.
+- **Sidebar Flags panel** on `/students/:id` (Profile → Flags → Status → Tags ordering matches the real product screenshots) with a `+ New flag` button, type chip, short description, status pill, assignee count, and an empty-state fallback.
+- **New-flag modal** driven by `AshPhoenix.Form.for_create` chained with `Students.open_flag` — pick type, description, sensitive?, followup date, assignees, click Open flag; assignees receive an email within ~100ms.
+- **Flag detail side-sheet** with state-conditional transition buttons (Move to Review / Set follow-up / Close / Reopen — conditional on current status + actor role), inline resolution + follow-up forms, assignee list, and a timeline pulled from `Flag.Version`.
+- **`Student.open_flags_count` aggregate** — populates the amber Flags chip on `/students` + `/lists/:id` rows (Phase 3 placed a `0` placeholder; Phase 4 makes it real).
+- Seeded 5 flag types per school (Academic, Attendance, Behavioral, Mental health, Family) + one open Academic flag on Marcus + one pending-followup Attendance flag on Elena for demo purposes.
+- **23 new tests** — resource actions, paper-trail, state machine rejections, policy matrix (read scoping + close + reopen), Oban digest worker + empty-case no-op, LiveView Flags panel empty / populated / closed-excluded. Total: **134 tests, 0 failures** (was 111 at end of Phase 3).
+- **ADR-006** captures the seven decisions — AshStateMachine over changeset guards, per-action policies, FlagAssignment as a real join, sensitivity as a FilterCheck, notifier-driven emails, AshOban triggers + custom workers, schema-now-UI-later for FlagComment.
 
 ## What Phase 3 delivers
 
@@ -131,4 +149,4 @@ mix sobelow --config
 
 ## Roadmap
 
-Phases 0 through 3 are complete. Next up: **Phase 4** — Flags (with AshStateMachine + AshOban for auto-close + follow-up notifiers). See `../build-plan-ash.md` for the full 20-phase roadmap.
+Phases 0 through 4 are complete. Next up: **Phase 5** — Actions, Supports & Notes. See `../build-plan-ash.md` for the full 20-phase roadmap.
