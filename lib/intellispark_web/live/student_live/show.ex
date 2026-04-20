@@ -73,6 +73,52 @@ defmodule IntellisparkWeb.StudentLive.Show do
     end
   end
 
+  def handle_event("validate_photo", _params, socket), do: {:noreply, socket}
+
+  def handle_event("save_photo", _params, socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    case consume_photo(socket) do
+      {:ok, photo} ->
+        case Students.upload_student_photo(student, photo,
+               actor: actor,
+               tenant: school.id
+             ) do
+          {:ok, _updated} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Photo updated.")
+             |> reload_student()}
+
+          {:error, _} ->
+            {:noreply, put_flash(socket, :error, "Could not upload photo.")}
+        end
+
+      :no_upload ->
+        {:noreply, socket}
+    end
+  end
+
+  defp consume_photo(socket) do
+    case uploaded_entries(socket, :photo) do
+      {[_ | _], _} ->
+        [photo] =
+          consume_uploaded_entries(socket, :photo, fn %{path: tmp}, entry ->
+            {:ok,
+             %{
+               path: tmp,
+               content_type: entry.client_type,
+               filename: entry.client_name
+             }}
+          end)
+
+        {:ok, photo}
+
+      _ ->
+        :no_upload
+    end
+  end
+
   defp build_edit_form(%{student: student, current_user: actor, current_school: school}) do
     student
     |> AshPhoenix.Form.for_update(:update,
@@ -178,7 +224,12 @@ defmodule IntellisparkWeb.StudentLive.Show do
       breadcrumb={@breadcrumb}
     >
       <section class="container-lg py-xl space-y-md">
-        <.header_card student={@student} tags={@tags} actor={@current_user} />
+        <.header_card
+          student={@student}
+          tags={@tags}
+          actor={@current_user}
+          uploads={@uploads}
+        />
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
           <div class="md:col-span-2 space-y-md">
@@ -329,6 +380,11 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   defp relative_time(_), do: ""
 
+  defp format_upload_error(:too_large), do: "File is too large (5MB max)."
+  defp format_upload_error(:not_accepted), do: "File type not accepted (PNG / JPEG / WEBP only)."
+  defp format_upload_error(:too_many_files), do: "Only one file at a time."
+  defp format_upload_error(err), do: to_string(err)
+
   attr :student, :map, required: true
 
   defp profile_card(assigns) do
@@ -379,15 +435,40 @@ defmodule IntellisparkWeb.StudentLive.Show do
   attr :student, :map, required: true
   attr :tags, :list, required: true
   attr :actor, :map, required: true
+  attr :uploads, :map, required: true
 
   defp header_card(assigns) do
     ~H"""
     <section class="bg-white rounded-card shadow-card p-lg flex flex-wrap gap-md">
-      <.avatar
-        name={to_string(@student.display_name)}
-        image_url={@student.photo_url}
-        size={:lg}
-      />
+      <form
+        phx-change="validate_photo"
+        phx-submit="save_photo"
+        class="flex flex-col items-center gap-xs"
+      >
+        <label class="block cursor-pointer">
+          <.live_file_input upload={@uploads.photo} class="hidden" />
+          <.avatar
+            name={to_string(@student.display_name)}
+            image_url={@student.photo_url}
+            size={:lg}
+          />
+        </label>
+        <span class="text-xs text-brand underline">Change photo</span>
+        <p
+          :for={err <- upload_errors(@uploads.photo)}
+          class="text-xs text-chocolate"
+        >
+          {format_upload_error(err)}
+        </p>
+        <.button
+          :if={Enum.any?(@uploads.photo.entries)}
+          type="submit"
+          variant={:primary}
+          size={:sm}
+        >
+          Upload
+        </.button>
+      </form>
 
       <div class="flex-1 min-w-[20rem] space-y-sm">
         <div class="flex items-start justify-between gap-sm">
