@@ -36,3 +36,9 @@ npm-debug.log
 /assets/node_modules/
 
 .env
+
+# User-uploaded student photos (served via /uploads/students/); keep the dir
+# under version control so first boot has a writable destination, but don't
+# commit the actual uploads.
+/priv/static/uploads/students/*
+!/priv/static/uploads/students/.gitkeep
