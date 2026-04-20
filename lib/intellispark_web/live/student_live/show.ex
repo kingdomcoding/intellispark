@@ -77,15 +77,19 @@ defmodule IntellisparkWeb.StudentLive.Show do
   def handle_event("save_photo", _params, socket) do
     %{current_user: actor, current_school: school, student: student} = socket.assigns
 
-    {completed, _in_progress} = uploaded_entries(socket, :photo)
+    {completed, in_progress} = uploaded_entries(socket, :photo)
 
-    case completed do
-      [] ->
-        # phx-change fires on every file-input change; only the second
-        # call (after auto_upload finishes) has a completed entry.
+    cond do
+      # phx-change fires repeatedly during the auto-upload lifecycle; only
+      # attempt to consume when there are done entries AND none still in
+      # flight (consume_uploaded_entries raises otherwise).
+      in_progress != [] ->
         {:noreply, socket}
 
-      [_ | _] ->
+      completed == [] ->
+        {:noreply, socket}
+
+      true ->
         [photo] =
           consume_uploaded_entries(socket, :photo, fn %{path: tmp}, entry ->
             {:ok,
