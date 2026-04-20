@@ -40,6 +40,11 @@ defmodule IntellisparkWeb.Router do
     ash_authentication_live_session :authenticated_user,
       on_mount: {IntellisparkWeb.LiveUserAuth, :live_user_required} do
       post "/set-school", SchoolController, :set_active
+
+      live "/students", StudentLive.Index
+      live "/students/:id", StudentLive.Show
+      live "/lists", CustomListLive.Index
+      live "/lists/:id", CustomListLive.Show
     end
   end
 
