@@ -190,6 +190,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
      |> reload_student()}
   end
 
+  def handle_info({IntellisparkWeb.StudentLive.FlagDetailSheet, :flag_changed}, socket) do
+    {:noreply, reload_student(socket)}
+  end
+
   def handle_info(%Phoenix.Socket.Broadcast{topic: "students:" <> _}, socket) do
     {:noreply, reload_student(socket)}
   end
@@ -408,6 +412,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
         flag_types={@flag_types}
         staff={@staff}
         error_message={nil}
+      />
+
+      <.live_component
+        :if={@flag_detail_open? and @active_flag_id}
+        module={IntellisparkWeb.StudentLive.FlagDetailSheet}
+        id={"flag-sheet-#{@active_flag_id}"}
+        flag_id={@active_flag_id}
+        actor={@current_user}
+        tenant={@current_school.id}
       />
     </Layouts.app>
     """
