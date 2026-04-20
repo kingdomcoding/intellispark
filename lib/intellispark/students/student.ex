@@ -97,7 +97,7 @@ defmodule Intellispark.Students.Student do
 
   aggregates do
     count :open_flags_count, :flags do
-      filter expr(status not in [:closed, :reopened])
+      filter expr(status != :closed)
       public? true
     end
   end

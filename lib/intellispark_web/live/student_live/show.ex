@@ -236,7 +236,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   defp load_flags(student, actor, school) do
     Flag
-    |> Ash.Query.filter(student_id == ^student.id and status not in [:closed, :reopened, :draft])
+    |> Ash.Query.filter(student_id == ^student.id and status not in [:closed, :draft])
     |> Ash.Query.load([:flag_type, :assignee_count, :comment_count])
     |> Ash.Query.set_tenant(school.id)
     |> Ash.Query.sort([{:inserted_at, :desc}])
