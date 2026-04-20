@@ -116,6 +116,32 @@ defmodule IntellisparkWeb.StyleguideLive do
             <.tag_chip label="1st Gen" removable={true} />
             <.tag_chip label="Academic Focus" />
           </div>
+
+          <h3 class="text-lg font-semibold mt-md mb-sm">Row with overflow</h3>
+          <.tag_chip_row
+            tags={[
+              %{id: "1", name: "Assistive Technology"},
+              %{id: "2", name: "IEP"},
+              %{id: "3", name: "1st Gen"},
+              %{id: "4", name: "Academic Focus"},
+              %{id: "5", name: "ELL"}
+            ]}
+            max_visible={2}
+          />
+        </section>
+
+        <section>
+          <h2 class="text-display-sm mb-md">Status Chips (per-Status color)</h2>
+          <div class="flex gap-sm items-center">
+            <.status_chip_for_status status={%{name: "Active", color: "#2b4366"}} />
+            <.status_chip_for_status status={%{name: "Watch", color: "#d9532a"}} />
+            <.status_chip_for_status status={%{name: "Withdrawn", color: "#4b4b4d"}} />
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-display-sm mb-md">Filter Bar</h2>
+          <.filter_bar search="" />
         </section>
 
         <section>

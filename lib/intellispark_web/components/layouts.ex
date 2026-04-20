@@ -49,6 +49,8 @@ defmodule IntellisparkWeb.Layouts do
     <main class="min-h-[calc(100vh-4rem)] bg-whitesmoke">
       {render_slot(@inner_block)}
     </main>
+
+    <.need_help_tab :if={@current_user} />
     """
   end
 

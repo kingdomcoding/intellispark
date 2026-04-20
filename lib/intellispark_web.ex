@@ -90,7 +90,9 @@ defmodule IntellisparkWeb do
       import IntellisparkWeb.UI.Button
       import IntellisparkWeb.UI.Card
       import IntellisparkWeb.UI.Chips
+      import IntellisparkWeb.UI.FilterBar
       import IntellisparkWeb.UI.Modal
+      import IntellisparkWeb.UI.NeedHelpTab
       import IntellisparkWeb.UI.Presentational
 
       alias Phoenix.LiveView.JS

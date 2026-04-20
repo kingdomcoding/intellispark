@@ -93,4 +93,42 @@ defmodule IntellisparkWeb.UI.Chips do
     </span>
     """
   end
+
+  attr :tags, :list, required: true
+  attr :max_visible, :integer, default: 2
+  attr :on_remove, :string, default: nil
+
+  def tag_chip_row(assigns) do
+    visible = Enum.take(assigns.tags, assigns.max_visible)
+    hidden_count = max(length(assigns.tags) - assigns.max_visible, 0)
+    assigns = assign(assigns, visible: visible, hidden_count: hidden_count)
+
+    ~H"""
+    <div class="flex flex-wrap items-center gap-1">
+      <.tag_chip
+        :for={tag <- @visible}
+        label={tag.name}
+        removable={not is_nil(@on_remove)}
+        on_remove={@on_remove}
+        value={tag.id}
+      />
+      <span :if={@hidden_count > 0} class="text-xs text-brand font-medium">
+        + {@hidden_count} more
+      </span>
+    </div>
+    """
+  end
+
+  attr :status, :map, required: true
+
+  def status_chip_for_status(assigns) do
+    ~H"""
+    <span
+      class="inline-flex items-center rounded-pill px-3 py-0.5 text-sm font-medium border-2 bg-transparent"
+      style={"border-color: #{@status.color}; color: #{@status.color}"}
+    >
+      {@status.name}
+    </span>
+    """
+  end
 end
