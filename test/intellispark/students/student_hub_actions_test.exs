@@ -166,6 +166,7 @@ defmodule Intellispark.Students.StudentHubActionsTest do
 
     test "returns an integer age when date_of_birth is set", %{school: school} do
       dob = Date.add(Date.utc_today(), -365 * 10 - 3)
+
       student =
         create_student!(school, %{first_name: "Known", last_name: "DOB", date_of_birth: dob})
 

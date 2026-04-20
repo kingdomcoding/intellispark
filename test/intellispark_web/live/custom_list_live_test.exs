@@ -82,7 +82,8 @@ defmodule IntellisparkWeb.CustomListLiveTest do
           authorize?: true
         )
 
-      {:ok, _lv, html} = conn |> log_in_user(admin) |> live(~p"/students/#{s.id}?return_to=/lists/#{list.id}")
+      {:ok, _lv, html} =
+        conn |> log_in_user(admin) |> live(~p"/students/#{s.id}?return_to=/lists/#{list.id}")
 
       assert html =~ "Back to RT"
       assert html =~ "/lists/#{list.id}"

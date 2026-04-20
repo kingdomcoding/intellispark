@@ -363,7 +363,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
     """
   end
 
-
   attr :timeline, :list, required: true
 
   defp activity_card(assigns) do

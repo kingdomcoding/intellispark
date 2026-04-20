@@ -71,7 +71,11 @@ defmodule IntellisparkWeb.StudentLive.Index do
 
   def handle_event("toggle_filters", _params, socket) do
     {:noreply,
-     put_flash(socket, :info, "Structured filters arrive in Phase 3 — use the search box for now.")}
+     put_flash(
+       socket,
+       :info,
+       "Structured filters arrive in Phase 3 — use the search box for now."
+     )}
   end
 
   def handle_event("search", %{"q" => q}, socket) do
