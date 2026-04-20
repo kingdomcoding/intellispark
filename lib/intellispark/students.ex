@@ -13,5 +13,18 @@ defmodule Intellispark.Students do
   end
 
   resources do
+    resource Intellispark.Students.Student do
+      define :list_students, action: :read
+      define :get_student, action: :read, get_by: [:id]
+
+      define :create_student,
+        action: :create,
+        args: [:first_name, :last_name, :grade_level]
+
+      define :update_student, action: :update
+      define :archive_student, action: :destroy
+    end
+
+    resource Intellispark.Students.Student.Version
   end
 end
