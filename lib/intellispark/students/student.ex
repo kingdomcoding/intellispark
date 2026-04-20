@@ -23,6 +23,8 @@ defmodule Intellispark.Students.Student do
   # - "students:<id>"               for the /students/:id hub LiveView
   pub_sub do
     module IntellisparkWeb.Endpoint
+    # Reset the default 'resource' prefix so LiveView subs match.
+    prefix ""
     publish_all :create, ["students:school", :school_id]
     publish_all :update, ["students:school", :school_id]
     publish_all :update, ["students", :id]

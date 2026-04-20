@@ -22,6 +22,10 @@ defmodule Intellispark.Flags.Flag do
 
   pub_sub do
     module IntellisparkWeb.Endpoint
+    # Reset the 'resource' prefix that Intellispark.Resource's default
+    # pub_sub block sets — we want unprefixed topics so LiveView subs
+    # like "flags:student:<id>" match the broadcast.
+    prefix ""
     publish_all :create, ["flags:school", :school_id]
     publish_all :update, ["flags:school", :school_id]
     publish_all :create, ["flags:student", :student_id]
