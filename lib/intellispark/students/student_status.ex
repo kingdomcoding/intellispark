@@ -52,7 +52,11 @@ defmodule Intellispark.Students.StudentStatus do
   end
 
   policies do
-    policy action_type([:read, :create, :update, :destroy]) do
+    policy action_type(:create) do
+      authorize_if IntellisparkWeb.Policies.ActorBelongsToTenantSchool
+    end
+
+    policy action_type([:read, :update, :destroy]) do
       authorize_if IntellisparkWeb.Policies.StaffEditsStudentsInSchool
     end
   end

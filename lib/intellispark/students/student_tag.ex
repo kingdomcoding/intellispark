@@ -59,7 +59,11 @@ defmodule Intellispark.Students.StudentTag do
   end
 
   policies do
-    policy action_type([:read, :create, :destroy]) do
+    policy action_type(:create) do
+      authorize_if IntellisparkWeb.Policies.ActorBelongsToTenantSchool
+    end
+
+    policy action_type([:read, :destroy]) do
       authorize_if IntellisparkWeb.Policies.StaffEditsStudentsInSchool
     end
   end
