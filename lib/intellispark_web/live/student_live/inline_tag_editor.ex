@@ -24,7 +24,7 @@ defmodule IntellisparkWeb.StudentLive.InlineTagEditor do
         value={tag.id}
       />
 
-      <details id={"add-tag-details-#{@student.id}"} class="relative">
+      <details id={"add-tag-details-#{@id}"} class="relative">
         <summary class="cursor-pointer text-xs text-brand underline list-none">
           + Add tag
         </summary>
