@@ -287,11 +287,41 @@ ensure_student_tag.(elena, iep)
 ensure_student_tag.(elena, first_gen)
 ensure_student_tag.(noah, iep)
 
-for {student, status} <- [{ava, active}, {elena, watch}] do
+# Phase 3: give most seeded students a status so the Hub's status chip
+# + ledger both have something to render. Guarded on current_status_id
+# so re-running seeds doesn't open duplicate ledger rows.
+ensure_status_for = fn student, status ->
+  student =
+    Student
+    |> Ash.Query.filter(id == ^student.id)
+    |> Ash.Query.set_tenant(school.id)
+    |> Ash.read_one!(authorize?: false)
+
+  if is_nil(student.current_status_id) do
+    {:ok, _} =
+      Students.set_student_status(student, status.id,
+        actor: admin,
+        tenant: school.id,
+        authorize?: false
+      )
+  end
+end
+
+ensure_status_for.(ava, active)
+ensure_status_for.(marcus, active)
+ensure_status_for.(ling, active)
+ensure_status_for.(elena, watch)
+ensure_status_for.(noah, active)
+
+# Give Ava a seeded photo so the hub's <img> branch is exercised on a
+# fresh boot. The demo silhouette ships under priv/static/images/ so
+# this path is stable across environments.
+if is_nil(ava.photo_url) do
   {:ok, _} =
-    Students.set_student_status(student, status.id,
-      actor: admin,
+    Ash.update(ava, %{photo_url: "/images/demo-student.png"},
+      action: :update,
       tenant: school.id,
+      actor: admin,
       authorize?: false
     )
 end
