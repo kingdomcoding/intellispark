@@ -6,6 +6,7 @@ config :intellispark,
   ash_domains: [
     Intellispark.Accounts,
     Intellispark.Students,
+    Intellispark.Flags,
     Intellispark.Support,
     Intellispark.Recognition,
     Intellispark.Assessments,
