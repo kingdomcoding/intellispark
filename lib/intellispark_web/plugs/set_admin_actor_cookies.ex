@@ -26,9 +26,17 @@ defmodule IntellisparkWeb.Plugs.SetAdminActorCookies do
     |> maybe_put_cookie("actor_primary_key", id)
     |> maybe_put_cookie("actor_authorizing", "true")
     |> maybe_put_cookie("actor_paused", "false")
+    |> maybe_seed_tenant_cookie()
   end
 
   def call(conn, _opts), do: conn
+
+  defp maybe_seed_tenant_cookie(conn) do
+    case conn.assigns[:current_school] do
+      %{id: school_id} -> maybe_put_cookie(conn, "tenant", school_id)
+      _ -> conn
+    end
+  end
 
   defp maybe_put_cookie(conn, name, value) do
     if conn.req_cookies[name] == value do

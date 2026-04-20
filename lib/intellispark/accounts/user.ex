@@ -7,6 +7,7 @@ defmodule Intellispark.Accounts.User do
 
   admin do
     actor? true
+    label_field :email
     # Preload the fields our policies (DistrictAdminOfUser,
     # DistrictAdminOfSchool, etc.) iterate to decide authorization. Without
     # this the policy check crashes with KeyError on a %Ash.NotLoaded{}.
