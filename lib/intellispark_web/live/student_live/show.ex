@@ -147,8 +147,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
            |> put_flash(:info, "Photo updated.")
            |> reload_student()}
 
-        {:error, err} ->
-          IO.inspect(err, label: "upload_student_photo error")
+        {:error, _err} ->
           {:noreply, put_flash(socket, :error, "Could not upload photo.")}
       end
     else
@@ -237,9 +236,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   defp load_flags(student, actor, school) do
     Flag
-    |> Ash.Query.filter(
-      student_id == ^student.id and status not in [:closed, :reopened, :draft]
-    )
+    |> Ash.Query.filter(student_id == ^student.id and status not in [:closed, :reopened, :draft])
     |> Ash.Query.load([:flag_type, :assignee_count, :comment_count])
     |> Ash.Query.set_tenant(school.id)
     |> Ash.Query.sort([{:inserted_at, :desc}])
@@ -358,7 +355,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
                 actor={@current_user}
               />
             </div>
-
           </div>
         </div>
 

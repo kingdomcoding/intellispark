@@ -107,7 +107,9 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailSheet do
           </dd>
           <dt class="text-azure">Auto-close</dt>
           <dd class="text-abbey">
-            {if @flag.auto_close_at, do: Calendar.strftime(@flag.auto_close_at, "%b %-d, %Y"), else: "—"}
+            {if @flag.auto_close_at,
+              do: Calendar.strftime(@flag.auto_close_at, "%b %-d, %Y"),
+              else: "—"}
           </dd>
           <dt :if={@flag.resolution_note} class="text-azure">Resolution</dt>
           <dd :if={@flag.resolution_note} class="text-abbey">{@flag.resolution_note}</dd>
@@ -142,7 +144,10 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailSheet do
             target={@myself}
           />
           <.transition_button
-            :if={@flag.status in [:open, :assigned, :under_review, :pending_followup] and not @close_form_open?}
+            :if={
+              @flag.status in [:open, :assigned, :under_review, :pending_followup] and
+                not @close_form_open?
+            }
             label="Close"
             event="open_close_form"
             target={@myself}
@@ -164,7 +169,9 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailSheet do
               class="w-full rounded border border-abbey/20 p-xs text-sm"
             ><%= @close_note %></textarea>
             <div class="flex justify-end gap-xs">
-              <.button type="button" variant={:ghost} phx-click="cancel_close" phx-target={@myself}>Cancel</.button>
+              <.button type="button" variant={:ghost} phx-click="cancel_close" phx-target={@myself}>
+                Cancel
+              </.button>
               <.button type="submit" variant={:primary}>Close flag</.button>
             </div>
           </form>
@@ -180,7 +187,9 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailSheet do
               class="rounded border border-abbey/20 px-xs py-0.5 text-sm"
             />
             <div class="flex justify-end gap-xs">
-              <.button type="button" variant={:ghost} phx-click="cancel_followup" phx-target={@myself}>Cancel</.button>
+              <.button type="button" variant={:ghost} phx-click="cancel_followup" phx-target={@myself}>
+                Cancel
+              </.button>
               <.button type="submit" variant={:primary}>Set</.button>
             </div>
           </form>

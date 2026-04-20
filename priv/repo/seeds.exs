@@ -189,7 +189,9 @@ ensure_student_tag = fn student, tag ->
          actor: admin,
          authorize?: false
        ) do
-    {:ok, _} -> :ok
+    {:ok, _} ->
+      :ok
+
     # Race-safe idempotency: the unique (school_id, student_id, tag_id)
     # index catches the re-seed case even when the pre-check read missed
     # the row (archival filter, replication lag, etc.).
@@ -336,7 +338,8 @@ alias Intellispark.Flags
 alias Intellispark.Flags.{Flag, FlagType}
 
 ensure_flag_type = fn name, color, sensitive? ->
-  case Ash.create(FlagType,
+  case Ash.create(
+         FlagType,
          %{name: name, color: color, default_sensitive?: sensitive?},
          tenant: school.id,
          actor: admin,
