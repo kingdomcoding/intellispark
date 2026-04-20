@@ -59,6 +59,20 @@ defmodule IntellisparkWeb.StudentLiveTest do
       assert path == ~p"/students/#{s.id}"
     end
 
+    test "clicking the Filters button does not crash (stub flash)", %{
+      conn: conn,
+      school: school,
+      admin: admin
+    } do
+      create_student!(school, %{first_name: "Ada", last_name: "L"})
+
+      {:ok, lv, _html} = conn |> log_in_user(admin) |> live(~p"/students")
+
+      assert lv
+             |> element(~s|button[phx-click="toggle_filters"]|)
+             |> render_click() =~ "Ada L"
+    end
+
     test "only students in the current school are visible", %{
       conn: conn,
       school: school,
