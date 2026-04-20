@@ -13,8 +13,7 @@ defmodule IntellisparkWeb.UI.FilterBar do
         phx-click={@on_toggle_filters}
         class="inline-flex items-center gap-1 rounded-pill border border-abbey/20 bg-white px-md py-xs text-sm font-medium text-brand hover:bg-whitesmoke"
       >
-        <span class="hero-funnel-mini"></span>
-        Filters
+        <span class="hero-funnel-mini"></span> Filters
       </button>
 
       <form phx-change={@on_search} class="relative flex-1 max-w-md">

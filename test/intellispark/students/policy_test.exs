@@ -19,7 +19,7 @@ defmodule Intellispark.Students.PolicyTest do
       _s1 = create_student!(school, %{first_name: "A", last_name: "One"})
 
       {:ok, rows} = Students.list_students(tenant: school.id, actor: admin)
-      assert length(rows) >= 1
+      assert rows != []
     end
 
     test "staff in school A cannot see students in school B", %{

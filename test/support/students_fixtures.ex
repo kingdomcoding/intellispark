@@ -30,9 +30,7 @@ defmodule Intellispark.StudentsFixtures do
 
   def add_second_school!(district, name \\ "Sandbox Middle", slug \\ "sm") do
     {:ok, s} =
-      Ash.create(School, %{name: name, slug: slug, district_id: district.id},
-        authorize?: false
-      )
+      Ash.create(School, %{name: name, slug: slug, district_id: district.id}, authorize?: false)
 
     s
   end

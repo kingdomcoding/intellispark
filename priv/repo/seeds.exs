@@ -153,9 +153,13 @@ ensure_tag = fn name, color ->
        |> Ash.Query.filter(name == ^name)
        |> Ash.Query.set_tenant(school.id)
        |> Ash.read_one(authorize?: false) do
-    {:ok, %Tag{} = t} -> t
+    {:ok, %Tag{} = t} ->
+      t
+
     {:ok, nil} ->
-      {:ok, t} = Ash.create(Tag, %{name: name, color: color}, tenant: school.id, authorize?: false)
+      {:ok, t} =
+        Ash.create(Tag, %{name: name, color: color}, tenant: school.id, authorize?: false)
+
       t
   end
 end
@@ -165,7 +169,9 @@ ensure_status = fn name, color, position ->
        |> Ash.Query.filter(name == ^name)
        |> Ash.Query.set_tenant(school.id)
        |> Ash.read_one(authorize?: false) do
-    {:ok, %Status{} = s} -> s
+    {:ok, %Status{} = s} ->
+      s
+
     {:ok, nil} ->
       {:ok, s} =
         Ash.create(Status, %{name: name, color: color, position: position},
@@ -182,7 +188,9 @@ ensure_student_tag = fn student, tag ->
        |> Ash.Query.filter(student_id == ^student.id and tag_id == ^tag.id)
        |> Ash.Query.set_tenant(school.id)
        |> Ash.read_one(authorize?: false) do
-    {:ok, %StudentTag{}} -> :ok
+    {:ok, %StudentTag{}} ->
+      :ok
+
     {:ok, nil} ->
       {:ok, _} =
         Ash.create(StudentTag, %{student_id: student.id, tag_id: tag.id},
@@ -200,7 +208,9 @@ ensure_custom_list = fn name, filters, shared? ->
        |> Ash.Query.filter(name == ^name and owner_id == ^admin.id)
        |> Ash.Query.set_tenant(school.id)
        |> Ash.read_one(authorize?: false) do
-    {:ok, %CustomList{} = l} -> l
+    {:ok, %CustomList{} = l} ->
+      l
+
     {:ok, nil} ->
       {:ok, l} =
         Ash.create(

@@ -152,7 +152,9 @@ defmodule IntellisparkWeb.StudentLive.Index do
     )
   end
 
-  defp bulk_counts(%{__metadata__: %{bulk_result: %Ash.BulkResult{status: :success, errors: nil}}} = _tag) do
+  defp bulk_counts(
+         %{__metadata__: %{bulk_result: %Ash.BulkResult{status: :success, errors: nil}}} = _tag
+       ) do
     {:unknown, 0}
   end
 

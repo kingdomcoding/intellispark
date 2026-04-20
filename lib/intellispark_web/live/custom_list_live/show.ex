@@ -14,8 +14,11 @@ defmodule IntellisparkWeb.CustomListLive.Show do
 
     with {:ok, list} <- Students.get_custom_list(id, actor: actor, tenant: school.id),
          {:ok, students} <- Students.run_custom_list(id, actor: actor, tenant: school.id) do
-      students = Ash.load!(students, [:display_name, :current_status, tags: [:id, :name, :color]],
-                            actor: actor, tenant: school.id)
+      students =
+        Ash.load!(students, [:display_name, :current_status, tags: [:id, :name, :color]],
+          actor: actor,
+          tenant: school.id
+        )
 
       {:ok,
        socket

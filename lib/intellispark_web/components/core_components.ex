@@ -212,12 +212,18 @@ defmodule IntellisparkWeb.CoreComponents do
     ~H"""
     <div class="mb-sm">
       <label for={@id}>
-        <span :if={@label} class={"block text-sm font-medium text-abbey mb-1"}>{@label}</span>
+        <span :if={@label} class="block text-sm font-medium text-abbey mb-1">{@label}</span>
         <select
           id={@id}
           name={@name}
           class={[
-            @class || (if @errors == [], do: "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent", else: "w-full rounded-lg border border-chocolate px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate")
+            @class ||
+              if(@errors == [],
+                do:
+                  "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent",
+                else:
+                  "w-full rounded-lg border border-chocolate px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate"
+              )
           ]}
           multiple={@multiple}
           {@rest}
@@ -235,12 +241,18 @@ defmodule IntellisparkWeb.CoreComponents do
     ~H"""
     <div class="mb-sm">
       <label for={@id}>
-        <span :if={@label} class={"block text-sm font-medium text-abbey mb-1"}>{@label}</span>
+        <span :if={@label} class="block text-sm font-medium text-abbey mb-1">{@label}</span>
         <textarea
           id={@id}
           name={@name}
           class={[
-            @class || (if @errors == [], do: "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent", else: "w-full rounded-lg border border-chocolate px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate")
+            @class ||
+              if(@errors == [],
+                do:
+                  "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent",
+                else:
+                  "w-full rounded-lg border border-chocolate px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate"
+              )
           ]}
           {@rest}
         >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
@@ -255,14 +267,20 @@ defmodule IntellisparkWeb.CoreComponents do
     ~H"""
     <div class="mb-sm">
       <label for={@id}>
-        <span :if={@label} class={"block text-sm font-medium text-abbey mb-1"}>{@label}</span>
+        <span :if={@label} class="block text-sm font-medium text-abbey mb-1">{@label}</span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
-            @class || (if @errors == [], do: "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent", else: "w-full rounded-lg border border-chocolate px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate")
+            @class ||
+              if(@errors == [],
+                do:
+                  "w-full rounded-lg border border-abbey/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent",
+                else:
+                  "w-full rounded-lg border border-chocolate px-3 py-2 focus:outline-none focus:ring-2 focus:ring-chocolate"
+              )
           ]}
           {@rest}
         />
