@@ -330,6 +330,96 @@ _at_risk = ensure_custom_list.("At-risk (IEP)", %{tag_ids: [iep.id]}, true)
 _seniors =
   ensure_custom_list.("Seniors graduating", %{grade_levels: [12]}, false)
 
+Logger.info("Seeding Phase 4 flag types + demo flags…")
+
+alias Intellispark.Flags
+alias Intellispark.Flags.{Flag, FlagType}
+
+ensure_flag_type = fn name, color, sensitive? ->
+  case Ash.create(FlagType,
+         %{name: name, color: color, default_sensitive?: sensitive?},
+         tenant: school.id,
+         actor: admin,
+         authorize?: false
+       ) do
+    {:ok, ft} ->
+      ft
+
+    {:error, %{errors: [%{private_vars: vars} | _]}} ->
+      if Keyword.get(vars || [], :constraint_type) == :unique do
+        {:ok, ft} =
+          FlagType
+          |> Ash.Query.filter(name == ^name)
+          |> Ash.Query.set_tenant(school.id)
+          |> Ash.read_one(authorize?: false)
+
+        ft
+      else
+        raise "unexpected ensure_flag_type error"
+      end
+  end
+end
+
+ensure_flag_for = fn student, type, desc, opts ->
+  short = String.slice(desc, 0, 80)
+
+  case Flag
+       |> Ash.Query.filter(student_id == ^student.id and short_description == ^short)
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, %Flag{}} ->
+      :ok
+
+    {:ok, nil} ->
+      {:ok, draft} =
+        Flags.create_flag(student.id, type.id, desc,
+          actor: admin,
+          tenant: school.id,
+          authorize?: false
+        )
+
+      {:ok, opened} =
+        Flags.open_flag(draft, [admin.id],
+          actor: admin,
+          tenant: school.id,
+          authorize?: false
+        )
+
+      if opts[:pending_followup?] do
+        {:ok, _} =
+          Flags.set_flag_followup(opened, Date.utc_today(),
+            actor: admin,
+            tenant: school.id,
+            authorize?: false
+          )
+      end
+
+      :ok
+  end
+end
+
+flag_types_map = %{
+  academic: ensure_flag_type.("Academic", "#2B4366", false),
+  attendance: ensure_flag_type.("Attendance", "#E5A73A", false),
+  behavioral: ensure_flag_type.("Behavioral", "#A1452E", false),
+  mental_health: ensure_flag_type.("Mental health", "#4B4B4D", true),
+  family: ensure_flag_type.("Family", "#14A369", true)
+}
+
+ensure_flag_for.(
+  marcus,
+  flag_types_map.academic,
+  "Missing homework for 3 consecutive weeks. Parent contact made.",
+  []
+)
+
+ensure_flag_for.(
+  elena,
+  flag_types_map.attendance,
+  "Three absences in the past week.",
+  pending_followup?: true
+)
+
 Logger.info("Seed complete.")
 Logger.info("  admin login:   admin@sandboxhigh.edu / phase1-demo-pass")
 Logger.info("  teacher login: curtis.murphy@sandboxhigh.edu / phase1-demo-pass")
