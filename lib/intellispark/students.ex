@@ -53,10 +53,20 @@ defmodule Intellispark.Students do
       define :list_student_statuses, action: :read
     end
 
+    resource Intellispark.Students.CustomList do
+      define :list_custom_lists, action: :read
+      define :get_custom_list, action: :read, get_by: [:id]
+      define :create_custom_list, action: :create, args: [:name, :filters]
+      define :update_custom_list, action: :update
+      define :archive_custom_list, action: :destroy
+      define :run_custom_list, action: :run, args: [:custom_list_id]
+    end
+
     resource Intellispark.Students.Student.Version
     resource Intellispark.Students.Tag.Version
     resource Intellispark.Students.StudentTag.Version
     resource Intellispark.Students.Status.Version
     resource Intellispark.Students.StudentStatus.Version
+    resource Intellispark.Students.CustomList.Version
   end
 end
