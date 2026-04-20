@@ -25,6 +25,9 @@ defmodule Intellispark.Students do
       define :archive_student, action: :destroy
 
       define :set_student_status, action: :set_status, args: [:status_id]
+      define :clear_student_status, action: :clear_status
+      define :upload_student_photo, action: :upload_photo, args: [:photo]
+      define :remove_tag_from_student, action: :remove_tag, args: [:tag_id]
     end
 
     resource Intellispark.Students.Tag do

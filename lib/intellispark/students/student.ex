@@ -113,6 +113,10 @@ defmodule Intellispark.Students.Student do
                   last_name
                 )
               )
+
+    calculate :age_in_years,
+              :integer,
+              expr(fragment("EXTRACT(YEAR FROM age(?))::int", date_of_birth))
   end
 
   actions do
@@ -154,6 +158,23 @@ defmodule Intellispark.Students.Student do
       argument :status_id, :uuid, allow_nil?: false
       require_atomic? false
       change Intellispark.Students.Changes.SetStudentStatus
+    end
+
+    update :clear_status do
+      require_atomic? false
+      change Intellispark.Students.Changes.ClearStudentStatus
+    end
+
+    update :upload_photo do
+      argument :photo, :map, allow_nil?: false
+      require_atomic? false
+      change Intellispark.Students.Changes.UploadStudentPhoto
+    end
+
+    update :remove_tag do
+      argument :tag_id, :uuid, allow_nil?: false
+      require_atomic? false
+      change Intellispark.Students.Changes.RemoveTag
     end
   end
 
