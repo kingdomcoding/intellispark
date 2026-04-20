@@ -47,5 +47,18 @@ defmodule Intellispark.Support do
     end
 
     resource Intellispark.Support.Support.Version
+
+    resource Intellispark.Support.Note do
+      define :list_notes, action: :read
+      define :get_note, action: :read, get_by: [:id]
+
+      define :create_note, action: :create, args: [:student_id, :body]
+      define :update_note, action: :update
+      define :pin_note, action: :pin
+      define :unpin_note, action: :unpin
+      define :archive_note, action: :destroy
+    end
+
+    resource Intellispark.Support.Note.Version
   end
 end
