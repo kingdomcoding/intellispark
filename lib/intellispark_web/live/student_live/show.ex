@@ -46,6 +46,27 @@ defmodule IntellisparkWeb.StudentLive.Show do
   @impl true
   def handle_event("open_edit_modal", _params, socket), do: {:noreply, socket}
 
+  @impl true
+  def handle_info({IntellisparkWeb.StudentLive.InlineTagEditor, {:tags_changed, id}}, socket)
+      when socket.assigns.student.id == id do
+    {:noreply, reload_student(socket)}
+  end
+
+  def handle_info(_other, socket), do: {:noreply, socket}
+
+  defp reload_student(socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    case Students.get_student(student.id, actor: actor, tenant: school.id) do
+      {:ok, fresh} ->
+        {:ok, loaded} = load_student(fresh, actor, school)
+        assign(socket, student: loaded)
+
+      _ ->
+        socket
+    end
+  end
+
   defp load_student(student, actor, school) do
     Ash.load(
       student,
@@ -87,7 +108,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       breadcrumb={@breadcrumb}
     >
       <section class="container-lg py-xl space-y-md">
-        <.header_card student={@student} />
+        <.header_card student={@student} tags={@tags} actor={@current_user} />
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
           <div class="md:col-span-2 space-y-md">
@@ -123,6 +144,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   attr :student, :map, required: true
+  attr :tags, :list, required: true
+  attr :actor, :map, required: true
 
   defp header_card(assigns) do
     ~H"""
@@ -146,7 +169,13 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
         <div class="flex items-center gap-sm flex-wrap">
           <.status_chip_for_status :if={@student.current_status} status={@student.current_status} />
-          <.tag_chip :for={tag <- @student.tags || []} label={tag.name} />
+          <.live_component
+            module={IntellisparkWeb.StudentLive.InlineTagEditor}
+            id="inline-tag-editor"
+            student={@student}
+            tags={@tags}
+            actor={@actor}
+          />
         </div>
 
         <div class="flex gap-lg pt-sm border-t border-abbey/10">
