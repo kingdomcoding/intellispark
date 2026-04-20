@@ -209,7 +209,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
               <tr
                 :for={s <- @students}
                 id={"student-#{s.id}"}
-                phx-click={JS.navigate(~p"/students/#{s.id}")}
+                phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
                 class="hover:bg-whitesmoke/40 cursor-pointer"
               >
                 <td class="px-md py-sm" onclick="event.stopPropagation()">
@@ -221,7 +221,10 @@ defmodule IntellisparkWeb.StudentLive.Index do
                   />
                 </td>
                 <td class="px-md py-sm">
-                  <.link navigate={~p"/students/#{s.id}"} class="text-brand hover:text-brand-700">
+                  <.link
+                    navigate={~p"/students/#{s.id}?return_to=/students"}
+                    class="text-brand hover:text-brand-700"
+                  >
                     {s.display_name}
                   </.link>
                 </td>

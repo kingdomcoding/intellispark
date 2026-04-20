@@ -66,11 +66,14 @@ defmodule IntellisparkWeb.CustomListLive.Show do
             <tbody class="divide-y divide-abbey/10">
               <tr
                 :for={s <- @students}
-                phx-click={JS.navigate(~p"/students/#{s.id}")}
+                phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/lists/#{@list.id}")}
                 class="hover:bg-whitesmoke/40 cursor-pointer"
               >
                 <td class="px-md py-sm">
-                  <.link navigate={~p"/students/#{s.id}"} class="text-brand hover:text-brand-700">
+                  <.link
+                    navigate={~p"/students/#{s.id}?return_to=/lists/#{@list.id}"}
+                    class="text-brand hover:text-brand-700"
+                  >
                     {s.display_name}
                   </.link>
                 </td>

@@ -64,6 +64,30 @@ defmodule IntellisparkWeb.CustomListLiveTest do
   end
 
   describe "/lists/:id" do
+    test "clicking a student row carries return_to back to the list", %{
+      conn: conn,
+      school: school,
+      admin: admin
+    } do
+      tag = create_tag!(school, %{name: "Return-Target"})
+      s = create_student!(school, %{first_name: "Back", last_name: "Me"})
+      apply_tag!(admin, school, s, tag)
+
+      {:ok, list} =
+        Ash.create(
+          CustomList,
+          %{name: "RT", filters: %{tag_ids: [tag.id]}},
+          tenant: school.id,
+          actor: admin,
+          authorize?: true
+        )
+
+      {:ok, _lv, html} = conn |> log_in_user(admin) |> live(~p"/students/#{s.id}?return_to=/lists/#{list.id}")
+
+      assert html =~ "Back to RT"
+      assert html =~ "/lists/#{list.id}"
+    end
+
     test "renders only students matching the saved filter", %{
       conn: conn,
       school: school,

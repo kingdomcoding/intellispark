@@ -56,7 +56,8 @@ defmodule IntellisparkWeb.StudentLiveTest do
                |> element(~s|tr#student-#{s.id} a|)
                |> render_click()
 
-      assert path == ~p"/students/#{s.id}"
+      assert path =~ "/students/#{s.id}"
+      assert path =~ "return_to=/students"
     end
 
     test "clicking the Filters button does not crash (stub flash)", %{
