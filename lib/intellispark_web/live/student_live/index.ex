@@ -137,7 +137,12 @@ defmodule IntellisparkWeb.StudentLive.Index do
 
     students =
       Student
-      |> Ash.Query.load([:display_name, :current_status, tags: [:id, :name, :color]])
+      |> Ash.Query.load([
+        :display_name,
+        :current_status,
+        :open_flags_count,
+        tags: [:id, :name, :color]
+      ])
       |> maybe_apply_search(search)
       |> Ash.Query.sort([:last_name, :first_name])
       |> Ash.read!(actor: actor, tenant: school.id)
@@ -248,7 +253,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
                   class="px-md py-sm text-center cursor-pointer"
                   phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
                 >
-                  <.count_badge value={0} variant={:flags} />
+                  <.count_badge value={s.open_flags_count} variant={:flags} />
                 </td>
                 <td
                   class="px-md py-sm text-center cursor-pointer"

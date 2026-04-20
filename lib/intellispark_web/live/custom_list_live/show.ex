@@ -15,7 +15,9 @@ defmodule IntellisparkWeb.CustomListLive.Show do
     with {:ok, list} <- Students.get_custom_list(id, actor: actor, tenant: school.id),
          {:ok, students} <- Students.run_custom_list(id, actor: actor, tenant: school.id) do
       students =
-        Ash.load!(students, [:display_name, :current_status, tags: [:id, :name, :color]],
+        Ash.load!(
+          students,
+          [:display_name, :current_status, :open_flags_count, tags: [:id, :name, :color]],
           actor: actor,
           tenant: school.id
         )
@@ -81,7 +83,7 @@ defmodule IntellisparkWeb.CustomListLive.Show do
                   <.count_badge value={0} variant={:high_fives} />
                 </td>
                 <td class="px-md py-sm text-center">
-                  <.count_badge value={0} variant={:flags} />
+                  <.count_badge value={s.open_flags_count} variant={:flags} />
                 </td>
                 <td class="px-md py-sm text-center">
                   <.status_chip_for_status :if={s.current_status} status={s.current_status} />

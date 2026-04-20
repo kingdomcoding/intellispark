@@ -91,6 +91,15 @@ defmodule Intellispark.Students.Student do
       attribute_writable? true
       public? true
     end
+
+    has_many :flags, Intellispark.Flags.Flag
+  end
+
+  aggregates do
+    count :open_flags_count, :flags do
+      filter expr(status not in [:closed, :reopened])
+      public? true
+    end
   end
 
   calculations do
