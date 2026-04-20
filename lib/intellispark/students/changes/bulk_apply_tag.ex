@@ -32,7 +32,11 @@ defmodule Intellispark.Students.Changes.BulkApplyTag do
           authorize?: false,
           upsert?: true,
           upsert_identity: :unique_student_tag,
-          upsert_fields: [:applied_at],
+          # Include archived_at so re-adding a previously-removed tag
+          # restores the row (AshArchival's destroy soft-deletes; without
+          # this, the upsert updates applied_at but leaves archived_at
+          # populated, and the tag stays hidden from the read filter).
+          upsert_fields: [:applied_at, :archived_at, :applied_by_id],
           notify?: true
         )
 

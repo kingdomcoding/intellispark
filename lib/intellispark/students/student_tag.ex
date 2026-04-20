@@ -62,6 +62,12 @@ defmodule Intellispark.Students.StudentTag do
           _ -> changeset
         end
       end
+
+      # Re-applying a previously-removed (archived) tag should restore
+      # the soft-deleted row, not leave it hidden. force_change archived_at
+      # to nil so upsert_fields: [..., :archived_at] in BulkApplyTag flips
+      # the row back to active on re-add.
+      change set_attribute(:archived_at, nil)
     end
   end
 
