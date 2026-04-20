@@ -82,12 +82,16 @@ defmodule Intellispark.Flags.Flag do
       source_attribute_on_join_resource :flag_id
       destination_attribute_on_join_resource :user_id
     end
+
+    has_many :comments, Intellispark.Flags.FlagComment
   end
 
   aggregates do
     count :assignee_count, :assignments do
       filter expr(is_nil(cleared_at))
     end
+
+    count :comment_count, :comments
   end
 
   actions do

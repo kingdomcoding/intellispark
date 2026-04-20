@@ -39,8 +39,14 @@ defmodule Intellispark.Flags do
       define :clear_flag_assignment, action: :clear
     end
 
+    resource Intellispark.Flags.FlagComment do
+      define :list_flag_comments, action: :read
+      define :add_flag_comment, action: :create, args: [:flag_id, :body]
+    end
+
     resource Intellispark.Flags.FlagType.Version
     resource Intellispark.Flags.Flag.Version
     resource Intellispark.Flags.FlagAssignment.Version
+    resource Intellispark.Flags.FlagComment.Version
   end
 end
