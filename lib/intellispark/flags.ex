@@ -23,6 +23,18 @@ defmodule Intellispark.Flags do
       define :archive_flag_type, action: :destroy
     end
 
+    resource Intellispark.Flags.Flag do
+      define :list_flags, action: :read
+      define :get_flag, action: :read, get_by: [:id]
+
+      define :create_flag,
+        action: :create,
+        args: [:student_id, :flag_type_id, :description]
+
+      define :archive_flag, action: :destroy
+    end
+
     resource Intellispark.Flags.FlagType.Version
+    resource Intellispark.Flags.Flag.Version
   end
 end
