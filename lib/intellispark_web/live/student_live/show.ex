@@ -44,7 +44,44 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   @impl true
-  def handle_event("open_edit_modal", _params, socket), do: {:noreply, socket}
+  def handle_event("open_edit_modal", _params, socket) do
+    form = build_edit_form(socket.assigns)
+    {:noreply, assign(socket, edit_modal_open?: true, edit_form: form)}
+  end
+
+  def handle_event("close_edit_modal", _params, socket) do
+    {:noreply, assign(socket, edit_modal_open?: false, edit_form: nil)}
+  end
+
+  def handle_event("validate_profile", %{"form" => params}, socket) do
+    form = AshPhoenix.Form.validate(socket.assigns.edit_form, params)
+    {:noreply, assign(socket, edit_form: form)}
+  end
+
+  def handle_event("save_profile", %{"form" => params}, socket) do
+    case AshPhoenix.Form.submit(socket.assigns.edit_form, params: params) do
+      {:ok, _student} ->
+        {:noreply,
+         socket
+         |> assign(edit_modal_open?: false, edit_form: nil)
+         |> put_flash(:info, "Profile updated.")
+         |> reload_student()}
+
+      {:error, form} ->
+        {:noreply, assign(socket, edit_form: form)}
+    end
+  end
+
+  defp build_edit_form(%{student: student, current_user: actor, current_school: school}) do
+    student
+    |> AshPhoenix.Form.for_update(:update,
+      actor: actor,
+      tenant: school.id,
+      domain: Intellispark.Students,
+      as: "form"
+    )
+    |> to_form()
+  end
 
   @impl true
   def handle_info({IntellisparkWeb.StudentLive.InlineTagEditor, {:tags_changed, id}}, socket)
@@ -124,7 +161,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
           </div>
 
           <div class="space-y-md">
-            <.placeholder_card title="Profile" phase="Phase H" />
+            <.profile_card student={@student} />
 
             <div class="bg-white rounded-card shadow-card p-md space-y-sm">
               <h2 class="text-sm font-semibold text-abbey">Status</h2>
@@ -152,6 +189,44 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
         <.placeholder_card title="Activity" phase="Phase I" />
       </section>
+
+      <.modal
+        :if={@edit_modal_open?}
+        id="edit-profile"
+        on_cancel={JS.push("close_edit_modal")}
+        show
+      >
+        <:title>Edit profile</:title>
+        <.form
+          for={@edit_form}
+          phx-change="validate_profile"
+          phx-submit="save_profile"
+          class="space-y-sm"
+        >
+          <.input field={@edit_form[:first_name]} label="First name" />
+          <.input field={@edit_form[:last_name]} label="Last name" />
+          <.input field={@edit_form[:preferred_name]} label="Preferred name" />
+          <.input field={@edit_form[:date_of_birth]} type="date" label="Date of birth" />
+          <.input field={@edit_form[:grade_level]} type="number" label="Grade" min="-1" max="16" />
+          <.input
+            field={@edit_form[:enrollment_status]}
+            type="select"
+            options={[
+              {"Active", "active"},
+              {"Inactive", "inactive"},
+              {"Graduated", "graduated"},
+              {"Withdrawn", "withdrawn"}
+            ]}
+            label="Enrollment status"
+          />
+          <.input field={@edit_form[:external_id]} label="External ID" />
+
+          <div class="flex justify-end gap-sm pt-md">
+            <.button type="button" variant={:ghost} phx-click="close_edit_modal">Cancel</.button>
+            <.button type="submit" variant={:primary}>Save</.button>
+          </div>
+        </.form>
+      </.modal>
     </Layouts.app>
     """
   end
@@ -164,6 +239,53 @@ defmodule IntellisparkWeb.StudentLive.Show do
     <div class="bg-white rounded-card shadow-card p-md">
       <h2 class="text-sm font-semibold text-abbey">{@title}</h2>
       <p class="text-xs text-azure mt-xs">Placeholder — filled in {@phase}.</p>
+    </div>
+    """
+  end
+
+  attr :student, :map, required: true
+
+  defp profile_card(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-abbey">Profile</h2>
+        <button
+          type="button"
+          phx-click="open_edit_modal"
+          class="text-xs text-brand underline hover:text-brand-700"
+        >
+          Edit
+        </button>
+      </div>
+      <dl class="text-sm space-y-xs">
+        <div class="flex justify-between gap-sm">
+          <dt class="text-azure">DOB</dt>
+          <dd class="text-abbey">
+            {if @student.date_of_birth, do: Date.to_string(@student.date_of_birth), else: "—"}
+          </dd>
+        </div>
+        <div :if={@student.age_in_years} class="flex justify-between gap-sm">
+          <dt class="text-azure">Age</dt>
+          <dd class="text-abbey">{@student.age_in_years}</dd>
+        </div>
+        <div class="flex justify-between gap-sm">
+          <dt class="text-azure">Preferred</dt>
+          <dd class="text-abbey">{@student.preferred_name || "—"}</dd>
+        </div>
+        <div class="flex justify-between gap-sm">
+          <dt class="text-azure">Grade</dt>
+          <dd class="text-abbey">{@student.grade_level || "—"}</dd>
+        </div>
+        <div class="flex justify-between gap-sm">
+          <dt class="text-azure">Enrollment</dt>
+          <dd class="text-abbey">{@student.enrollment_status}</dd>
+        </div>
+        <div class="flex justify-between gap-sm">
+          <dt class="text-azure">External ID</dt>
+          <dd class="text-abbey">{@student.external_id || "—"}</dd>
+        </div>
+      </dl>
     </div>
     """
   end
