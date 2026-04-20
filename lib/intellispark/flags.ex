@@ -34,7 +34,13 @@ defmodule Intellispark.Flags do
       define :archive_flag, action: :destroy
     end
 
+    resource Intellispark.Flags.FlagAssignment do
+      define :list_flag_assignments, action: :read
+      define :clear_flag_assignment, action: :clear
+    end
+
     resource Intellispark.Flags.FlagType.Version
     resource Intellispark.Flags.Flag.Version
+    resource Intellispark.Flags.FlagAssignment.Version
   end
 end

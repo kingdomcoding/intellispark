@@ -74,6 +74,20 @@ defmodule Intellispark.Flags.Flag do
     belongs_to :flag_type, Intellispark.Flags.FlagType, allow_nil?: false
     belongs_to :opened_by, Intellispark.Accounts.User, allow_nil?: false
     belongs_to :closed_by, Intellispark.Accounts.User
+
+    has_many :assignments, Intellispark.Flags.FlagAssignment
+
+    many_to_many :assignees, Intellispark.Accounts.User do
+      through Intellispark.Flags.FlagAssignment
+      source_attribute_on_join_resource :flag_id
+      destination_attribute_on_join_resource :user_id
+    end
+  end
+
+  aggregates do
+    count :assignee_count, :assignments do
+      filter expr(is_nil(cleared_at))
+    end
   end
 
   actions do

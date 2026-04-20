@@ -40,7 +40,7 @@ defmodule Intellispark.Flags.FlagType do
 
   relationships do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
-    # has_many :flags wires in Phase C when the Flag resource exists
+    has_many :flags, Intellispark.Flags.Flag
   end
 
   actions do
