@@ -68,6 +68,7 @@ defmodule IntellisparkWeb.Router do
       on_mount: {IntellisparkWeb.LiveUserAuth, :live_user_optional} do
       live "/styleguide", StyleguideLive
       live "/invitations/:token", InvitationLive.Accept
+      live "/high-fives/:token", HighFiveViewLive, :show
     end
 
     auth_routes AuthController, Intellispark.Accounts.User, path: "/auth"
