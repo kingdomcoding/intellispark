@@ -69,6 +69,7 @@ defmodule IntellisparkWeb.Router do
       live "/styleguide", StyleguideLive
       live "/invitations/:token", InvitationLive.Accept
       live "/high-fives/:token", HighFiveViewLive, :show
+      live "/surveys/:token", SurveyLive.Show, :show
     end
 
     auth_routes AuthController, Intellispark.Accounts.User, path: "/auth"
