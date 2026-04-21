@@ -71,12 +71,10 @@ defmodule IntellisparkWeb.StudentLive.NewSurveyModal do
   end
 
   defp inspect_error(%Ash.Error.Invalid{errors: errs}) do
-    errs
-    |> Enum.map(fn
+    Enum.map_join(errs, ", ", fn
       %{message: m} when is_binary(m) -> m
       other -> inspect(other)
     end)
-    |> Enum.join(", ")
   end
 
   defp inspect_error(err), do: inspect(err)
