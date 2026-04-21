@@ -54,8 +54,8 @@ defmodule IntellisparkWeb.HighFiveViewLive do
   @impl true
   def render(%{not_found?: true} = assigns) do
     ~H"""
-    <main class="min-h-screen bg-cream flex items-center justify-center p-md">
-      <div class="bg-white rounded-card shadow-card p-lg max-w-md text-center space-y-sm">
+    <main class="min-h-screen bg-cream py-xl">
+      <div class="container-sm bg-white rounded-card shadow-card p-lg text-center space-y-sm">
         <h1 class="text-display-sm text-abbey">Link expired</h1>
         <p class="text-sm text-azure">
           We couldn't find the High 5 you're looking for. The link may have expired or been sent in error.
@@ -67,8 +67,8 @@ defmodule IntellisparkWeb.HighFiveViewLive do
 
   def render(assigns) do
     ~H"""
-    <main class="min-h-screen bg-cream flex items-center justify-center p-md">
-      <div class="bg-white rounded-card shadow-elevated p-xl max-w-xl w-full space-y-md">
+    <main class="min-h-screen bg-cream py-xl">
+      <div class="container-sm bg-white rounded-card shadow-elevated p-xl space-y-md">
         <div class="text-center space-y-xs">
           <span class="hero-hand-raised text-brand size-12 inline-block"></span>
           <h1 class="text-display-sm text-abbey">
@@ -79,7 +79,7 @@ defmodule IntellisparkWeb.HighFiveViewLive do
           </p>
         </div>
 
-        <article class="rounded-card p-md bg-status-resolved/10 border border-status-resolved/30 space-y-xs">
+        <article class="rounded-card p-md bg-status-resolved border border-status-resolved-border/40 space-y-xs">
           <h2 class="text-md font-semibold text-abbey">{@high_five.title}</h2>
           <p class="text-sm text-abbey whitespace-pre-line">{@high_five.body}</p>
         </article>
