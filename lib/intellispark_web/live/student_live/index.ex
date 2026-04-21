@@ -142,6 +142,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
         :current_status,
         :open_flags_count,
         :open_supports_count,
+        :recent_high_fives_count,
         tags: [:id, :name, :color]
       ])
       |> maybe_apply_search(search)
@@ -248,7 +249,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
                   class="px-md py-sm text-center cursor-pointer"
                   phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
                 >
-                  <.count_badge value={0} variant={:high_fives} />
+                  <.count_badge value={s.recent_high_fives_count} variant={:high_fives} />
                 </td>
                 <td
                   class="px-md py-sm text-center cursor-pointer"

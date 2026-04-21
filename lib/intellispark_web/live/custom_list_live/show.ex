@@ -22,6 +22,7 @@ defmodule IntellisparkWeb.CustomListLive.Show do
             :current_status,
             :open_flags_count,
             :open_supports_count,
+            :recent_high_fives_count,
             tags: [:id, :name, :color]
           ],
           actor: actor,
@@ -86,7 +87,7 @@ defmodule IntellisparkWeb.CustomListLive.Show do
                   </.link>
                 </td>
                 <td class="px-md py-sm text-center">
-                  <.count_badge value={0} variant={:high_fives} />
+                  <.count_badge value={s.recent_high_fives_count} variant={:high_fives} />
                 </td>
                 <td class="px-md py-sm text-center">
                   <.count_badge value={s.open_flags_count} variant={:flags} />

@@ -528,6 +528,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
         :current_status,
         :open_flags_count,
         :open_supports_count,
+        :recent_high_fives_count,
         tags: [:id, :name, :color]
       ],
       actor: actor,
@@ -898,7 +899,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
         <div class="flex gap-lg pt-sm border-t border-abbey/10">
           <div class="flex items-center gap-sm">
-            <.count_badge value={0} variant={:high_fives} />
+            <.count_badge value={@student.recent_high_fives_count} variant={:high_fives} />
             <span class="text-azure text-xs">High-5s</span>
           </div>
           <div class="flex items-center gap-sm">

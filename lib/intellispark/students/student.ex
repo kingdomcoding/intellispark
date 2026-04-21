@@ -99,6 +99,7 @@ defmodule Intellispark.Students.Student do
     has_many :actions, Intellispark.Support.Action
     has_many :supports, Intellispark.Support.Support
     has_many :notes, Intellispark.Support.Note
+    has_many :high_fives, Intellispark.Recognition.HighFive
   end
 
   aggregates do
@@ -109,6 +110,11 @@ defmodule Intellispark.Students.Student do
 
     count :open_supports_count, :supports do
       filter expr(status in [:offered, :in_progress])
+      public? true
+    end
+
+    count :recent_high_fives_count, :high_fives do
+      filter expr(sent_at >= ago(30, :day))
       public? true
     end
   end
