@@ -16,7 +16,7 @@ defmodule Intellispark.Recognition.Notifiers.Emails do
         data: high_five
       })
       when name in [:send_to_student, :bulk_send_to_students] do
-    %{high_five_id: high_five.id}
+    %{high_five_id: high_five.id, school_id: high_five.school_id}
     |> DeliverHighFiveEmailWorker.new()
     |> Oban.insert()
 

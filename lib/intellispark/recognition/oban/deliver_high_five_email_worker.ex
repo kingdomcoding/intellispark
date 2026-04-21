@@ -12,13 +12,14 @@ defmodule Intellispark.Recognition.Oban.DeliverHighFiveEmailWorker do
   alias Intellispark.Recognition.Emails.HighFiveNotification
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"high_five_id" => id}}) do
-    case Recognition.get_high_five(id, authorize?: false) do
+  def perform(%Oban.Job{args: %{"high_five_id" => id, "school_id" => school_id}}) do
+    case Recognition.get_high_five(id, tenant: school_id, authorize?: false) do
       {:ok, high_five} ->
         hydrated =
           Ash.load!(
             high_five,
             [:student, :sent_by, student: [:display_name]],
+            tenant: school_id,
             authorize?: false
           )
 
