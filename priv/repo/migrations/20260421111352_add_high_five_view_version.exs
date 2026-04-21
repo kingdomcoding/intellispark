@@ -20,7 +20,9 @@ defmodule Intellispark.Repo.Migrations.AddHighFiveViewVersion do
           name: "high_five_views_versions_version_source_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(:changes, :map)
 

@@ -601,9 +601,7 @@ hf_templates = %{
 
 ensure_high_five = fn student, template, days_ago ->
   case HighFivePhase6
-       |> Ash.Query.filter(
-         student_id == ^student.id and title == ^template.title
-       )
+       |> Ash.Query.filter(student_id == ^student.id and title == ^template.title)
        |> Ash.Query.set_tenant(school.id)
        |> Ash.read_one(authorize?: false) do
     {:ok, %HighFivePhase6{}} ->
@@ -619,8 +617,7 @@ ensure_high_five = fn student, template, days_ago ->
             title: template.title,
             body: template.body,
             template_id: template.id,
-            recipient_email:
-              "#{student.first_name |> String.downcase()}@example.com"
+            recipient_email: "#{student.first_name |> String.downcase()}@example.com"
           },
           tenant: school.id,
           actor: admin

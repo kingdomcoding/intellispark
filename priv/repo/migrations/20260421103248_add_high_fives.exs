@@ -42,7 +42,9 @@ defmodule Intellispark.Repo.Migrations.AddHighFives do
           name: "high_fives_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :student_id,
@@ -51,7 +53,9 @@ defmodule Intellispark.Repo.Migrations.AddHighFives do
           name: "high_fives_student_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :sent_by_id,
@@ -60,7 +64,9 @@ defmodule Intellispark.Repo.Migrations.AddHighFives do
           name: "high_fives_sent_by_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :template_id,
@@ -89,7 +95,9 @@ defmodule Intellispark.Repo.Migrations.AddHighFives do
           name: "high_fives_versions_version_source_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(:changes, :map)
 

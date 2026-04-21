@@ -17,9 +17,7 @@ defmodule Intellispark.RecognitionFixtures do
     }
 
     HighFiveTemplate
-    |> Ash.Changeset.for_create(:create, Map.merge(defaults, attrs),
-      tenant: school.id
-    )
+    |> Ash.Changeset.for_create(:create, Map.merge(defaults, attrs), tenant: school.id)
     |> Ash.create!(authorize?: false)
   end
 

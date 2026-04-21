@@ -55,7 +55,8 @@ defmodule IntellisparkWeb.StudentLive.PreviousHighFivesDrawer do
           </div>
           <p class="text-sm text-abbey whitespace-pre-line">{h.body}</p>
           <p class="text-xs text-azure pt-xs">
-            Sent by <strong>{h.sent_by.email}</strong> · viewed {h.view_audit_count} time<span :if={h.view_audit_count != 1}>s</span>
+            Sent by <strong>{h.sent_by.email}</strong>
+            · viewed {h.view_audit_count} time<span :if={h.view_audit_count != 1}>s</span>
           </p>
         </article>
       </section>

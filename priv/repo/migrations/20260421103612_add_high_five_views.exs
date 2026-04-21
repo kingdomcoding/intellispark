@@ -32,7 +32,9 @@ defmodule Intellispark.Repo.Migrations.AddHighFiveViews do
           name: "high_five_views_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :high_five_id,
@@ -41,7 +43,9 @@ defmodule Intellispark.Repo.Migrations.AddHighFiveViews do
           name: "high_five_views_high_five_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
     end
   end
 

@@ -2,7 +2,27 @@
 
 A faithful Phoenix/LiveView/Ash recreation of the Intellispark K-12 student-support platform.
 
-This repository now ships **Phase 5** — Actions / Supports / Notes (three new resources with two state machines, pin/unpin, paper-trailed edits, sensitive-gated reads, two daily digest Oban workers, and three new Student Hub panels) — on top of **Phase 4** (Flag workflow), **Phase 3** (Student Hub), **Phase 2** (Students / Tags / Status / CustomLists), **Phase 1.5** (admin invitations), **Phase 1** (auth + multi-tenancy), and the Phase 0 design-system + tooling baseline. See `../phase-5-actions-supports-notes.md`, `../phase-4-flags.md`, `../phase-3-student-hub.md`, `../phase-2-students-tags-lists.md`, `../phase-1-implementation.md`, and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+This repository now ships **Phase 6** — High 5s (three new recognition resources, token-based public view at `/high-fives/:token`, bulk send via `Ash.bulk_create`, notifier-triggered Oban email delivery, recent+previous panels on the Hub, `recent_high_fives_count` aggregate + `no_high_five_in_30_days` custom-list filter) — on top of **Phase 5** (Actions / Supports / Notes), **Phase 4** (Flag workflow), **Phase 3** (Student Hub), **Phase 2** (Students / Tags / Status / CustomLists), **Phase 1.5** (admin invitations), **Phase 1** (auth + multi-tenancy), and the Phase 0 design-system + tooling baseline. See `../phase-6-high-fives.md`, `../phase-5-actions-supports-notes.md`, `../phase-4-flags.md`, `../phase-3-student-hub.md`, `../phase-2-students-tags-lists.md`, `../phase-1-implementation.md`, and `../phase-1.5-school-invitations.md` for the plans, and ADRs under `docs/architecture/decisions/`.
+
+## What Phase 6 delivers
+
+- `Intellispark.Recognition` domain now holds three resources — **HighFiveTemplate** (per-school reusable messages with a 6-category enum), **HighFive** (sent record with a 128-bit URL-safe token + view counters), **HighFiveView** (append-only audit log of public-view clicks). All tenant-scoped on `school_id`.
+- **`:by_token` read action** with `multitenancy :bypass` + `authorize_if always()` — powers the unauthenticated public view at `/high-fives/:token`.
+- **Unauthenticated LiveView** at `/high-fives/:token` (mounted in the `:maybe_user` live_session) — renders the branded message, records the view after the socket connects, and falls back to a "Link expired" card for unknown tokens.
+- **`Ash.bulk_create` bulk send** via `HighFive.:bulk_send_to_students` generic action — one template_id + N student_ids → one payload batch with partial-failure reporting through `%Ash.BulkResult{records, errors}`. `notify?: true` ensures the Oban email job fires per row.
+- **Notifier → Oban → Swoosh** email pipeline: `Intellispark.Recognition.Notifiers.Emails` subscribes to `:send_to_student` + `:bulk_send_to_students`, enqueues `DeliverHighFiveEmailWorker`, which hydrates + dispatches `HighFiveNotification.send/1`. A Resend outage no longer blocks the LiveView.
+- **One policy** — `CanSendHighFive` SimpleCheck gating staff-role (teacher / counselor / clinician / social_worker / admin) on the target student's school. Reads + destroys reuse existing Phase 2 policies.
+- **Recent High 5's panel** on the Hub main column (first card, above Notes) — green-tinted cards with title + body + "Sent by · time ago" footer, "+ High 5" button, "View previous High 5's" link when the student has more than 5.
+- **New High 5 modal** (`NewHighFiveModal` LiveComponent) — two modes (template picker / custom message) toggled via pill buttons, `recipient_email` prefilled from `Student.email`, AshPhoenix.Form wiring.
+- **Previous High 5's drawer** (`PreviousHighFivesDrawer` LiveComponent) — slide-over listing every High 5 reverse-chronologically with `view_audit_count` footers.
+- **Bulk High 5 modal** (`HighFiveBulkModal` LiveComponent) opened from the `/students` BulkToolbar — "Send a High 5 to N students" with a template select + partial-failure flash.
+- **`Student.recent_high_fives_count` aggregate** filtered on `sent_at >= ago(30, :day)` — wired into the roster High-5s column, the custom-list row template, and the hub header badge (all previously hard-coded `0`).
+- **`Student.email` attribute** — nullable, SIS-populated in Phase 11. Drives the `recipient_email` fallback on `HighFive.:send_to_student`.
+- **`no_high_five_in_30_days: boolean` CustomList filter** on `FilterSpec` — one attribute + one `apply_filters/2` clause that loads the aggregate + filters to `recent_high_fives_count == 0`.
+- **Activity timeline extension** — merges `HighFive.Version` rows as `:recognition_event` ("Sent a High 5" / "High 5 viewed") alongside the existing Student/Tag/Status/Note version streams.
+- Seeded 5 templates (achievement / effort / kindness / behavior / attendance) + 2 high 5s on Marcus (4 days and 2 days old, backdated via `force_change_attribute`).
+- **39 new tests** across 9 files — template identity + category enum, HighFive send+token+view count, audit-log append-only, bulk_create partial failure + Oban job enqueue, CanSendHighFive matrix, LiveView panel rendering, public-view mount + fallback. Total: **224 tests, 0 failures** (was 185 at end of Phase 5).
+- **ADR-008** captures the nine decisions — three-resource split, plain text, token strategy, multitenancy bypass, public view, aggregate window, notifier→Oban indirection, bulk_create with `notify?: true`, FilterSpec extension.
 
 ## What Phase 5 delivers
 

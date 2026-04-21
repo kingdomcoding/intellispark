@@ -601,7 +601,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
       |> Ash.read!(authorize?: false)
       |> Enum.map(&Map.put(&1, :__kind__, :recognition_event))
 
-    (student_versions ++ tag_versions ++ status_versions ++ note_versions ++
+    (student_versions ++
+       tag_versions ++
+       status_versions ++
+       note_versions ++
        high_five_versions)
     |> Enum.sort_by(& &1.version_inserted_at, {:desc, DateTime})
     |> Enum.take(20)

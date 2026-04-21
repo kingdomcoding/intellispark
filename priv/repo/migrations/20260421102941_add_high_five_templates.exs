@@ -34,7 +34,9 @@ defmodule Intellispark.Repo.Migrations.AddHighFiveTemplates do
           name: "high_five_templates_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
     end
 
     create unique_index(:high_five_templates, [:school_id, :title],
@@ -54,7 +56,9 @@ defmodule Intellispark.Repo.Migrations.AddHighFiveTemplates do
           name: "high_five_templates_versions_version_source_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(:changes, :map)
 

@@ -339,5 +339,4 @@ defmodule IntellisparkWeb.StudentLive.Index do
     </Layouts.app>
     """
   end
-
 end

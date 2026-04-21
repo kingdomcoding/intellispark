@@ -75,7 +75,7 @@ defmodule Intellispark.Recognition.BulkSendTest do
         )
 
       assert length(records) == 1
-      assert is_list(errs) and length(errs) >= 1
+      assert is_list(errs) and errs != []
     end
 
     test "all inserted rows use the same title + body from the template", %{

@@ -95,8 +95,7 @@ defmodule IntellisparkWeb.StudentLive.HighFiveBulkModal do
         {:noreply, socket}
 
       _ ->
-        {:noreply,
-         assign(socket, error_message: "Bulk send failed. Check permissions.")}
+        {:noreply, assign(socket, error_message: "Bulk send failed. Check permissions.")}
     end
   end
 end

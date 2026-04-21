@@ -32,7 +32,10 @@ defmodule Intellispark.Recognition.HighFiveViewTest do
       hf = send_high_five!(admin, school, student, %{recipient_email: "x@example.com"})
 
       _ = record_view!(hf)
-      fresh = Ash.get!(Intellispark.Recognition.HighFive, hf.id, tenant: school.id, authorize?: false)
+
+      fresh =
+        Ash.get!(Intellispark.Recognition.HighFive, hf.id, tenant: school.id, authorize?: false)
+
       _ = record_view!(fresh)
 
       count =
