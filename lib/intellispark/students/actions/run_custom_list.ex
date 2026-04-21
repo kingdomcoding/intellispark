@@ -37,6 +37,7 @@ defmodule Intellispark.Students.Actions.RunCustomList do
     |> apply_grade_levels(spec.grade_levels)
     |> apply_enrollment_statuses(spec.enrollment_statuses)
     |> apply_name_contains(spec.name_contains)
+    |> apply_no_high_five_in_30_days(Map.get(spec, :no_high_five_in_30_days, false))
   end
 
   defp apply_tag_ids(query, []), do: query
@@ -74,4 +75,12 @@ defmodule Intellispark.Students.Actions.RunCustomList do
       ilike(first_name, ^like) or ilike(last_name, ^like) or ilike(preferred_name, ^like)
     )
   end
+
+  defp apply_no_high_five_in_30_days(query, true) do
+    query
+    |> Ash.Query.load(:recent_high_fives_count)
+    |> Ash.Query.filter(recent_high_fives_count == 0)
+  end
+
+  defp apply_no_high_five_in_30_days(query, _), do: query
 end
