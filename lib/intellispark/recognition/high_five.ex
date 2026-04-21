@@ -126,8 +126,8 @@ defmodule Intellispark.Recognition.HighFive do
       change Intellispark.Recognition.Changes.LogView
     end
 
-    action :bulk_send_to_students, {:array, :struct} do
-      constraints items: [instance_of: __MODULE__]
+    action :bulk_send_to_students, :struct do
+      constraints instance_of: Ash.BulkResult
 
       argument :student_ids, {:array, :uuid}, allow_nil?: false
       argument :template_id, :uuid, allow_nil?: false
