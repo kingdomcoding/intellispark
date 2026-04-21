@@ -46,6 +46,9 @@ defmodule Intellispark.Assessments.SurveyTemplate do
 
   relationships do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
+
+    has_many :questions, Intellispark.Assessments.SurveyQuestion,
+      destination_attribute: :survey_template_id
   end
 
   actions do

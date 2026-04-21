@@ -27,5 +27,19 @@ defmodule Intellispark.Assessments do
     end
 
     resource Intellispark.Assessments.SurveyTemplate.Version
+
+    resource Intellispark.Assessments.SurveyQuestion do
+      define :list_survey_questions, action: :read
+      define :get_survey_question, action: :read, get_by: [:id]
+
+      define :create_survey_question,
+        action: :create,
+        args: [:survey_template_id, :position, :prompt, :question_type]
+
+      define :update_survey_question, action: :update
+      define :archive_survey_question, action: :destroy
+    end
+
+    resource Intellispark.Assessments.SurveyQuestion.Version
   end
 end
