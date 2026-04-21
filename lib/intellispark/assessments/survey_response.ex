@@ -36,8 +36,6 @@ defmodule Intellispark.Assessments.SurveyResponse do
       allow_nil?: false,
       default: &DateTime.utc_now/0
 
-    attribute :survey_assignment_id, :uuid, allow_nil?: false, public?: true
-
     timestamps()
   end
 
@@ -48,6 +46,9 @@ defmodule Intellispark.Assessments.SurveyResponse do
   relationships do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
     belongs_to :question, Intellispark.Assessments.SurveyQuestion, allow_nil?: false
+
+    belongs_to :survey_assignment, Intellispark.Assessments.SurveyAssignment,
+      allow_nil?: false
   end
 
   actions do

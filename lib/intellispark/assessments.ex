@@ -55,5 +55,34 @@ defmodule Intellispark.Assessments do
     end
 
     resource Intellispark.Assessments.SurveyResponse.Version
+
+    resource Intellispark.Assessments.SurveyAssignment do
+      define :list_survey_assignments, action: :read
+      define :get_survey_assignment, action: :read, get_by: [:id]
+
+      define :get_survey_assignment_by_token,
+        action: :by_token,
+        args: [:token],
+        get?: true
+
+      define :assign_survey,
+        action: :assign_to_student,
+        args: [:student_id, :survey_template_id]
+
+      define :bulk_assign_survey,
+        action: :bulk_assign_to_students,
+        args: [:student_ids, :survey_template_id, :mode]
+
+      define :save_survey_progress,
+        action: :save_progress,
+        args: [:question_id, :answer_text, :answer_values]
+
+      define :submit_survey, action: :submit
+      define :expire_survey, action: :expire
+      define :touch_last_reminded, action: :touch_last_reminded
+      define :archive_survey_assignment, action: :destroy
+    end
+
+    resource Intellispark.Assessments.SurveyAssignment.Version
   end
 end
