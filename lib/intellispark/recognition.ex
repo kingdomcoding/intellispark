@@ -29,7 +29,10 @@ defmodule Intellispark.Recognition do
     resource Intellispark.Recognition.HighFive do
       define :list_high_fives, action: :read
       define :get_high_five, action: :read, get_by: [:id]
-      define :get_high_five_by_token, action: :by_token, args: [:token]
+      define :get_high_five_by_token,
+        action: :by_token,
+        args: [:token],
+        get?: true
 
       define :send_high_five,
         action: :send_to_student,
@@ -51,5 +54,7 @@ defmodule Intellispark.Recognition do
     resource Intellispark.Recognition.HighFiveView do
       define :list_high_five_views, action: :read
     end
+
+    resource Intellispark.Recognition.HighFiveView.Version
   end
 end

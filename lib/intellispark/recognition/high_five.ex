@@ -111,17 +111,7 @@ defmodule Intellispark.Recognition.HighFive do
       argument :ip_hash, :string, allow_nil?: true
       require_atomic? false
 
-      change set_attribute(
-               :first_viewed_at,
-               expr(
-                 if is_nil(first_viewed_at) do
-                   now()
-                 else
-                   first_viewed_at
-                 end
-               )
-             )
-
+      change Intellispark.Recognition.Changes.SetFirstViewedAt
       change Intellispark.Recognition.Changes.IncrementViewCount
       change Intellispark.Recognition.Changes.LogView
     end

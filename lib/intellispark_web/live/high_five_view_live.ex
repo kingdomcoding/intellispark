@@ -15,6 +15,7 @@ defmodule IntellisparkWeb.HighFiveViewLive do
       {:ok, high_five} ->
         hydrated =
           Ash.load!(high_five, [:student, :sent_by, :school, student: [:display_name]],
+            tenant: high_five.school_id,
             authorize?: false
           )
 

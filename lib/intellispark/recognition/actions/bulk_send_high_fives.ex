@@ -43,7 +43,9 @@ defmodule Intellispark.Recognition.Actions.BulkSendHighFives do
           tenant: tenant,
           return_records?: true,
           return_errors?: true,
-          stop_on_error?: false
+          stop_on_error?: false,
+          notify?: true,
+          return_notifications?: false
         )
 
       {:ok, result}

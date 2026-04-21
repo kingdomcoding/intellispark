@@ -3,11 +3,11 @@ defmodule Intellispark.Recognition.Changes.LogView do
   use Ash.Resource.Change
 
   @impl true
-  def change(changeset, _opts, context) do
-    Ash.Changeset.after_action(changeset, fn _cs, high_five ->
-      ua = context.arguments[:user_agent] || "unknown"
-      ip_hash = context.arguments[:ip_hash]
+  def change(changeset, _opts, _context) do
+    ua = Ash.Changeset.get_argument(changeset, :user_agent) || "unknown"
+    ip_hash = Ash.Changeset.get_argument(changeset, :ip_hash)
 
+    Ash.Changeset.after_action(changeset, fn _cs, high_five ->
       Ash.create!(
         Intellispark.Recognition.HighFiveView,
         %{

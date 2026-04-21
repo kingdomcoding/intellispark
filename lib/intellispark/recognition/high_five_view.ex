@@ -10,6 +10,10 @@ defmodule Intellispark.Recognition.HighFiveView do
     label_field :id
   end
 
+  paper_trail do
+    attributes_as_attributes [:school_id]
+  end
+
   postgres do
     table "high_five_views"
     repo Intellispark.Repo
@@ -34,7 +38,12 @@ defmodule Intellispark.Recognition.HighFiveView do
   end
 
   actions do
-    defaults [:read, :destroy, create: :*]
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+      accept [:high_five_id, :user_agent, :ip_hash]
+    end
   end
 
   policies do
