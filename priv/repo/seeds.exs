@@ -538,6 +538,106 @@ ensure_note_for.(
   false
 )
 
+Logger.info("Seeding Phase 6 High 5 templates + demo high fives…")
+
+alias Intellispark.Recognition.HighFive, as: HighFivePhase6
+alias Intellispark.Recognition.HighFiveTemplate
+
+ensure_template = fn title, body, category ->
+  case HighFiveTemplate
+       |> Ash.Query.filter(title == ^title)
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, %HighFiveTemplate{} = t} ->
+      t
+
+    {:ok, nil} ->
+      {:ok, t} =
+        HighFiveTemplate
+        |> Ash.Changeset.for_create(
+          :create,
+          %{title: title, body: body, category: category},
+          tenant: school.id,
+          actor: admin
+        )
+        |> Ash.create(authorize?: false)
+
+      t
+  end
+end
+
+hf_templates = %{
+  achievement:
+    ensure_template.(
+      "Great class participation today!",
+      "Congrats on great class participation in today's class.",
+      :achievement
+    ),
+  effort:
+    ensure_template.(
+      "So proud of you!",
+      "So proud of your improved attendance this week. You are such an important member of the class and your comments are brilliant!",
+      :effort
+    ),
+  kindness:
+    ensure_template.(
+      "Saw you help a classmate",
+      "Noticed you stopping to help a classmate today — thank you for being that kind of student!",
+      :kindness
+    ),
+  behavior:
+    ensure_template.(
+      "Strong focus today",
+      "You stayed on task the entire period today. That kind of focus is rare and impressive.",
+      :behavior
+    ),
+  attendance:
+    ensure_template.(
+      "Perfect attendance this week",
+      "Five days this week — you're showing up and that's huge.",
+      :attendance
+    )
+}
+
+ensure_high_five = fn student, template, days_ago ->
+  case HighFivePhase6
+       |> Ash.Query.filter(
+         student_id == ^student.id and title == ^template.title
+       )
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, %HighFivePhase6{}} ->
+      :ok
+
+    {:ok, nil} ->
+      {:ok, _hf} =
+        HighFivePhase6
+        |> Ash.Changeset.for_create(
+          :send_to_student,
+          %{
+            student_id: student.id,
+            title: template.title,
+            body: template.body,
+            template_id: template.id,
+            recipient_email:
+              "#{student.first_name |> String.downcase()}@example.com"
+          },
+          tenant: school.id,
+          actor: admin
+        )
+        |> Ash.Changeset.force_change_attribute(
+          :sent_at,
+          DateTime.add(DateTime.utc_now(), -days_ago * 86_400, :second)
+        )
+        |> Ash.create(authorize?: false)
+
+      :ok
+  end
+end
+
+ensure_high_five.(marcus, hf_templates.achievement, 4)
+ensure_high_five.(marcus, hf_templates.effort, 2)
+
 Logger.info("Seed complete.")
 Logger.info("  admin login:   admin@sandboxhigh.edu / phase1-demo-pass")
 Logger.info("  teacher login: curtis.murphy@sandboxhigh.edu / phase1-demo-pass")
