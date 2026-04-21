@@ -56,8 +56,7 @@ defmodule Intellispark.Assessments.SurveyQuestion do
   relationships do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
 
-    belongs_to :survey_template, Intellispark.Assessments.SurveyTemplate,
-      allow_nil?: false
+    belongs_to :survey_template, Intellispark.Assessments.SurveyTemplate, allow_nil?: false
   end
 
   actions do
@@ -65,7 +64,16 @@ defmodule Intellispark.Assessments.SurveyQuestion do
 
     create :create do
       primary? true
-      accept [:survey_template_id, :prompt, :help_text, :position, :required?, :question_type, :metadata]
+
+      accept [
+        :survey_template_id,
+        :prompt,
+        :help_text,
+        :position,
+        :required?,
+        :question_type,
+        :metadata
+      ]
     end
 
     update :update do

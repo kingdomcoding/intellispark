@@ -39,7 +39,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyResponses do
           name: "survey_responses_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :question_id,
@@ -48,7 +50,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyResponses do
           name: "survey_responses_question_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
     end
 
     create unique_index(:survey_responses, [:school_id, :survey_assignment_id, :question_id],
@@ -70,7 +74,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyResponses do
           name: "survey_responses_versions_version_source_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(:changes, :map)
 

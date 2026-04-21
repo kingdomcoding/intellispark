@@ -1498,7 +1498,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
           <p class="text-sm font-semibold text-abbey">{h.title}</p>
           <p class="text-sm text-abbey whitespace-pre-line">{h.body}</p>
           <p class="text-xs text-azure pt-xs">
-            Sent by <strong>{h.sent_by.email}</strong> · {relative_time(h.sent_at)} · viewed {h.view_count} time<span :if={h.view_count != 1}>s</span>
+            Sent by <strong>{h.sent_by.email}</strong>
+            · {relative_time(h.sent_at)} · viewed {h.view_count} time<span :if={h.view_count != 1}>s</span>
           </p>
         </li>
       </ul>
@@ -1551,7 +1552,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
               {a.survey_template.name}
             </p>
             <p class="text-xs text-azure">
-              Assigned by <strong>{a.assigned_by.email}</strong> on {Calendar.strftime(a.assigned_at, "%b %-d, %Y")}
+              Assigned by <strong>{a.assigned_by.email}</strong>
+              on {Calendar.strftime(a.assigned_at, "%b %-d, %Y")}
             </p>
           </div>
           <.assignment_state_pill state={a.state} submitted_at={a.submitted_at} />

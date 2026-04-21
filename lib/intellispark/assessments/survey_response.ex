@@ -47,8 +47,7 @@ defmodule Intellispark.Assessments.SurveyResponse do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
     belongs_to :question, Intellispark.Assessments.SurveyQuestion, allow_nil?: false
 
-    belongs_to :survey_assignment, Intellispark.Assessments.SurveyAssignment,
-      allow_nil?: false
+    belongs_to :survey_assignment, Intellispark.Assessments.SurveyAssignment, allow_nil?: false
   end
 
   actions do

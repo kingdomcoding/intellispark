@@ -77,7 +77,9 @@ defmodule Intellispark.Assessments.BulkAssignTest do
       fresh = create_student!(school)
 
       {:ok, %Ash.BulkResult{records: records}} =
-        Assessments.bulk_assign_survey([done.id, fresh.id], template.id,
+        Assessments.bulk_assign_survey(
+          [done.id, fresh.id],
+          template.id,
           :skip_previously_submitted,
           actor: admin,
           tenant: school.id

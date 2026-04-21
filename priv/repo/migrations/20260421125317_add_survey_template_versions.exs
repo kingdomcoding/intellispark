@@ -49,7 +49,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyTemplateVersions do
           name: "survey_template_versions_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :survey_template_id,
@@ -58,7 +60,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyTemplateVersions do
           name: "survey_template_versions_survey_template_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
     end
 
     create table(:survey_template_versions_versions, primary_key: false) do
@@ -75,7 +79,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyTemplateVersions do
           name: "survey_template_versions_versions_version_source_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(:changes, :map)
 

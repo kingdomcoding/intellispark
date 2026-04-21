@@ -35,7 +35,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyTemplates do
           name: "survey_templates_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
     end
 
     create unique_index(:survey_templates, [:school_id, :name],
@@ -55,7 +57,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyTemplates do
           name: "survey_templates_versions_version_source_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(:changes, :map)
 

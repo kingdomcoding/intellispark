@@ -65,8 +65,7 @@ defmodule IntellisparkWeb.StudentLive.NewSurveyModal do
       {:error, err} ->
         {:noreply,
          assign(socket,
-           error_message:
-             "Could not assign: #{inspect_error(err)}"
+           error_message: "Could not assign: #{inspect_error(err)}"
          )}
     end
   end

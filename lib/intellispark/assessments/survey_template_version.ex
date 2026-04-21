@@ -39,8 +39,7 @@ defmodule Intellispark.Assessments.SurveyTemplateVersion do
   relationships do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
 
-    belongs_to :survey_template, Intellispark.Assessments.SurveyTemplate,
-      allow_nil?: false
+    belongs_to :survey_template, Intellispark.Assessments.SurveyTemplate, allow_nil?: false
   end
 
   actions do

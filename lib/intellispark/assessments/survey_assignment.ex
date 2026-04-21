@@ -90,8 +90,7 @@ defmodule Intellispark.Assessments.SurveyAssignment do
     belongs_to :student, Intellispark.Students.Student, allow_nil?: false
     belongs_to :assigned_by, Intellispark.Accounts.User, allow_nil?: false
 
-    belongs_to :survey_template, Intellispark.Assessments.SurveyTemplate,
-      allow_nil?: false
+    belongs_to :survey_template, Intellispark.Assessments.SurveyTemplate, allow_nil?: false
 
     belongs_to :survey_template_version,
                Intellispark.Assessments.SurveyTemplateVersion,
@@ -184,9 +183,7 @@ defmodule Intellispark.Assessments.SurveyAssignment do
 
         list_tenants &Intellispark.Assessments.SurveyAssignment.list_school_tenants/0
 
-        where expr(
-                expires_at <= now() and state in [:assigned, :in_progress]
-              )
+        where expr(expires_at <= now() and state in [:assigned, :in_progress])
       end
     end
   end

@@ -33,9 +33,7 @@ defmodule Intellispark.AssessmentsFixtures do
     }
 
     SurveyQuestion
-    |> Ash.Changeset.for_create(:create, Map.merge(defaults, attrs),
-      tenant: template.school_id
-    )
+    |> Ash.Changeset.for_create(:create, Map.merge(defaults, attrs), tenant: template.school_id)
     |> Ash.create!(authorize?: false)
   end
 

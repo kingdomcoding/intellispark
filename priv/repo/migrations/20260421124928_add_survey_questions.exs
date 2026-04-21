@@ -71,7 +71,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyQuestions do
           name: "survey_questions_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :survey_template_id,
@@ -80,7 +82,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyQuestions do
           name: "survey_questions_survey_template_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
     end
   end
 

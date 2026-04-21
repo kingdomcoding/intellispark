@@ -59,7 +59,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyAssignments do
           name: "survey_assignments_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :student_id,
@@ -68,7 +70,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyAssignments do
           name: "survey_assignments_student_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :assigned_by_id,
@@ -77,7 +81,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyAssignments do
           name: "survey_assignments_assigned_by_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :survey_template_id,
@@ -86,7 +92,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyAssignments do
           name: "survey_assignments_survey_template_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :survey_template_version_id,
@@ -95,7 +103,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyAssignments do
           name: "survey_assignments_survey_template_version_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
     end
 
     create unique_index(:survey_assignments, [:school_id, :token],
@@ -117,7 +127,9 @@ defmodule Intellispark.Repo.Migrations.AddSurveyAssignments do
           name: "survey_assignments_versions_version_source_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(:changes, :map)
 
