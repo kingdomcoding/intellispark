@@ -1399,7 +1399,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
         <li
           :for={h <- @high_fives}
           id={"high-five-#{h.id}"}
-          class="rounded-card p-sm bg-status-resolved/20 border border-status-resolved/50 space-y-0.5"
+          class="rounded-card p-sm bg-status-resolved border border-status-resolved-border/40 space-y-0.5"
         >
           <p class="text-sm font-semibold text-abbey">{h.title}</p>
           <p class="text-sm text-abbey whitespace-pre-line">{h.body}</p>

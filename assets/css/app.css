@@ -96,6 +96,7 @@
   /* Status workflow badges */
   --color-status-followup-border: #b478b4;
   --color-status-followup-text: #8e518e;
+  --color-status-resolved: #d4edda;
   --color-status-resolved-border: #5da38f;
   --color-status-resolved-text: #4a8772;
   --color-status-active-border: #7da9d3;
