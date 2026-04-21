@@ -407,7 +407,11 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   defp reload_notes(socket) do
     %{current_user: actor, current_school: school, student: student} = socket.assigns
-    assign(socket, notes: load_notes(student, actor, school))
+
+    assign(socket,
+      notes: load_notes(student, actor, school),
+      timeline: load_timeline(student, school)
+    )
   end
 
   defp load_staff(school) do
