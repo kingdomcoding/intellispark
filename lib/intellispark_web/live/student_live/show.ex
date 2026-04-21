@@ -3,6 +3,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
   use IntellisparkWeb, :live_view
 
   alias Intellispark.Flags.Flag
+  alias Intellispark.Recognition
+  alias Intellispark.Recognition.HighFive
   alias Intellispark.Students
   alias Intellispark.Students.{Student, StudentStatus, StudentTag}
   alias Intellispark.Support
@@ -24,6 +26,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
         Phoenix.PubSub.subscribe(Intellispark.PubSub, "actions:student:#{student.id}")
         Phoenix.PubSub.subscribe(Intellispark.PubSub, "supports:student:#{student.id}")
         Phoenix.PubSub.subscribe(Intellispark.PubSub, "notes:student:#{student.id}")
+        Phoenix.PubSub.subscribe(Intellispark.PubSub, "high_fives:student:#{student.id}")
       end
 
       {:ok,
@@ -42,6 +45,9 @@ defmodule IntellisparkWeb.StudentLive.Show do
          notes: load_notes(student, actor, school),
          note_composer_form: build_note_composer_form(student, actor, school),
          edit_note_id: nil,
+         recent_high_fives: load_recent_high_fives(student, actor, school),
+         has_more_high_fives?: has_more_high_fives?(student, actor, school),
+         templates: load_templates(actor, school),
          flag_types: Intellispark.Flags.list_flag_types!(actor: actor, tenant: school.id),
          staff: load_staff(school),
          edit_modal_open?: false,
@@ -52,7 +58,9 @@ defmodule IntellisparkWeb.StudentLive.Show do
          new_action_open?: false,
          new_support_open?: false,
          active_support_id: nil,
-         support_detail_open?: false
+         support_detail_open?: false,
+         new_high_five_open?: false,
+         previous_high_fives_open?: false
        )
        |> allow_upload(:photo,
          accept: ~w(.png .jpg .jpeg .webp),
@@ -368,6 +376,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, reload_notes(socket)}
   end
 
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "high_fives:" <> _}, socket) do
+    {:noreply, reload_high_fives(socket)}
+  end
+
   def handle_info(%Ash.Notifier.Notification{}, socket) do
     {:noreply, reload_student(socket)}
   end
@@ -388,7 +400,9 @@ defmodule IntellisparkWeb.StudentLive.Show do
           actions: load_actions(loaded, actor, school),
           has_completed_actions?: has_completed_actions?(loaded, actor, school),
           supports: load_supports(loaded, actor, school),
-          notes: load_notes(loaded, actor, school)
+          notes: load_notes(loaded, actor, school),
+          recent_high_fives: load_recent_high_fives(loaded, actor, school),
+          has_more_high_fives?: has_more_high_fives?(loaded, actor, school)
         )
 
       _ ->
@@ -412,6 +426,17 @@ defmodule IntellisparkWeb.StudentLive.Show do
       notes: load_notes(student, actor, school),
       timeline: load_timeline(student, school)
     )
+  end
+
+  defp reload_high_fives(socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    assign(socket,
+      recent_high_fives: load_recent_high_fives(student, actor, school),
+      has_more_high_fives?: has_more_high_fives?(student, actor, school),
+      timeline: load_timeline(student, school)
+    )
+    |> reload_student()
   end
 
   defp load_staff(school) do
@@ -482,6 +507,34 @@ defmodule IntellisparkWeb.StudentLive.Show do
       end
     )
     |> to_form()
+  end
+
+  defp load_recent_high_fives(student, actor, school) do
+    HighFive
+    |> Ash.Query.filter(student_id == ^student.id)
+    |> Ash.Query.set_tenant(school.id)
+    |> Ash.Query.sort([{:sent_at, :desc}])
+    |> Ash.Query.limit(5)
+    |> Ash.read!(actor: actor)
+    |> Ash.load!([:sent_by], authorize?: false)
+  end
+
+  defp has_more_high_fives?(student, actor, school) do
+    case HighFive
+         |> Ash.Query.filter(student_id == ^student.id)
+         |> Ash.Query.set_tenant(school.id)
+         |> Ash.count(actor: actor) do
+      {:ok, n} -> n > 5
+      _ -> false
+    end
+  end
+
+  defp load_templates(actor, school) do
+    Recognition.list_high_five_templates!(
+      actor: actor,
+      tenant: school.id,
+      query: Ash.Query.filter(Intellispark.Recognition.HighFiveTemplate, active? == true)
+    )
   end
 
   defp load_timeline(student, school) do
@@ -566,17 +619,16 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
           <div class="md:col-span-2 space-y-md">
+            <.recent_high_fives_panel
+              high_fives={@recent_high_fives}
+              has_more?={@has_more_high_fives?}
+              current_user={@current_user}
+            />
             <.notes_panel
               notes={@notes}
               composer_form={@note_composer_form}
               current_user={@current_user}
               edit_note_id={@edit_note_id}
-            />
-            <.future_panel
-              title="High-5s"
-              icon="hero-hand-raised"
-              phase="Phase 6"
-              message="High-5s — quick positive acknowledgements — arrive in Phase 6."
             />
           </div>
 
@@ -702,31 +754,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
         tenant={@current_school.id}
       />
     </Layouts.app>
-    """
-  end
-
-  attr :title, :string, required: true
-  attr :icon, :string, required: true
-  attr :phase, :string, required: true
-  attr :message, :string, required: true
-
-  defp future_panel(assigns) do
-    ~H"""
-    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
-      <div class="flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-abbey">{@title}</h2>
-        <button
-          type="button"
-          disabled
-          title={"Arrives in #{@phase}"}
-          aria-disabled="true"
-          class="inline-flex items-center gap-1 rounded-pill border border-abbey/20 bg-lightgrey px-md py-1 text-xs font-medium text-azure cursor-not-allowed"
-        >
-          + New {@title |> String.downcase() |> String.trim_trailing("s")}
-        </button>
-      </div>
-      <.empty_state icon={@icon} message={@message} />
-    </div>
     """
   end
 
@@ -1277,6 +1304,57 @@ defmodule IntellisparkWeb.StudentLive.Show do
         {@note.body}
       </p>
     </article>
+    """
+  end
+
+  attr :high_fives, :list, required: true
+  attr :has_more?, :boolean, required: true
+  attr :current_user, :map, required: true
+
+  defp recent_high_fives_panel(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-abbey">Recent High 5's</h2>
+        <button
+          type="button"
+          phx-click="open_new_high_five_modal"
+          class="text-xs text-brand underline hover:text-brand-700"
+        >
+          + High 5
+        </button>
+      </div>
+
+      <ul :if={@high_fives != []} class="space-y-sm">
+        <li
+          :for={h <- @high_fives}
+          id={"high-five-#{h.id}"}
+          class="rounded-card p-sm bg-status-resolved/10 border border-status-resolved/30 space-y-0.5"
+        >
+          <p class="text-sm font-semibold text-abbey">{h.title}</p>
+          <p class="text-sm text-abbey whitespace-pre-line">{h.body}</p>
+          <p class="text-xs text-azure pt-xs">
+            Sent by <strong>{h.sent_by.email}</strong> · {relative_time(h.sent_at)}
+          </p>
+        </li>
+      </ul>
+
+      <.empty_state
+        :if={@high_fives == []}
+        icon="hero-hand-raised"
+        message="No High 5's yet — send the first one!"
+      />
+
+      <p :if={@has_more?} class="pt-xs text-right">
+        <button
+          type="button"
+          phx-click="open_previous_high_fives"
+          class="text-xs text-brand underline"
+        >
+          View previous High 5's
+        </button>
+      </p>
+    </div>
     """
   end
 end
