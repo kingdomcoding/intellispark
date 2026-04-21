@@ -45,6 +45,12 @@ defmodule IntellisparkWeb.UI.BulkToolbar do
         enabled?={false}
         coming_in="Phase 5"
       />
+      <.bulk_icon
+        action="high_fives"
+        icon="hero-hand-raised"
+        label="Send High 5"
+        enabled?={true}
+      />
       <.bulk_icon action="tag" icon="hero-tag" label="Apply tag" enabled?={true} />
       <.bulk_icon
         action="team"

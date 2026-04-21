@@ -130,6 +130,31 @@ defmodule IntellisparkWeb.StudentLive.Index do
     {:noreply, assign_students(socket)}
   end
 
+  def handle_info(
+        {IntellisparkWeb.StudentLive.HighFiveBulkModal, {:bulk_success, n}},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(active_modal: nil, selected: MapSet.new())
+     |> put_flash(:info, "#{n} High 5 emails sent.")
+     |> assign_students()}
+  end
+
+  def handle_info(
+        {IntellisparkWeb.StudentLive.HighFiveBulkModal, {:bulk_partial, ok, failed}},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(active_modal: nil, selected: MapSet.new())
+     |> put_flash(
+       :warning,
+       "#{ok} sent. #{failed} failed (likely missing recipient emails)."
+     )
+     |> assign_students()}
+  end
+
   def handle_info(_other, socket), do: {:noreply, socket}
 
   defp assign_students(socket) do
@@ -301,8 +326,18 @@ defmodule IntellisparkWeb.StudentLive.Index do
           id="bulk-settings"
           selected_ids={@selected}
         />
+
+        <.live_component
+          :if={@active_modal == "high_fives"}
+          module={IntellisparkWeb.StudentLive.HighFiveBulkModal}
+          id="bulk-high-fives"
+          actor={@current_user}
+          current_school={@current_school}
+          selected_student_ids={MapSet.to_list(@selected)}
+        />
       </section>
     </Layouts.app>
     """
   end
+
 end

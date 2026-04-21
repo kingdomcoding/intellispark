@@ -554,10 +554,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   defp load_templates(actor, school) do
+    query =
+      Intellispark.Recognition.HighFiveTemplate
+      |> Ash.Query.filter(active? == true)
+
     Recognition.list_high_five_templates!(
       actor: actor,
       tenant: school.id,
-      query: Ash.Query.filter(Intellispark.Recognition.HighFiveTemplate, active? == true)
+      query: query
     )
   end
 
