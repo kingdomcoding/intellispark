@@ -21,6 +21,7 @@ defmodule Intellispark.Students.FilterSpec do
 
     attribute :name_contains, :string, public?: true
     attribute :no_high_five_in_30_days, :boolean, default: false, public?: true
+    attribute :has_open_survey_assignment, :boolean, default: false, public?: true
   end
 
   actions do

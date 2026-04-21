@@ -38,6 +38,7 @@ defmodule Intellispark.Students.Actions.RunCustomList do
     |> apply_enrollment_statuses(spec.enrollment_statuses)
     |> apply_name_contains(spec.name_contains)
     |> apply_no_high_five_in_30_days(Map.get(spec, :no_high_five_in_30_days, false))
+    |> apply_has_open_survey_assignment(Map.get(spec, :has_open_survey_assignment, false))
   end
 
   defp apply_tag_ids(query, []), do: query
@@ -83,4 +84,12 @@ defmodule Intellispark.Students.Actions.RunCustomList do
   end
 
   defp apply_no_high_five_in_30_days(query, _), do: query
+
+  defp apply_has_open_survey_assignment(query, true) do
+    query
+    |> Ash.Query.load(:open_survey_assignments_count)
+    |> Ash.Query.filter(open_survey_assignments_count > 0)
+  end
+
+  defp apply_has_open_survey_assignment(query, _), do: query
 end
