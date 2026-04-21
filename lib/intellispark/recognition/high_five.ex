@@ -77,6 +77,12 @@ defmodule Intellispark.Recognition.HighFive do
     belongs_to :template, Intellispark.Recognition.HighFiveTemplate,
       attribute_writable?: true,
       public?: true
+
+    has_many :views, Intellispark.Recognition.HighFiveView
+  end
+
+  aggregates do
+    count :view_audit_count, :views
   end
 
   actions do

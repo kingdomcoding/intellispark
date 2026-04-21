@@ -58,6 +58,8 @@ defmodule Intellispark.Recognition.HighFiveTemplate do
 
   relationships do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
+    has_many :high_fives, Intellispark.Recognition.HighFive,
+      destination_attribute: :template_id
   end
 
   actions do

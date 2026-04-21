@@ -47,5 +47,9 @@ defmodule Intellispark.Recognition do
     end
 
     resource Intellispark.Recognition.HighFive.Version
+
+    resource Intellispark.Recognition.HighFiveView do
+      define :list_high_five_views, action: :read
+    end
   end
 end
