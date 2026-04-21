@@ -431,10 +431,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp load_actions(student, actor, school) do
     Action
     |> Ash.Query.filter(student_id == ^student.id and status == :pending)
-    |> Ash.Query.load([:assignee])
     |> Ash.Query.set_tenant(school.id)
     |> Ash.Query.sort([{:due_on, :asc_nils_last}, {:inserted_at, :desc}])
     |> Ash.read!(actor: actor)
+    |> Ash.load!([:assignee], authorize?: false)
   end
 
   defp has_completed_actions?(student, actor, school) do
@@ -450,19 +450,20 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp load_supports(student, actor, school) do
     SupportPlan
     |> Ash.Query.filter(student_id == ^student.id and status in [:offered, :in_progress])
-    |> Ash.Query.load([:provider_staff])
     |> Ash.Query.set_tenant(school.id)
     |> Ash.Query.sort([{:starts_at, :desc_nils_last}, {:inserted_at, :desc}])
     |> Ash.read!(actor: actor)
+    |> Ash.load!([:provider_staff], authorize?: false)
   end
 
   defp load_notes(student, actor, school) do
     Note
     |> Ash.Query.filter(student_id == ^student.id)
-    |> Ash.Query.load([:author, :edited?, :preview])
+    |> Ash.Query.load([:edited?, :preview])
     |> Ash.Query.set_tenant(school.id)
     |> Ash.Query.sort([{:pinned?, :desc}, {:inserted_at, :desc}])
     |> Ash.read!(actor: actor)
+    |> Ash.load!([:author], authorize?: false)
   end
 
   defp build_note_composer_form(student, actor, school) do
