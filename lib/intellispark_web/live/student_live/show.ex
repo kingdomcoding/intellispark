@@ -1404,7 +1404,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
           <p class="text-sm font-semibold text-abbey">{h.title}</p>
           <p class="text-sm text-abbey whitespace-pre-line">{h.body}</p>
           <p class="text-xs text-azure pt-xs">
-            Sent by <strong>{h.sent_by.email}</strong> · {relative_time(h.sent_at)}
+            Sent by <strong>{h.sent_by.email}</strong> · {relative_time(h.sent_at)} · viewed {h.view_count} time<span :if={h.view_count != 1}>s</span>
           </p>
         </li>
       </ul>
