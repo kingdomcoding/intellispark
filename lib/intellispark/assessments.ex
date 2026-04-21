@@ -41,5 +41,12 @@ defmodule Intellispark.Assessments do
     end
 
     resource Intellispark.Assessments.SurveyQuestion.Version
+
+    resource Intellispark.Assessments.SurveyTemplateVersion do
+      define :list_survey_template_versions, action: :read
+      define :get_survey_template_version, action: :read, get_by: [:id]
+    end
+
+    resource Intellispark.Assessments.SurveyTemplateVersion.Version
   end
 end

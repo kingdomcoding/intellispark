@@ -49,6 +49,13 @@ defmodule Intellispark.Assessments.SurveyTemplate do
 
     has_many :questions, Intellispark.Assessments.SurveyQuestion,
       destination_attribute: :survey_template_id
+
+    has_many :versions, Intellispark.Assessments.SurveyTemplateVersion,
+      destination_attribute: :survey_template_id
+
+    belongs_to :current_version, Intellispark.Assessments.SurveyTemplateVersion,
+      attribute_writable?: true,
+      define_attribute?: false
   end
 
   actions do
