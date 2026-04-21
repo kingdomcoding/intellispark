@@ -67,6 +67,7 @@ defmodule Intellispark.Students.Student do
 
     attribute :external_id, :string, public?: true
     attribute :photo_url, :string, public?: true
+    attribute :email, :string, public?: true
 
     timestamps()
   end
@@ -153,7 +154,8 @@ defmodule Intellispark.Students.Student do
         :grade_level,
         :enrollment_status,
         :external_id,
-        :photo_url
+        :photo_url,
+        :email
       ]
     end
 
@@ -168,7 +170,8 @@ defmodule Intellispark.Students.Student do
         :grade_level,
         :enrollment_status,
         :external_id,
-        :photo_url
+        :photo_url,
+        :email
       ]
 
       require_atomic? false
