@@ -35,8 +35,7 @@ defmodule IntellisparkWeb.UI.BulkToolbar do
         action="forms"
         icon="hero-clipboard-document"
         label="Assign Forms & Surveys"
-        enabled?={false}
-        coming_in="Phase 7"
+        enabled?={true}
       />
       <.bulk_icon
         action="supports"
