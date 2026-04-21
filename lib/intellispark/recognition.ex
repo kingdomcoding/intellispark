@@ -25,5 +25,27 @@ defmodule Intellispark.Recognition do
     end
 
     resource Intellispark.Recognition.HighFiveTemplate.Version
+
+    resource Intellispark.Recognition.HighFive do
+      define :list_high_fives, action: :read
+      define :get_high_five, action: :read, get_by: [:id]
+      define :get_high_five_by_token, action: :by_token, args: [:token]
+
+      define :send_high_five,
+        action: :send_to_student,
+        args: [:student_id, :title, :body]
+
+      define :bulk_send_high_five,
+        action: :bulk_send_to_students,
+        args: [:student_ids, :template_id]
+
+      define :record_high_five_view,
+        action: :record_view,
+        args: [:user_agent, :ip_hash]
+
+      define :archive_high_five, action: :destroy
+    end
+
+    resource Intellispark.Recognition.HighFive.Version
   end
 end
