@@ -140,7 +140,19 @@ ensure_student = fn attrs ->
        |> Ash.Query.set_tenant(school.id)
        |> Ash.read_one(authorize?: false) do
     {:ok, %Student{} = s} ->
-      s
+      # Backfill email on previously-seeded students (Phase 6 added the column).
+      if is_nil(s.email) and Map.get(attrs, :email) do
+        {:ok, updated} =
+          Ash.update(s, %{email: attrs.email},
+            action: :update,
+            tenant: school.id,
+            authorize?: false
+          )
+
+        updated
+      else
+        s
+      end
 
     {:ok, nil} ->
       {:ok, s} = Ash.create(Student, attrs, tenant: school.id, authorize?: false)
@@ -232,7 +244,8 @@ ava =
     last_name: "Patel",
     grade_level: 10,
     enrollment_status: :active,
-    external_id: "SH-0001"
+    external_id: "SH-0001",
+    email: "ava.patel@example.com"
   })
 
 marcus =
@@ -241,7 +254,8 @@ marcus =
     last_name: "Johnson",
     grade_level: 11,
     enrollment_status: :active,
-    external_id: "SH-0002"
+    external_id: "SH-0002",
+    email: "marcus.johnson@example.com"
   })
 
 ling =
@@ -251,7 +265,8 @@ ling =
     preferred_name: "Lily",
     grade_level: 9,
     enrollment_status: :active,
-    external_id: "SH-0003"
+    external_id: "SH-0003",
+    email: "ling.chen@example.com"
   })
 
 elena =
@@ -260,7 +275,8 @@ elena =
     last_name: "Ramirez",
     grade_level: 12,
     enrollment_status: :active,
-    external_id: "SH-0004"
+    external_id: "SH-0004",
+    email: "elena.ramirez@example.com"
   })
 
 noah =
@@ -269,7 +285,8 @@ noah =
     last_name: "Williams",
     grade_level: 9,
     enrollment_status: :inactive,
-    external_id: "SH-0005"
+    external_id: "SH-0005",
+    email: "noah.williams@example.com"
   })
 
 iep = ensure_tag.("IEP", "#14213D")
