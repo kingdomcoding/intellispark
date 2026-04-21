@@ -652,6 +652,86 @@ end
 ensure_high_five.(marcus, hf_templates.achievement, 4)
 ensure_high_five.(marcus, hf_templates.effort, 2)
 
+Logger.info("Seeding Phase 7 Get to Know Me survey…")
+
+alias Intellispark.Assessments
+alias Intellispark.Assessments.SurveyTemplate, as: SurveyTemplatePhase7
+
+{get_to_know_me, gtkm_created?} =
+  case SurveyTemplatePhase7
+       |> Ash.Query.filter(name == "Get to Know Me")
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, %SurveyTemplatePhase7{} = t} ->
+      {t, false}
+
+    {:ok, nil} ->
+      {:ok, t} =
+        Assessments.create_survey_template(
+          "Get to Know Me",
+          "A quick profile to help your teachers know you better.",
+          actor: admin,
+          tenant: school.id,
+          authorize?: false
+        )
+
+      {t, true}
+  end
+
+if gtkm_created? do
+  questions = [
+    {1, "What name do you like to be called?", :short_text, false, %{}},
+    {2, "What are your favorite subjects in school?", :short_text, false, %{}},
+    {3, "What are your least favorite subjects in school?", :short_text, false, %{}},
+    {4, "I learn the most when the teacher...", :short_text, true, %{}},
+    {5,
+     "When you think of the best class you have ever taken, what about it made it the best?",
+     :long_text, true, %{}},
+    {6, "What are your hobbies outside of school?", :short_text, false, %{}},
+    {7, "What would you like your teachers to know about you?", :long_text, false, %{}},
+    {8, "Who are the adults at home who help you with school?", :short_text, false, %{}},
+    {9, "What are you most looking forward to this school year?", :long_text, false, %{}}
+  ]
+
+  for {pos, prompt, type, required?, meta} <- questions do
+    Assessments.create_survey_question(
+      get_to_know_me.id,
+      pos,
+      prompt,
+      type,
+      %{required?: required?, metadata: meta},
+      actor: admin,
+      tenant: school.id,
+      authorize?: false
+    )
+  end
+
+  {:ok, _} =
+    Assessments.publish_survey_template(get_to_know_me,
+      actor: admin,
+      tenant: school.id,
+      authorize?: false
+    )
+end
+
+marcus_assignment =
+  Intellispark.Assessments.SurveyAssignment
+  |> Ash.Query.filter(student_id == ^marcus.id)
+  |> Ash.Query.set_tenant(school.id)
+  |> Ash.read_one!(authorize?: false)
+
+if is_nil(marcus_assignment) do
+  get_to_know_me =
+    Ash.load!(get_to_know_me, :current_version, tenant: school.id, authorize?: false)
+
+  {:ok, _} =
+    Assessments.assign_survey(marcus.id, get_to_know_me.id,
+      actor: admin,
+      tenant: school.id,
+      authorize?: false
+    )
+end
+
 Logger.info("Seed complete.")
 Logger.info("  admin login:   admin@sandboxhigh.edu / phase1-demo-pass")
 Logger.info("  teacher login: curtis.murphy@sandboxhigh.edu / phase1-demo-pass")
