@@ -2,6 +2,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
   @moduledoc false
   use IntellisparkWeb, :live_view
 
+  alias Intellispark.Assessments
+  alias Intellispark.Assessments.SurveyAssignment
   alias Intellispark.Flags.Flag
   alias Intellispark.Recognition
   alias Intellispark.Recognition.HighFive
@@ -27,6 +29,11 @@ defmodule IntellisparkWeb.StudentLive.Show do
         Phoenix.PubSub.subscribe(Intellispark.PubSub, "supports:student:#{student.id}")
         Phoenix.PubSub.subscribe(Intellispark.PubSub, "notes:student:#{student.id}")
         Phoenix.PubSub.subscribe(Intellispark.PubSub, "high_fives:student:#{student.id}")
+
+        Phoenix.PubSub.subscribe(
+          Intellispark.PubSub,
+          "survey_assignments:student:#{student.id}"
+        )
       end
 
       {:ok,
@@ -48,6 +55,9 @@ defmodule IntellisparkWeb.StudentLive.Show do
          recent_high_fives: load_recent_high_fives(student, actor, school),
          has_more_high_fives?: has_more_high_fives?(student, actor, school),
          templates: load_templates(actor, school),
+         survey_assignments: load_survey_assignments(student, actor, school),
+         survey_templates: load_survey_templates(actor, school),
+         new_survey_open?: false,
          flag_types: Intellispark.Flags.list_flag_types!(actor: actor, tenant: school.id),
          staff: load_staff(school),
          edit_modal_open?: false,
@@ -161,6 +171,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   def handle_event("close_previous_high_fives", _params, socket) do
     {:noreply, assign(socket, previous_high_fives_open?: false)}
+  end
+
+  def handle_event("open_new_survey_modal", _params, socket) do
+    {:noreply, assign(socket, new_survey_open?: true)}
+  end
+
+  def handle_event("close_new_survey_modal", _params, socket) do
+    {:noreply, assign(socket, new_survey_open?: false)}
   end
 
   def handle_event("validate_note", %{"note" => params}, socket) do
@@ -380,6 +398,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
      |> reload_high_fives()}
   end
 
+  def handle_info({IntellisparkWeb.StudentLive.NewSurveyModal, :survey_assigned}, socket) do
+    {:noreply,
+     socket
+     |> assign(new_survey_open?: false)
+     |> put_flash(:info, "Form assigned.")
+     |> reload_survey_assignments()}
+  end
+
   def handle_info(%Phoenix.Socket.Broadcast{topic: "students:" <> _}, socket) do
     {:noreply, reload_student(socket)}
   end
@@ -404,6 +430,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, reload_high_fives(socket)}
   end
 
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "survey_assignments:" <> _}, socket) do
+    {:noreply, reload_survey_assignments(socket)}
+  end
+
   def handle_info(%Ash.Notifier.Notification{}, socket) do
     {:noreply, reload_student(socket)}
   end
@@ -426,7 +456,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
           supports: load_supports(loaded, actor, school),
           notes: load_notes(loaded, actor, school),
           recent_high_fives: load_recent_high_fives(loaded, actor, school),
-          has_more_high_fives?: has_more_high_fives?(loaded, actor, school)
+          has_more_high_fives?: has_more_high_fives?(loaded, actor, school),
+          survey_assignments: load_survey_assignments(loaded, actor, school)
         )
 
       _ ->
@@ -461,6 +492,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
       timeline: load_timeline(student, school)
     )
     |> reload_student()
+  end
+
+  defp reload_survey_assignments(socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    assign(socket,
+      survey_assignments: load_survey_assignments(student, actor, school),
+      timeline: load_timeline(student, school)
+    )
   end
 
   defp load_staff(school) do
@@ -559,6 +599,27 @@ defmodule IntellisparkWeb.StudentLive.Show do
       |> Ash.Query.filter(active? == true)
 
     Recognition.list_high_five_templates!(
+      actor: actor,
+      tenant: school.id,
+      query: query
+    )
+  end
+
+  defp load_survey_assignments(student, actor, school) do
+    SurveyAssignment
+    |> Ash.Query.filter(student_id == ^student.id)
+    |> Ash.Query.set_tenant(school.id)
+    |> Ash.Query.sort([{:assigned_at, :desc}])
+    |> Ash.read!(actor: actor)
+    |> Ash.load!([:assigned_by, :survey_template], authorize?: false)
+  end
+
+  defp load_survey_templates(actor, school) do
+    query =
+      Intellispark.Assessments.SurveyTemplate
+      |> Ash.Query.filter(published? == true)
+
+    Assessments.list_survey_templates!(
       actor: actor,
       tenant: school.id,
       query: query
@@ -669,6 +730,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
               current_user={@current_user}
               edit_note_id={@edit_note_id}
             />
+            <.forms_surveys_panel assignments={@survey_assignments} />
           </div>
 
           <div class="space-y-md">
@@ -810,6 +872,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
         student={@student}
         actor={@current_user}
         tenant={@current_school.id}
+      />
+
+      <.live_component
+        :if={@new_survey_open?}
+        module={IntellisparkWeb.StudentLive.NewSurveyModal}
+        id="new-survey-modal"
+        student={@student}
+        actor={@current_user}
+        templates={@survey_templates}
       />
     </Layouts.app>
     """
@@ -1427,4 +1498,81 @@ defmodule IntellisparkWeb.StudentLive.Show do
     </div>
     """
   end
+
+  attr :assignments, :list, required: true
+
+  defp forms_surveys_panel(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-abbey">
+          Forms &amp; Surveys ({length(@assignments)})
+        </h2>
+        <button
+          type="button"
+          phx-click="open_new_survey_modal"
+          class="text-xs text-brand underline hover:text-brand-700"
+        >
+          + Form assignment
+        </button>
+      </div>
+
+      <ul :if={@assignments != []} class="space-y-xs">
+        <li
+          :for={a <- @assignments}
+          id={"assignment-#{a.id}"}
+          class="flex items-center justify-between gap-sm p-xs rounded border border-abbey/10 bg-whitesmoke"
+        >
+          <div class="min-w-0 space-y-0.5">
+            <p class="text-sm font-medium text-abbey truncate">
+              {a.survey_template.name}
+            </p>
+            <p class="text-xs text-azure">
+              Assigned by <strong>{a.assigned_by.email}</strong> on {Calendar.strftime(a.assigned_at, "%b %-d, %Y")}
+            </p>
+          </div>
+          <.assignment_state_pill state={a.state} submitted_at={a.submitted_at} />
+        </li>
+      </ul>
+
+      <.empty_state
+        :if={@assignments == []}
+        icon="hero-clipboard-document"
+        message="No forms assigned yet."
+      />
+    </div>
+    """
+  end
+
+  attr :state, :atom, required: true
+  attr :submitted_at, :any, required: true
+
+  defp assignment_state_pill(%{state: :submitted} = assigns) do
+    ~H"""
+    <span class="text-xs text-azure">
+      Completed on {Calendar.strftime(@submitted_at, "%b %-d, %Y")}
+    </span>
+    """
+  end
+
+  defp assignment_state_pill(assigns) do
+    ~H"""
+    <span class={[
+      "inline-flex items-center rounded-pill border px-2 py-0.5 text-[0.6875rem] font-medium",
+      assignment_pill_classes(@state)
+    ]}>
+      {assignment_pill_label(@state)}
+    </span>
+    """
+  end
+
+  defp assignment_pill_classes(:assigned), do: "border-abbey/30 text-abbey bg-white"
+  defp assignment_pill_classes(:in_progress), do: "border-brand text-brand bg-brand/5"
+
+  defp assignment_pill_classes(:expired),
+    do: "border-chocolate text-chocolate bg-chocolate/5"
+
+  defp assignment_pill_label(:assigned), do: "Not started"
+  defp assignment_pill_label(:in_progress), do: "In progress"
+  defp assignment_pill_label(:expired), do: "Expired"
 end
