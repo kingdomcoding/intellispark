@@ -147,6 +147,22 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, assign(socket, support_detail_open?: false, active_support_id: nil)}
   end
 
+  def handle_event("open_new_high_five_modal", _params, socket) do
+    {:noreply, assign(socket, new_high_five_open?: true)}
+  end
+
+  def handle_event("close_new_high_five_modal", _params, socket) do
+    {:noreply, assign(socket, new_high_five_open?: false)}
+  end
+
+  def handle_event("open_previous_high_fives", _params, socket) do
+    {:noreply, assign(socket, previous_high_fives_open?: true)}
+  end
+
+  def handle_event("close_previous_high_fives", _params, socket) do
+    {:noreply, assign(socket, previous_high_fives_open?: false)}
+  end
+
   def handle_event("validate_note", %{"note" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.note_composer_form, params)
     {:noreply, assign(socket, note_composer_form: form)}
@@ -354,6 +370,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
      socket
      |> assign(support_detail_open?: false, active_support_id: nil)
      |> reload_student()}
+  end
+
+  def handle_info({IntellisparkWeb.StudentLive.NewHighFiveModal, :high_five_sent}, socket) do
+    {:noreply,
+     socket
+     |> assign(new_high_five_open?: false)
+     |> put_flash(:info, "High 5 sent.")
+     |> reload_high_fives()}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{topic: "students:" <> _}, socket) do
@@ -750,6 +774,25 @@ defmodule IntellisparkWeb.StudentLive.Show do
         module={IntellisparkWeb.StudentLive.SupportDetailSheet}
         id={"support-sheet-#{@active_support_id}"}
         support_id={@active_support_id}
+        actor={@current_user}
+        tenant={@current_school.id}
+      />
+
+      <.live_component
+        :if={@new_high_five_open?}
+        module={IntellisparkWeb.StudentLive.NewHighFiveModal}
+        id="new-high-five-modal"
+        student={@student}
+        actor={@current_user}
+        templates={@templates}
+        error_message={nil}
+      />
+
+      <.live_component
+        :if={@previous_high_fives_open?}
+        module={IntellisparkWeb.StudentLive.PreviousHighFivesDrawer}
+        id="previous-high-fives-drawer"
+        student={@student}
         actor={@current_user}
         tenant={@current_school.id}
       />
