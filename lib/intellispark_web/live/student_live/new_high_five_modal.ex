@@ -1,19 +1,21 @@
 defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
   @moduledoc """
-  Modal for sending a High 5 to a student. Supports two modes — pick a
-  template (autofills title + body) or write a custom message.
-  Submits through `HighFive.:send_to_student`; the notifier enqueues
-  the Oban email delivery job.
+  Modal for sending or re-sending a High 5. In `:create` mode it offers
+  template-autofill and custom-message pills; in `:resend` mode it
+  pre-fills title + body from an existing HighFive and routes the submit
+  through the `:resend` action (edit-before-resend).
   """
 
   use IntellisparkWeb, :live_component
 
   @impl true
   def update(assigns, socket) do
+    assigns = Map.put_new(assigns, :mode, :create)
+
     {:ok,
      socket
      |> assign(assigns)
-     |> assign_new(:mode, fn -> :template end)
+     |> assign_new(:template_mode, fn -> :template end)
      |> assign_new(:selected_template_id, fn -> nil end)
      |> assign_new(:form, fn -> build_form(assigns) end)}
   end
@@ -22,20 +24,20 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
   def render(assigns) do
     ~H"""
     <div>
-      <.modal id={@id} on_cancel={JS.push("close_new_high_five_modal")} show>
-        <:title>New High 5 for {@student.display_name}</:title>
+      <.modal id={@id} on_cancel={JS.push(close_event(@mode))} show>
+        <:title>{modal_title(@mode, @student)}</:title>
 
-        <div class="flex items-center gap-sm pb-sm border-b border-abbey/10">
+        <div :if={@mode == :create} class="flex items-center gap-sm pb-sm border-b border-abbey/10">
           <.mode_pill
             label="From template"
             mode={:template}
-            active={@mode == :template}
+            active={@template_mode == :template}
             target={@myself}
           />
           <.mode_pill
             label="Custom message"
             mode={:custom}
-            active={@mode == :custom}
+            active={@template_mode == :custom}
             target={@myself}
           />
         </div>
@@ -48,7 +50,7 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
           class="space-y-sm pt-sm"
         >
           <.input
-            :if={@mode == :template}
+            :if={@mode == :create and @template_mode == :template}
             field={@form[:template_id]}
             type="select"
             label="Template"
@@ -66,6 +68,7 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
           />
 
           <.input
+            :if={@mode == :create}
             field={@form[:recipient_email]}
             type="email"
             label="Send to"
@@ -77,11 +80,11 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
             <.button
               type="button"
               variant={:ghost}
-              phx-click={JS.push("close_new_high_five_modal")}
+              phx-click={JS.push(close_event(@mode))}
             >
               Cancel
             </.button>
-            <.button type="submit" variant={:primary}>Send High 5</.button>
+            <.button type="submit" variant={:primary}>{submit_label(@mode)}</.button>
           </div>
         </.form>
       </.modal>
@@ -98,7 +101,7 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
     ~H"""
     <button
       type="button"
-      phx-click="set_mode"
+      phx-click="set_template_mode"
       phx-value-mode={@mode}
       phx-target={@target}
       class={[
@@ -113,12 +116,12 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
   end
 
   @impl true
-  def handle_event("set_mode", %{"mode" => "template"}, socket) do
-    {:noreply, assign(socket, mode: :template)}
+  def handle_event("set_template_mode", %{"mode" => "template"}, socket) do
+    {:noreply, assign(socket, template_mode: :template)}
   end
 
-  def handle_event("set_mode", %{"mode" => "custom"}, socket) do
-    {:noreply, assign(socket, mode: :custom, selected_template_id: nil)}
+  def handle_event("set_template_mode", %{"mode" => "custom"}, socket) do
+    {:noreply, assign(socket, template_mode: :custom, selected_template_id: nil)}
   end
 
   def handle_event("validate", %{"high_five" => params}, socket) do
@@ -150,7 +153,7 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
   def handle_event("save", %{"high_five" => params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.form, params: params) do
       {:ok, _high_five} ->
-        send(self(), {__MODULE__, :high_five_sent})
+        send(self(), {__MODULE__, message_for_mode(socket.assigns.mode)})
         {:noreply, socket}
 
       {:error, form} ->
@@ -160,6 +163,18 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
            error_message: "Check the fields below and try again."
          )}
     end
+  end
+
+  defp build_form(%{mode: :resend, high_five: hf} = assigns) when not is_nil(hf) do
+    hf
+    |> AshPhoenix.Form.for_update(:resend,
+      actor: assigns.actor,
+      tenant: assigns.student.school_id,
+      domain: Intellispark.Recognition,
+      as: "high_five"
+    )
+    |> AshPhoenix.Form.validate(%{"title" => hf.title, "body" => hf.body})
+    |> to_form()
   end
 
   defp build_form(assigns) do
@@ -203,4 +218,16 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
         |> to_form()
     end
   end
+
+  defp modal_title(:create, student), do: "New High 5 for #{student.display_name}"
+  defp modal_title(:resend, student), do: "Re-send High 5 to #{student.display_name}"
+
+  defp submit_label(:create), do: "Send High 5"
+  defp submit_label(:resend), do: "Re-send"
+
+  defp close_event(:create), do: "close_new_high_five_modal"
+  defp close_event(:resend), do: "close_resend_high_five_modal"
+
+  defp message_for_mode(:create), do: :high_five_sent
+  defp message_for_mode(:resend), do: :high_five_resent
 end
