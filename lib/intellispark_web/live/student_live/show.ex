@@ -1077,6 +1077,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
         actor={@current_user}
         staff={@staff}
       />
+
+      <.live_component
+        :if={@new_strength_open?}
+        module={IntellisparkWeb.StudentLive.NewStrengthModal}
+        id="new-strength-modal"
+        student={@student}
+        actor={@current_user}
+      />
     </Layouts.app>
     """
   end
