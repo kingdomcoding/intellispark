@@ -39,7 +39,7 @@ defmodule IntellisparkWeb.BulkSurveyModalTest do
     assert html =~ "Bulk LV Tmpl"
   end
 
-  test "skip_previously_submitted excludes students who already completed",
+  test "skip_if_previously_assigned excludes students with any prior assignment",
        %{conn: conn, school: school, admin: admin, template: template} do
     done = create_student!(school, %{first_name: "Done"})
     fresh = create_student!(school, %{first_name: "Fresh"})
@@ -66,7 +66,7 @@ defmodule IntellisparkWeb.BulkSurveyModalTest do
     _ =
       lv
       |> element("#bulk-forms form")
-      |> render_submit(%{"template_id" => template.id, "mode" => "skip_previously_submitted"})
+      |> render_submit(%{"template_id" => template.id, "mode" => "skip_if_previously_assigned"})
 
     _ = :sys.get_state(lv.pid)
 

@@ -45,7 +45,7 @@ Single `metadata :map` attribute holds type-specific config: `%{options: [...]}`
 ### 7. Bulk assign with two modes matching the real product's modal
 
 `bulk_assign_to_students` is a custom action that calls `Ash.bulk_create` with `notify?: true, stop_on_error?: false` — same pattern as Phase 6 bulk High-5. Two `mode` values match the screenshots:
-- `:skip_previously_submitted` — pre-filters student_ids by removing those with an existing `:submitted` assignment for this template.
+- `:skip_if_previously_assigned` — pre-filters student_ids by removing those with any existing assignment for this template, regardless of state (`:assigned`, `:in_progress`, `:submitted`, or `:expired`). Matches the "Assign only if never assigned" button text.
 - `:assign_regardless` — pass-through; creates one assignment per id unconditionally.
 
 Per-row authorization runs through `ActorBelongsToTenantSchool`, so a mixed-school bulk fails cleanly.

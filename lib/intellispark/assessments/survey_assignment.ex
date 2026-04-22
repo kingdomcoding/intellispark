@@ -120,8 +120,8 @@ defmodule Intellispark.Assessments.SurveyAssignment do
 
       argument :mode, :atom do
         allow_nil? false
-        default :skip_previously_submitted
-        constraints one_of: [:skip_previously_submitted, :assign_regardless]
+        default :skip_if_previously_assigned
+        constraints one_of: [:skip_if_previously_assigned, :assign_regardless]
       end
 
       run Intellispark.Assessments.Actions.BulkAssignSurvey

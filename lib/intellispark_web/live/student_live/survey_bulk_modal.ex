@@ -3,7 +3,7 @@ defmodule IntellisparkWeb.StudentLive.SurveyBulkModal do
   Bulk-assign a survey to the currently-selected student_ids on the
   /students roster. Two submit modes match the screenshot wording:
   "Assign even if previously completed" (`:assign_regardless`) and
-  "Assign only if never assigned" (`:skip_previously_submitted`).
+  "Assign only if never assigned" (`:skip_if_previously_assigned`).
   """
 
   use IntellisparkWeb, :live_component
@@ -72,7 +72,7 @@ defmodule IntellisparkWeb.StudentLive.SurveyBulkModal do
             <button
               type="submit"
               name="mode"
-              value="skip_previously_submitted"
+              value="skip_if_previously_assigned"
               class="rounded-pill bg-brand-700 hover:bg-brand text-white text-sm font-medium px-md py-xs"
             >
               Assign only if never assigned

@@ -67,8 +67,8 @@ defmodule Intellispark.Assessments.BulkAssignTest do
     end
   end
 
-  describe ":skip_previously_submitted" do
-    test "filters out students who already submitted this template",
+  describe ":skip_if_previously_assigned" do
+    test "skips students with a submitted assignment for this template",
          %{school: school, admin: admin, template: template} do
       done = create_student!(school)
       first = assign_survey!(admin, school, done, template)
@@ -80,13 +80,51 @@ defmodule Intellispark.Assessments.BulkAssignTest do
         Assessments.bulk_assign_survey(
           [done.id, fresh.id],
           template.id,
-          :skip_previously_submitted,
+          :skip_if_previously_assigned,
           actor: admin,
           tenant: school.id
         )
 
       assert length(records) == 1
       assert hd(records).student_id == fresh.id
+    end
+
+    test "skips students with an :assigned (open, not submitted) row",
+         %{school: school, admin: admin, template: template} do
+      open = create_student!(school)
+      _ = assign_survey!(admin, school, open, template)
+
+      fresh = create_student!(school)
+
+      {:ok, %Ash.BulkResult{records: records}} =
+        Assessments.bulk_assign_survey(
+          [open.id, fresh.id],
+          template.id,
+          :skip_if_previously_assigned,
+          actor: admin,
+          tenant: school.id
+        )
+
+      assert length(records) == 1
+      assert hd(records).student_id == fresh.id
+    end
+
+    test "skips students with an :expired row",
+         %{school: school, admin: admin, template: template} do
+      stale = create_student!(school)
+      first = assign_survey!(admin, school, stale, template)
+      _ = expire!(first)
+
+      {:ok, %Ash.BulkResult{records: records}} =
+        Assessments.bulk_assign_survey(
+          [stale.id],
+          template.id,
+          :skip_if_previously_assigned,
+          actor: admin,
+          tenant: school.id
+        )
+
+      assert records == []
     end
   end
 

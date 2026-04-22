@@ -2,8 +2,10 @@ defmodule Intellispark.Assessments.Actions.BulkAssignSurvey do
   @moduledoc """
   Generic action implementing `SurveyAssignment.:bulk_assign_to_students`.
   Two modes matching the real-product modal:
-  - `:skip_previously_submitted` filters out students who already have
-    a `:submitted` assignment for this template.
+  - `:skip_if_previously_assigned` filters out students who already have
+    any assignment for this template, regardless of state (assigned,
+    in_progress, submitted, or expired). Matches the "Assign only if
+    never assigned" button.
   - `:assign_regardless` creates one assignment per student unconditionally.
   """
 
@@ -54,18 +56,17 @@ defmodule Intellispark.Assessments.Actions.BulkAssignSurvey do
 
   defp filter_students(:assign_regardless, student_ids, _template_id, _tenant), do: student_ids
 
-  defp filter_students(:skip_previously_submitted, student_ids, template_id, tenant) do
-    already_done =
+  defp filter_students(:skip_if_previously_assigned, student_ids, template_id, tenant) do
+    already_assigned =
       SurveyAssignment
       |> Ash.Query.filter(
-        state == :submitted and
-          survey_template_id == ^template_id and
+        survey_template_id == ^template_id and
           student_id in ^student_ids
       )
       |> Ash.Query.set_tenant(tenant)
       |> Ash.read!(authorize?: false)
       |> Enum.map(& &1.student_id)
 
-    student_ids -- already_done
+    student_ids -- already_assigned
   end
 end
