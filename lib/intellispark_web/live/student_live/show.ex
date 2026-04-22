@@ -1068,6 +1068,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
         actor={@current_user}
         staff={@staff}
       />
+
+      <.live_component
+        :if={@new_connection_open?}
+        module={IntellisparkWeb.StudentLive.NewConnectionModal}
+        id="new-connection-modal"
+        student={@student}
+        actor={@current_user}
+        staff={@staff}
+      />
     </Layouts.app>
     """
   end
