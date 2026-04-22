@@ -28,8 +28,7 @@ defmodule IntellisparkWeb.UI.BulkToolbar do
         action="insights"
         icon="hero-chart-bar"
         label="Insights"
-        enabled?={false}
-        coming_in="Phase 8"
+        enabled?={true}
       />
       <.bulk_icon
         action="forms"
