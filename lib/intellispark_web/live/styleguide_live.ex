@@ -150,7 +150,7 @@ defmodule IntellisparkWeb.StyleguideLive do
 
         <section>
           <h2 class="text-display-sm mb-md">Filter Bar</h2>
-          <.filter_bar search="" />
+          <.filter_bar search="" tags={[]} statuses={[]} />
         </section>
 
         <section>
