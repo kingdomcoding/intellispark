@@ -733,6 +733,108 @@ if is_nil(marcus_gtkm_assignment) do
     )
 end
 
+Logger.info("Seeding Phase 8 Insightfull survey…")
+
+insightfull_items = [
+  {"I feel like I belong at my school.", :belonging},
+  {"I feel accepted by other students here.", :belonging},
+  {"I feel close to people at my school.", :connection},
+  {"There is an adult at school I can talk to if I need help.", :connection},
+  {"Before making a decision, I think about the consequences.", :decision_making},
+  {"I consider different options before making a choice.", :decision_making},
+  {"I get excited about what I'm learning in class.", :engagement},
+  {"I put effort into my schoolwork.", :engagement},
+  {"I come to class prepared and ready to learn.", :readiness},
+  {"I get enough sleep to be ready for school.", :readiness},
+  {"I handle disagreements with others in a healthy way.", :relationship_skills},
+  {"I work well with classmates on group projects.", :relationship_skills},
+  {"I have adults in my life I can rely on.", :relationships_adult},
+  {"There is a teacher who knows me well.", :relationships_adult},
+  {"I have people who support me outside of school.", :relationships_networks},
+  {"I'm part of a community that cares about me.", :relationships_networks},
+  {"I have friends my age I can count on.", :relationships_peer},
+  {"I feel understood by my friends.", :relationships_peer},
+  {"I know what I am good at.", :self_awareness},
+  {"I recognise how my emotions affect my choices.", :self_awareness},
+  {"I can calm myself down when I'm upset.", :self_management},
+  {"I stay focused on what I need to do, even when it's hard.", :self_management},
+  {"I try to understand how others feel.", :social_awareness},
+  {"I notice when someone around me is having a hard time.", :social_awareness},
+  {"Overall, I feel good about my life.", :well_being},
+  {"I feel energetic most days.", :well_being}
+]
+
+{insightfull, insightfull_created?} =
+  case SurveyTemplatePhase7
+       |> Ash.Query.filter(name == "Insightfull")
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, %SurveyTemplatePhase7{} = t} ->
+      {t, false}
+
+    {:ok, nil} ->
+      {:ok, t} =
+        Assessments.create_survey_template(
+          "Insightfull",
+          "A quick self-check on how you're feeling about school + your relationships.",
+          actor: admin,
+          tenant: school.id,
+          authorize?: false
+        )
+
+      {t, true}
+  end
+
+if insightfull_created? do
+  insightfull_items
+  |> Enum.with_index(1)
+  |> Enum.each(fn {{prompt, dimension}, pos} ->
+    Assessments.create_survey_question(
+      insightfull.id,
+      pos,
+      prompt,
+      :dimension_rating,
+      %{
+        required?: true,
+        metadata: %{
+          "dimension" => Atom.to_string(dimension),
+          "scale_labels" => ["Never", "Rarely", "Sometimes", "Often", "Always"]
+        }
+      },
+      actor: admin,
+      tenant: school.id,
+      authorize?: false
+    )
+  end)
+
+  {:ok, _} =
+    Assessments.publish_survey_template(insightfull,
+      actor: admin,
+      tenant: school.id,
+      authorize?: false
+    )
+end
+
+marcus_insightfull_assignment =
+  Intellispark.Assessments.SurveyAssignment
+  |> Ash.Query.filter(
+    student_id == ^marcus.id and survey_template_id == ^insightfull.id
+  )
+  |> Ash.Query.set_tenant(school.id)
+  |> Ash.read_one!(authorize?: false)
+
+if is_nil(marcus_insightfull_assignment) do
+  insightfull =
+    Ash.load!(insightfull, :current_version, tenant: school.id, authorize?: false)
+
+  {:ok, _} =
+    Assessments.assign_survey(marcus.id, insightfull.id,
+      actor: admin,
+      tenant: school.id,
+      authorize?: false
+    )
+end
+
 Logger.info("Seed complete.")
 Logger.info("  admin login:   admin@sandboxhigh.edu / phase1-demo-pass")
 Logger.info("  teacher login: curtis.murphy@sandboxhigh.edu / phase1-demo-pass")
