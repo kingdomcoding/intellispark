@@ -46,6 +46,7 @@ defmodule IntellisparkWeb.Router do
       live "/lists", CustomListLive.Index
       live "/lists/:id", CustomListLive.Show
       live "/insights", InsightsLive
+      live "/me/email-preferences", UserSettingsLive.EmailPreferences, :show
     end
 
     get "/insights/export.csv", InsightsController, :export
