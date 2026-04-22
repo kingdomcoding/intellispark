@@ -9,7 +9,7 @@ defmodule Intellispark.Support.Emails.SupportExpiring do
   def send(user, supports) when is_list(supports) and supports != [] do
     body_html =
       EmailLayout.wrap(
-        heading: "Supports ending this week",
+        heading: "Hi #{first_name(user)},",
         body_html: """
         <p>You have <strong>#{length(supports)}</strong> support(s) ending within 3 days:</p>
         <ul>
@@ -43,4 +43,12 @@ defmodule Intellispark.Support.Emails.SupportExpiring do
   defp host do
     System.get_env("PHX_HOST") || "https://intellispark.josboxoffice.com"
   end
+
+  defp first_name(%{first_name: name}) when is_binary(name) and name != "", do: name
+
+  defp first_name(%{email: email}) when is_binary(email) do
+    email |> String.split("@") |> List.first()
+  end
+
+  defp first_name(_), do: "there"
 end

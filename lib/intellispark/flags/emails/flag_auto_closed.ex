@@ -11,7 +11,7 @@ defmodule Intellispark.Flags.Emails.FlagAutoClosed do
 
     body_html =
       EmailLayout.wrap(
-        heading: "A flag was auto-closed",
+        heading: "Hi #{first_name(user)},",
         body_html: """
         <p>A flag on <strong>#{student_name}</strong> was automatically closed after
         30 days without activity.</p>
@@ -33,4 +33,12 @@ defmodule Intellispark.Flags.Emails.FlagAutoClosed do
   defp host do
     System.get_env("PHX_HOST") || "https://intellispark.josboxoffice.com"
   end
+
+  defp first_name(%{first_name: name}) when is_binary(name) and name != "", do: name
+
+  defp first_name(%{email: email}) when is_binary(email) do
+    email |> String.split("@") |> List.first()
+  end
+
+  defp first_name(_), do: "there"
 end

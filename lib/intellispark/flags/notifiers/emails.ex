@@ -48,7 +48,7 @@ defmodule Intellispark.Flags.Notifiers.Emails do
   def notify(_), do: :ok
 
   defp load_for_email(flag) do
-    case Ash.load(flag, [:student, assignments: [:user]],
+    case Ash.load(flag, [:student, :flag_type, assignments: [:user]],
            tenant: flag.school_id,
            authorize?: false
          ) do

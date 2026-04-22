@@ -9,7 +9,7 @@ defmodule Intellispark.Flags.Emails.FollowupDigest do
   def send(user, flags) when is_list(flags) and flags != [] do
     body_html =
       EmailLayout.wrap(
-        heading: "Follow-ups due today",
+        heading: "Hi #{first_name(user)},",
         body_html: """
         <p>You have <strong>#{length(flags)}</strong> flag(s) awaiting follow-up today:</p>
         <ul>
@@ -44,4 +44,12 @@ defmodule Intellispark.Flags.Emails.FollowupDigest do
   defp host do
     System.get_env("PHX_HOST") || "https://intellispark.josboxoffice.com"
   end
+
+  defp first_name(%{first_name: name}) when is_binary(name) and name != "", do: name
+
+  defp first_name(%{email: email}) when is_binary(email) do
+    email |> String.split("@") |> List.first()
+  end
+
+  defp first_name(_), do: "there"
 end
