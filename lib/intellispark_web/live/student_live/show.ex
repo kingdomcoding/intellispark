@@ -12,6 +12,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   alias Intellispark.Support
   alias Intellispark.Support.{Action, Note}
   alias Intellispark.Support.Support, as: SupportPlan
+  alias Intellispark.Teams.{KeyConnection, Strength, TeamMembership}
 
   require Ash.Query
 
@@ -815,13 +816,37 @@ defmodule IntellisparkWeb.StudentLive.Show do
       |> Ash.read!(authorize?: false)
       |> Enum.map(&Map.put(&1, :__kind__, :indicator_event))
 
+    team_versions =
+      TeamMembership.Version
+      |> Ash.Query.filter(student_id == ^student.id)
+      |> Ash.Query.set_tenant(school.id)
+      |> Ash.read!(authorize?: false)
+      |> Enum.map(&Map.put(&1, :__kind__, :team_event))
+
+    connection_versions =
+      KeyConnection.Version
+      |> Ash.Query.filter(student_id == ^student.id)
+      |> Ash.Query.set_tenant(school.id)
+      |> Ash.read!(authorize?: false)
+      |> Enum.map(&Map.put(&1, :__kind__, :connection_event))
+
+    strength_versions =
+      Strength.Version
+      |> Ash.Query.filter(student_id == ^student.id)
+      |> Ash.Query.set_tenant(school.id)
+      |> Ash.read!(authorize?: false)
+      |> Enum.map(&Map.put(&1, :__kind__, :strength_event))
+
     (student_versions ++
        tag_versions ++
        status_versions ++
        note_versions ++
        high_five_versions ++
        survey_versions ++
-       indicator_versions)
+       indicator_versions ++
+       team_versions ++
+       connection_versions ++
+       strength_versions)
     |> Enum.sort_by(& &1.version_inserted_at, {:desc, DateTime})
     |> Enum.take(20)
   end
@@ -1116,6 +1141,9 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp icon_for(:recognition_event), do: "hero-hand-raised"
   defp icon_for(:survey_event), do: "hero-clipboard-document"
   defp icon_for(:indicator_event), do: "hero-chart-bar"
+  defp icon_for(:team_event), do: "hero-user-plus"
+  defp icon_for(:connection_event), do: "hero-user-circle"
+  defp icon_for(:strength_event), do: "hero-sparkles"
 
   defp summarise(%{__kind__: :student_event, version_action_name: name}) do
     case name do
@@ -1176,6 +1204,39 @@ defmodule IntellisparkWeb.StudentLive.Show do
     do: "Indicators refreshed"
 
   defp summarise(%{__kind__: :indicator_event}), do: "Indicator update"
+
+  defp summarise(%{__kind__: :team_event, version_action_name: :create}),
+    do: "Team member added"
+
+  defp summarise(%{__kind__: :team_event, version_action_name: :update}),
+    do: "Team member updated"
+
+  defp summarise(%{__kind__: :team_event, version_action_name: :destroy}),
+    do: "Team member removed"
+
+  defp summarise(%{__kind__: :team_event}), do: "Team change"
+
+  defp summarise(%{__kind__: :connection_event, version_action_name: :create}),
+    do: "Key connection added"
+
+  defp summarise(%{__kind__: :connection_event, version_action_name: :update}),
+    do: "Key connection updated"
+
+  defp summarise(%{__kind__: :connection_event, version_action_name: :destroy}),
+    do: "Key connection removed"
+
+  defp summarise(%{__kind__: :connection_event}), do: "Key connection change"
+
+  defp summarise(%{__kind__: :strength_event, version_action_name: :create}),
+    do: "Strength added"
+
+  defp summarise(%{__kind__: :strength_event, version_action_name: :update}),
+    do: "Strength edited"
+
+  defp summarise(%{__kind__: :strength_event, version_action_name: :destroy}),
+    do: "Strength removed"
+
+  defp summarise(%{__kind__: :strength_event}), do: "Strength change"
 
   defp relative_time(%DateTime{} = ts) do
     diff = DateTime.diff(DateTime.utc_now(), ts, :second)
