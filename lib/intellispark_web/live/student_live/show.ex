@@ -1990,7 +1990,13 @@ defmodule IntellisparkWeb.StudentLive.Show do
        when is_binary(first) and is_binary(last) and first != "" and last != "",
        do: "#{first} #{last}"
 
-  defp user_display_name(%{email: email}) when is_binary(email), do: email
+  defp user_display_name(%{email: email}) do
+    case to_string_or_nil(email) do
+      nil -> "Unknown"
+      str -> str
+    end
+  end
+
   defp user_display_name(_), do: "Unknown"
 
   defp user_initials(%{first_name: first, last_name: last})
@@ -1998,11 +2004,20 @@ defmodule IntellisparkWeb.StudentLive.Show do
     String.upcase(String.first(first)) <> String.upcase(String.first(last))
   end
 
-  defp user_initials(%{email: email}) when is_binary(email) and email != "" do
-    String.upcase(String.first(email))
+  defp user_initials(%{email: email}) do
+    case to_string_or_nil(email) do
+      nil -> "?"
+      str -> String.upcase(String.first(str))
+    end
   end
 
   defp user_initials(_), do: "?"
+
+  defp to_string_or_nil(nil), do: nil
+  defp to_string_or_nil(""), do: nil
+  defp to_string_or_nil(s) when is_binary(s), do: s
+  defp to_string_or_nil(%Ash.CiString{} = s), do: Ash.CiString.value(s)
+  defp to_string_or_nil(other), do: to_string(other)
 
   defp humanize_team_role(:teacher), do: "Teacher"
   defp humanize_team_role(:coach), do: "Coach"
