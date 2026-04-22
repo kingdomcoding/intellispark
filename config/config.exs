@@ -70,7 +70,8 @@ config :intellispark, Oban,
        {"0 8 * * *", Intellispark.Flags.Oban.DailyFollowupReminderWorker},
        {"0 7 * * *", Intellispark.Support.Oban.DailyActionReminderWorker},
        {"5 7 * * *", Intellispark.Support.Oban.SupportExpirationReminderWorker},
-       {"0 9 * * *", Intellispark.Assessments.Oban.DailySurveyReminderScanner}
+       {"0 9 * * *", Intellispark.Assessments.Oban.DailySurveyReminderScanner},
+       {"0 7 * * 1", Intellispark.Digest.WeeklyDigestWorker}
      ]}
   ]
 
