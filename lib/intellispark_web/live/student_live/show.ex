@@ -982,67 +982,13 @@ defmodule IntellisparkWeb.StudentLive.Show do
       <section class="container-lg py-xl space-y-md">
         <.header_card student={@student} uploads={@uploads} />
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
-          <div class="md:col-span-2 space-y-md">
-            <.recent_high_fives_panel
-              high_fives={@recent_high_fives}
-              has_more?={@has_more_high_fives?}
-              current_user={@current_user}
-            />
-            <.key_indicators_panel student={@student} />
+        <IntellisparkWeb.StudentLive.TabStrip.tab_strip
+          student={@student}
+          active_tab={@active_tab}
+          open_tabs={@open_tabs}
+        />
 
-            <.team_members_panel
-              memberships={@student.team_memberships || []}
-              student={@student}
-            />
-
-            <.notes_panel
-              notes={@notes}
-              composer_form={@note_composer_form}
-              current_user={@current_user}
-              edit_note_id={@edit_note_id}
-            />
-            <.forms_surveys_panel assignments={@survey_assignments} />
-          </div>
-
-          <div class="space-y-md">
-            <.profile_card student={@student} />
-
-            <.strengths_panel strengths={@strengths} />
-
-            <.key_connections_panel connections={@student.key_connections || []} />
-
-            <.flags_panel flags={@flags} />
-
-            <.actions_panel actions={@actions} has_completed?={@has_completed_actions?} />
-
-            <.supports_panel supports={@supports} />
-
-            <div class="bg-white rounded-card shadow-card p-md space-y-sm">
-              <h2 class="text-sm font-semibold text-abbey">Status</h2>
-              <.live_component
-                module={IntellisparkWeb.StudentLive.InlineStatusEditor}
-                id="inline-status-editor"
-                student={@student}
-                statuses={@statuses}
-                actor={@current_user}
-              />
-            </div>
-
-            <div class="bg-white rounded-card shadow-card p-md space-y-sm">
-              <h2 class="text-sm font-semibold text-abbey">Tags</h2>
-              <.live_component
-                module={IntellisparkWeb.StudentLive.InlineTagEditor}
-                id="inline-tag-editor"
-                student={@student}
-                tags={@tags}
-                actor={@current_user}
-              />
-            </div>
-          </div>
-        </div>
-
-        <.activity_card timeline={@timeline} />
+        <.hub_pane outer={assigns} />
       </section>
 
       <.modal
@@ -1094,14 +1040,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
         error_message={nil}
       />
 
-      <.live_component
-        :if={@flag_detail_open? and @active_flag_id}
-        module={IntellisparkWeb.StudentLive.FlagDetailSheet}
-        id={"flag-sheet-#{@active_flag_id}"}
-        flag_id={@active_flag_id}
-        actor={@current_user}
-        tenant={@current_school.id}
-      />
+      <div :if={@flag_detail_open? and @active_flag_id} class="md:hidden">
+        <.live_component
+          module={IntellisparkWeb.StudentLive.FlagDetailSheet}
+          id={"flag-sheet-#{@active_flag_id}"}
+          flag_id={@active_flag_id}
+          actor={@current_user}
+          tenant={@current_school.id}
+        />
+      </div>
 
       <.live_component
         :if={@new_action_open?}
@@ -1122,14 +1069,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
         staff={@staff}
       />
 
-      <.live_component
-        :if={@support_detail_open? and @active_support_id}
-        module={IntellisparkWeb.StudentLive.SupportDetailSheet}
-        id={"support-sheet-#{@active_support_id}"}
-        support_id={@active_support_id}
-        actor={@current_user}
-        tenant={@current_school.id}
-      />
+      <div :if={@support_detail_open? and @active_support_id} class="md:hidden">
+        <.live_component
+          module={IntellisparkWeb.StudentLive.SupportDetailSheet}
+          id={"support-sheet-#{@active_support_id}"}
+          support_id={@active_support_id}
+          actor={@current_user}
+          tenant={@current_school.id}
+        />
+      </div>
 
       <.live_component
         :if={@new_high_five_open?}
@@ -1185,6 +1133,122 @@ defmodule IntellisparkWeb.StudentLive.Show do
         actor={@current_user}
       />
     </Layouts.app>
+    """
+  end
+
+  attr :outer, :map, required: true
+
+  defp hub_pane(assigns) do
+    case assigns.outer.active_tab do
+      :profile -> profile_pane(assigns)
+      {:flag, id} -> flag_tab_pane(Map.merge(assigns, %{flag_id: id}))
+      {:support, id} -> support_tab_pane(Map.merge(assigns, %{support_id: id}))
+      :about -> about_tab_pane(assigns)
+    end
+  end
+
+  defp flag_tab_pane(assigns) do
+    ~H"""
+    <.live_component
+      module={IntellisparkWeb.StudentLive.FlagDetailPane}
+      id={"flag-pane-#{@flag_id}"}
+      flag_id={@flag_id}
+      actor={@outer.current_user}
+      tenant={@outer.current_school.id}
+    />
+    """
+  end
+
+  defp support_tab_pane(assigns) do
+    ~H"""
+    <.live_component
+      module={IntellisparkWeb.StudentLive.SupportDetailPane}
+      id={"support-pane-#{@support_id}"}
+      support_id={@support_id}
+      actor={@outer.current_user}
+      tenant={@outer.current_school.id}
+    />
+    """
+  end
+
+  defp about_tab_pane(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md">
+      <p class="text-sm text-azure italic">
+        About the Student lands in Phase 11/14 (Xello + ScholarCentric integration).
+      </p>
+    </div>
+    """
+  end
+
+  defp profile_pane(assigns) do
+    ~H"""
+    <div class="space-y-md">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+        <div class="md:col-span-2 space-y-md">
+          <.recent_high_fives_panel
+            high_fives={@outer.recent_high_fives}
+            has_more?={@outer.has_more_high_fives?}
+            current_user={@outer.current_user}
+          />
+          <.key_indicators_panel student={@outer.student} />
+
+          <.team_members_panel
+            memberships={@outer.student.team_memberships || []}
+            student={@outer.student}
+          />
+
+          <.notes_panel
+            notes={@outer.notes}
+            composer_form={@outer.note_composer_form}
+            current_user={@outer.current_user}
+            edit_note_id={@outer.edit_note_id}
+          />
+          <.forms_surveys_panel assignments={@outer.survey_assignments} />
+        </div>
+
+        <div class="space-y-md">
+          <.profile_card student={@outer.student} />
+
+          <.strengths_panel strengths={@outer.strengths} />
+
+          <.key_connections_panel connections={@outer.student.key_connections || []} />
+
+          <.flags_panel flags={@outer.flags} />
+
+          <.actions_panel
+            actions={@outer.actions}
+            has_completed?={@outer.has_completed_actions?}
+          />
+
+          <.supports_panel supports={@outer.supports} />
+
+          <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+            <h2 class="text-sm font-semibold text-abbey">Status</h2>
+            <.live_component
+              module={IntellisparkWeb.StudentLive.InlineStatusEditor}
+              id="inline-status-editor"
+              student={@outer.student}
+              statuses={@outer.statuses}
+              actor={@outer.current_user}
+            />
+          </div>
+
+          <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+            <h2 class="text-sm font-semibold text-abbey">Tags</h2>
+            <.live_component
+              module={IntellisparkWeb.StudentLive.InlineTagEditor}
+              id="inline-tag-editor"
+              student={@outer.student}
+              tags={@outer.tags}
+              actor={@outer.current_user}
+            />
+          </div>
+        </div>
+      </div>
+
+      <.activity_card timeline={@outer.timeline} />
+    </div>
     """
   end
 
@@ -1468,7 +1532,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
         <li
           :for={flag <- @flags}
           id={"flag-#{flag.id}"}
-          phx-click="open_flag_sheet"
+          phx-click="open_tab"
+          phx-value-kind="flag"
           phx-value-id={flag.id}
           class="cursor-pointer flex items-start gap-sm p-xs rounded hover:bg-whitesmoke"
         >
@@ -1625,7 +1690,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
         <li
           :for={s <- @supports}
           id={"support-#{s.id}"}
-          phx-click="open_support_sheet"
+          phx-click="open_tab"
+          phx-value-kind="support"
           phx-value-id={s.id}
           class="cursor-pointer p-xs rounded hover:bg-whitesmoke space-y-0.5"
         >
