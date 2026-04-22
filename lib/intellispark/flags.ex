@@ -37,7 +37,7 @@ defmodule Intellispark.Flags do
       define :assign_flag, action: :assign, args: [:assignee_ids]
       define :move_flag_to_review, action: :move_to_review
       define :set_flag_followup, action: :set_followup, args: [:followup_at]
-      define :close_flag, action: :close_with_resolution, args: [:resolution_note]
+      define :close_flag, action: :close_with_resolution
       define :auto_close_flag, action: :auto_close
       define :reopen_flag, action: :reopen
     end

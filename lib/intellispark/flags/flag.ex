@@ -170,10 +170,12 @@ defmodule Intellispark.Flags.Flag do
     end
 
     update :close_with_resolution do
-      argument :resolution_note, :string, allow_nil?: false
+      argument :resolution_note, :string, allow_nil?: true, default: ""
+      argument :followup_at, :date, allow_nil?: true, default: nil
       require_atomic? false
 
       change set_attribute(:resolution_note, arg(:resolution_note))
+      change Intellispark.Flags.Changes.MaybeSetFollowup
       change Intellispark.Flags.Changes.StampClosedBy
       change transition_state(:closed)
     end
