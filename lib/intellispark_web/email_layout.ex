@@ -4,11 +4,14 @@ defmodule IntellisparkWeb.EmailLayout do
   email clients strip <style> blocks and external stylesheets.
   """
 
-  @logo_url "https://intellispark.example.com/images/logo-150.png"
   @footer_company """
   1390 Chain Bridge Road · Suite 10071 · McLean, VA 22101 USA<br>
   +1 703-397-8700 · <a href="https://intellispark.example.com" style="color:#ffffff;text-decoration:underline;">intellispark.com</a>
   """
+
+  defp logo_url do
+    IntellisparkWeb.Endpoint.url() <> "/images/logo-150.png"
+  end
 
   @spec wrap(keyword) :: String.t()
   def wrap(opts) do
@@ -32,7 +35,7 @@ defmodule IntellisparkWeb.EmailLayout do
         <tr><td align="center">
           <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
             <tr><td align="center" style="padding:0 0 24px 0;">
-              <img src="#{@logo_url}" alt="Intellispark" width="180" style="display:block;border:0;outline:none;text-decoration:none;" />
+              <img src="#{logo_url()}" alt="Intellispark" width="180" style="display:block;border:0;outline:none;text-decoration:none;" />
             </td></tr>
           </table>
 

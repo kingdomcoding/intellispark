@@ -158,10 +158,19 @@ defmodule IntellisparkWeb.Layouts do
         </div>
 
         <.link
+          navigate={~p"/me/email-preferences"}
+          role="menuitem"
+          class="block px-md py-sm text-sm text-abbey hover:bg-whitesmoke"
+        >
+          <span class="hero-envelope-mini size-4 align-middle mr-1"></span>
+          Email preferences
+        </.link>
+
+        <.link
           href={~p"/sign-out"}
           method="delete"
           role="menuitem"
-          class="block px-md py-sm text-sm text-abbey hover:bg-whitesmoke"
+          class="block px-md py-sm text-sm text-abbey hover:bg-whitesmoke border-t border-abbey/10"
         >
           Sign out
         </.link>
