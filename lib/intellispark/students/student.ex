@@ -150,6 +150,46 @@ defmodule Intellispark.Students.Student do
     calculate :age_in_years,
               :integer,
               expr(fragment("EXTRACT(YEAR FROM age(?))::int", date_of_birth))
+
+    calculate :belonging, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :belonging}
+
+    calculate :connection, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :connection}
+
+    calculate :decision_making, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :decision_making}
+
+    calculate :engagement, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :engagement}
+
+    calculate :readiness, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :readiness}
+
+    calculate :relationship_skills, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :relationship_skills}
+
+    calculate :relationships_adult, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :relationships_adult}
+
+    calculate :relationships_networks, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel,
+               dimension: :relationships_networks}
+
+    calculate :relationships_peer, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :relationships_peer}
+
+    calculate :self_awareness, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :self_awareness}
+
+    calculate :self_management, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :self_management}
+
+    calculate :social_awareness, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :social_awareness}
+
+    calculate :well_being, :atom,
+              {Intellispark.Students.Calculations.IndicatorLevel, dimension: :well_being}
   end
 
   actions do
