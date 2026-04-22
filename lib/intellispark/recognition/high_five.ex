@@ -96,6 +96,7 @@ defmodule Intellispark.Recognition.HighFive do
       change Intellispark.Recognition.Changes.StampSender
       change Intellispark.Recognition.Changes.GenerateToken
       change Intellispark.Recognition.Changes.ResolveRecipientEmail
+      change Intellispark.Recognition.Changes.SanitizeBody
     end
 
     # Read-by-token for the public view. Does not set_tenant — the

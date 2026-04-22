@@ -83,6 +83,7 @@ defmodule Intellispark.MixProject do
       {:cloak, "~> 1.1"},
       {:cloak_ecto, "~> 1.3"},
       {:hammer, "~> 7.3"},
+      {:html_sanitize_ex, "~> 1.4"},
 
       # Observability (wired up in Phase 17; installed now so nothing is missing later)
       {:opentelemetry, "~> 1.5"},
