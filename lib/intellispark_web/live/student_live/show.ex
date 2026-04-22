@@ -1059,6 +1059,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
         actor={@current_user}
         templates={@survey_templates}
       />
+
+      <.live_component
+        :if={@new_team_member_open?}
+        module={IntellisparkWeb.StudentLive.NewTeamMemberModal}
+        id="new-team-member-modal"
+        student={@student}
+        actor={@current_user}
+        staff={@staff}
+      />
     </Layouts.app>
     """
   end
