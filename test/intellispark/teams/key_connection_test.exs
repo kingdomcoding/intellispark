@@ -34,7 +34,7 @@ defmodule Intellispark.Teams.KeyConnectionTest do
         |> Ash.Query.set_tenant(school.id)
         |> Ash.read!(authorize?: false)
 
-      assert length(versions) >= 1
+      assert versions != []
     end
 
     test "supports :self_reported source", %{school: school, admin: admin} do

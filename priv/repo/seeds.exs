@@ -879,7 +879,9 @@ existing_connection =
 
 if is_nil(existing_connection) do
   {:ok, _} =
-    Teams.create_key_connection(marcus.id, curtis.id,
+    Teams.create_key_connection(
+      marcus.id,
+      curtis.id,
       %{note: "self-reported on Insightfull", source: :self_reported},
       actor: admin,
       tenant: school.id,

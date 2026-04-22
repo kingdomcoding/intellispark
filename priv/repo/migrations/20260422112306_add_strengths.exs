@@ -67,7 +67,9 @@ defmodule Intellispark.Repo.Migrations.AddStrengths do
           name: "strengths_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :student_id,
@@ -76,7 +78,9 @@ defmodule Intellispark.Repo.Migrations.AddStrengths do
           name: "strengths_student_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :added_by_id,

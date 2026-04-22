@@ -77,7 +77,9 @@ defmodule Intellispark.Repo.Migrations.AddTeamMemberships do
           name: "team_memberships_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :student_id,
@@ -86,7 +88,9 @@ defmodule Intellispark.Repo.Migrations.AddTeamMemberships do
           name: "team_memberships_student_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :user_id,
@@ -95,7 +99,9 @@ defmodule Intellispark.Repo.Migrations.AddTeamMemberships do
           name: "team_memberships_user_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :added_by_id,
