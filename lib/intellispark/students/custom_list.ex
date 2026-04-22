@@ -79,7 +79,7 @@ defmodule Intellispark.Students.CustomList do
     end
 
     policy action_type([:update, :destroy]) do
-      authorize_if expr(owner_id == ^actor(:id))
+      authorize_if IntellisparkWeb.Policies.OwnerOrAdminForCustomList
     end
 
     policy action(:run) do
