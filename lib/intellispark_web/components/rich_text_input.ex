@@ -18,7 +18,7 @@ defmodule IntellisparkWeb.Components.RichTextInput do
       assign_new(assigns, :id, fn -> "rt-#{normalize_id(assigns.name)}" end)
 
     ~H"""
-    <div phx-hook="RichTextEditor" id={@id} class="space-y-0" phx-update="ignore">
+    <div phx-hook="RichTextEditor" id={@id} class="space-y-0">
       <label
         :if={@label}
         class="block text-sm font-medium text-abbey mb-xs"
@@ -45,6 +45,7 @@ defmodule IntellisparkWeb.Components.RichTextInput do
           aria-multiline="true"
           aria-label={@label || @name}
           data-placeholder={@placeholder}
+          phx-update="ignore"
           class="min-h-[6rem] p-sm text-sm text-abbey focus:outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-azure/50"
         ></div>
 

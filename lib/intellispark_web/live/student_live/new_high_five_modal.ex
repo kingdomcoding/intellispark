@@ -57,7 +57,13 @@ defmodule IntellisparkWeb.StudentLive.NewHighFiveModal do
           />
 
           <.input field={@form[:title]} label="Title" />
-          <.input field={@form[:body]} type="textarea" rows="4" label="Message" />
+          <IntellisparkWeb.Components.RichTextInput.rich_text_input
+            name="high_five[body]"
+            id={"high-five-body-#{@id}"}
+            value={to_string(@form[:body].value || "")}
+            label="Message"
+            placeholder="Type your message…"
+          />
 
           <.input
             field={@form[:recipient_email]}
