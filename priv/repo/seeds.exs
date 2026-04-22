@@ -107,7 +107,7 @@ admin =
     {middle_school, :admin}
   ])
 
-_teacher = ensure_user.("curtis.murphy@sandboxhigh.edu", [{school, :teacher}])
+curtis = ensure_user.("curtis.murphy@sandboxhigh.edu", [{school, :teacher}])
 
 # Seed one pending invitation so /admin has something to show on a fresh boot
 # and the accept flow has a ready-made demo URL in /dev/mailbox.
@@ -825,6 +825,62 @@ if is_nil(marcus_insightfull_assignment) do
 
   {:ok, _} =
     Assessments.assign_survey(marcus.id, insightfull.id,
+      actor: admin,
+      tenant: school.id,
+      authorize?: false
+    )
+end
+
+Logger.info("Seeding Phase 10 teams, connections, strengths…")
+
+alias Intellispark.Teams
+alias Intellispark.Teams.{KeyConnection, Strength, TeamMembership}
+
+ensure_strength = fn student, description ->
+  existing =
+    Strength
+    |> Ash.Query.filter(student_id == ^student.id and description == ^description)
+    |> Ash.Query.set_tenant(school.id)
+    |> Ash.read_one!(authorize?: false)
+
+  if is_nil(existing) do
+    {:ok, _} =
+      Teams.create_strength(student.id, description,
+        actor: admin,
+        tenant: school.id,
+        authorize?: false
+      )
+  end
+end
+
+ensure_strength.(marcus, "Creativity")
+ensure_strength.(marcus, "Relationship building")
+
+existing_team =
+  TeamMembership
+  |> Ash.Query.filter(student_id == ^marcus.id and user_id == ^curtis.id and role == :coach)
+  |> Ash.Query.set_tenant(school.id)
+  |> Ash.read_one!(authorize?: false)
+
+if is_nil(existing_team) do
+  {:ok, _} =
+    Teams.create_team_membership(marcus.id, curtis.id, :coach,
+      actor: admin,
+      tenant: school.id,
+      authorize?: false
+    )
+end
+
+existing_connection =
+  KeyConnection
+  |> Ash.Query.filter(student_id == ^marcus.id and connected_user_id == ^curtis.id)
+  |> Ash.Query.set_tenant(school.id)
+  |> Ash.read_one!(authorize?: false)
+
+if is_nil(existing_connection) do
+  {:ok, _} =
+    Teams.create_key_connection(marcus.id, curtis.id,
+      %{note: "self-reported on Insightfull", source: :self_reported},
       actor: admin,
       tenant: school.id,
       authorize?: false
