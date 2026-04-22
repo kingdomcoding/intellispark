@@ -755,6 +755,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
               has_more?={@has_more_high_fives?}
               current_user={@current_user}
             />
+            <.key_indicators_panel student={@student} />
             <.notes_panel
               notes={@notes}
               composer_form={@note_composer_form}
@@ -1623,4 +1624,53 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp assignment_pill_label(:assigned), do: "Not started"
   defp assignment_pill_label(:in_progress), do: "In progress"
   defp assignment_pill_label(:expired), do: "Expired"
+
+  attr :student, :map, required: true
+
+  defp key_indicators_panel(assigns) do
+    dimensions = Intellispark.Indicators.Dimension.all()
+    half = div(length(dimensions) + 1, 2)
+    {left, right} = Enum.split(dimensions, half)
+    assigns = assign(assigns, left: left, right: right)
+
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <h2 class="text-sm font-semibold text-abbey">
+        Key SEL &amp; Well-Being Indicators
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-md gap-y-xs">
+        <div class="space-y-xs">
+          <.indicator_row :for={dim <- @left} student={@student} dimension={dim} />
+        </div>
+        <div class="space-y-xs">
+          <.indicator_row :for={dim <- @right} student={@student} dimension={dim} />
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  attr :student, :map, required: true
+  attr :dimension, :atom, required: true
+
+  defp indicator_row(assigns) do
+    level = Map.get(assigns.student, assigns.dimension)
+    assigns = assign(assigns, level: level)
+
+    ~H"""
+    <div class="flex items-center gap-sm">
+      <.level_indicator :if={@level} level={@level} />
+      <span
+        :if={is_nil(@level)}
+        class="inline-flex items-center rounded-pill border border-abbey/20 bg-whitesmoke px-2 py-0.5 text-[0.6875rem] font-medium text-azure"
+      >
+        —
+      </span>
+      <span class="text-sm text-abbey">
+        {Intellispark.Indicators.Dimension.humanize(@dimension)}
+      </span>
+    </div>
+    """
+  end
 end
