@@ -39,6 +39,21 @@ defmodule IntellisparkWeb.StudentLive.Show do
           Intellispark.PubSub,
           "indicator_scores:student:#{student.id}"
         )
+
+        Phoenix.PubSub.subscribe(
+          Intellispark.PubSub,
+          "team_memberships:student:#{student.id}"
+        )
+
+        Phoenix.PubSub.subscribe(
+          Intellispark.PubSub,
+          "key_connections:student:#{student.id}"
+        )
+
+        Phoenix.PubSub.subscribe(
+          Intellispark.PubSub,
+          "strengths:student:#{student.id}"
+        )
       end
 
       {:ok,
@@ -75,7 +90,11 @@ defmodule IntellisparkWeb.StudentLive.Show do
          active_support_id: nil,
          support_detail_open?: false,
          new_high_five_open?: false,
-         previous_high_fives_open?: false
+         previous_high_fives_open?: false,
+         strengths: load_strengths_for(student, actor, school),
+         new_team_member_open?: false,
+         new_connection_open?: false,
+         new_strength_open?: false
        )
        |> allow_upload(:photo,
          accept: ~w(.png .jpg .jpeg .webp),
@@ -184,6 +203,30 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   def handle_event("close_new_survey_modal", _params, socket) do
     {:noreply, assign(socket, new_survey_open?: false)}
+  end
+
+  def handle_event("open_new_team_member_modal", _params, socket) do
+    {:noreply, assign(socket, new_team_member_open?: true)}
+  end
+
+  def handle_event("close_new_team_member_modal", _params, socket) do
+    {:noreply, assign(socket, new_team_member_open?: false)}
+  end
+
+  def handle_event("open_new_connection_modal", _params, socket) do
+    {:noreply, assign(socket, new_connection_open?: true)}
+  end
+
+  def handle_event("close_new_connection_modal", _params, socket) do
+    {:noreply, assign(socket, new_connection_open?: false)}
+  end
+
+  def handle_event("open_new_strength_modal", _params, socket) do
+    {:noreply, assign(socket, new_strength_open?: true)}
+  end
+
+  def handle_event("close_new_strength_modal", _params, socket) do
+    {:noreply, assign(socket, new_strength_open?: false)}
   end
 
   def handle_event("validate_note", %{"note" => params}, socket) do
@@ -443,6 +486,42 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, reload_indicators(socket)}
   end
 
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "team_memberships:" <> _}, socket) do
+    {:noreply, reload_team(socket)}
+  end
+
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "key_connections:" <> _}, socket) do
+    {:noreply, reload_key_connections(socket)}
+  end
+
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "strengths:" <> _}, socket) do
+    {:noreply, reload_strengths(socket)}
+  end
+
+  def handle_info({IntellisparkWeb.StudentLive.NewTeamMemberModal, :team_member_added}, socket) do
+    {:noreply,
+     socket
+     |> assign(new_team_member_open?: false)
+     |> put_flash(:info, "Team member added.")
+     |> reload_team()}
+  end
+
+  def handle_info({IntellisparkWeb.StudentLive.NewConnectionModal, :connection_added}, socket) do
+    {:noreply,
+     socket
+     |> assign(new_connection_open?: false)
+     |> put_flash(:info, "Connection added.")
+     |> reload_key_connections()}
+  end
+
+  def handle_info({IntellisparkWeb.StudentLive.NewStrengthModal, :strength_added}, socket) do
+    {:noreply,
+     socket
+     |> assign(new_strength_open?: false)
+     |> put_flash(:info, "Strength added.")
+     |> reload_strengths()}
+  end
+
   def handle_info(%Ash.Notifier.Notification{}, socket) do
     {:noreply, reload_student(socket)}
   end
@@ -524,6 +603,43 @@ defmodule IntellisparkWeb.StudentLive.Show do
       )
 
     assign(socket, student: reloaded, timeline: load_timeline(student, school))
+  end
+
+  defp reload_team(socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    reloaded =
+      Ash.load!(
+        student,
+        [team_memberships: [:user, :added_by]],
+        actor: actor,
+        tenant: school.id
+      )
+
+    assign(socket, student: reloaded, timeline: load_timeline(student, school))
+  end
+
+  defp reload_key_connections(socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    reloaded =
+      Ash.load!(
+        student,
+        [key_connections: [:connected_user]],
+        actor: actor,
+        tenant: school.id
+      )
+
+    assign(socket, student: reloaded, timeline: load_timeline(student, school))
+  end
+
+  defp reload_strengths(socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    assign(socket,
+      strengths: load_strengths_for(student, actor, school),
+      timeline: load_timeline(student, school)
+    )
   end
 
   defp load_staff(school) do
@@ -721,11 +837,21 @@ defmodule IntellisparkWeb.StudentLive.Show do
         :open_flags_count,
         :open_supports_count,
         :recent_high_fives_count,
-        tags: [:id, :name, :color]
+        tags: [:id, :name, :color],
+        team_memberships: [:user, :added_by],
+        key_connections: [:connected_user]
       ] ++ Intellispark.Indicators.Dimension.all(),
       actor: actor,
       tenant: school.id
     )
+  end
+
+  defp load_strengths_for(student, actor, school) do
+    Intellispark.Teams.Strength
+    |> Ash.Query.filter(student_id == ^student.id)
+    |> Ash.Query.sort(:display_order)
+    |> Ash.Query.set_tenant(school.id)
+    |> Ash.read!(actor: actor)
   end
 
   defp resolve_breadcrumb("/students", _actor, _school),
@@ -764,6 +890,17 @@ defmodule IntellisparkWeb.StudentLive.Show do
               current_user={@current_user}
             />
             <.key_indicators_panel student={@student} />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+              <.strengths_panel strengths={@strengths} />
+              <.key_connections_panel connections={@student.key_connections || []} />
+            </div>
+
+            <.team_members_panel
+              memberships={@student.team_memberships || []}
+              student={@student}
+            />
+
             <.notes_panel
               notes={@notes}
               composer_form={@note_composer_form}
@@ -1687,6 +1824,152 @@ defmodule IntellisparkWeb.StudentLive.Show do
       <span class="text-sm text-abbey">
         {Intellispark.Indicators.Dimension.humanize(@dimension)}
       </span>
+    </div>
+    """
+  end
+
+  attr :memberships, :list, required: true
+  attr :student, :map, required: true
+
+  defp team_members_panel(assigns) do
+    grouped = Enum.group_by(assigns.memberships, &team_group_key(&1.role))
+    assigns = assign(assigns, grouped: grouped, count: length(assigns.memberships))
+
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-md">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-abbey">Team members ({@count})</h2>
+        <button
+          type="button"
+          phx-click="open_new_team_member_modal"
+          class="text-xs text-brand underline hover:text-brand-700"
+        >
+          + Team member
+        </button>
+      </div>
+
+      <.role_group
+        title="Current Teachers"
+        empty="No course roster information added."
+        memberships={@grouped[:teachers] || []}
+      />
+      <.role_group
+        title="Family"
+        empty="No family members added."
+        memberships={@grouped[:family] || []}
+      />
+      <.role_group
+        title="Other Staff"
+        empty="No other staff added."
+        memberships={@grouped[:other] || []}
+      />
+    </div>
+    """
+  end
+
+  defp team_group_key(:teacher), do: :teachers
+  defp team_group_key(:family), do: :family
+  defp team_group_key(_), do: :other
+
+  attr :title, :string, required: true
+  attr :empty, :string, required: true
+  attr :memberships, :list, required: true
+
+  defp role_group(assigns) do
+    ~H"""
+    <div class="space-y-xs">
+      <h3 class="text-xs uppercase text-azure tracking-wide">{@title}</h3>
+
+      <p :if={@memberships == []} class="text-sm text-azure italic">{@empty}</p>
+
+      <ul :if={@memberships != []} class="space-y-xs">
+        <li :for={m <- @memberships} class="flex items-center gap-sm">
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-brand-700 text-xs font-medium">
+            {user_initials(m.user)}
+          </span>
+          <div class="flex-1">
+            <p class="text-sm text-abbey">
+              {m.user.first_name} {m.user.last_name}
+            </p>
+            <p class="text-xs text-azure">{humanize_team_role(m.role)}</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+    """
+  end
+
+  defp user_initials(%{first_name: first, last_name: last}) do
+    String.upcase(String.first(first || "?")) <>
+      String.upcase(String.first(last || "?"))
+  end
+
+  defp humanize_team_role(:teacher), do: "Teacher"
+  defp humanize_team_role(:coach), do: "Coach"
+  defp humanize_team_role(:counselor), do: "Counselor"
+  defp humanize_team_role(:social_worker), do: "Social Worker"
+  defp humanize_team_role(:clinician), do: "Clinician"
+  defp humanize_team_role(:family), do: "Family member"
+  defp humanize_team_role(:community_partner), do: "Community partner"
+  defp humanize_team_role(:other), do: "Other"
+
+  attr :connections, :list, required: true
+
+  defp key_connections_panel(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-abbey">
+          Key connections ({length(@connections)})
+        </h2>
+        <button
+          type="button"
+          phx-click="open_new_connection_modal"
+          class="text-xs text-brand underline hover:text-brand-700"
+        >
+          + Connection
+        </button>
+      </div>
+
+      <p :if={@connections == []} class="text-sm text-azure italic">
+        No connections added yet.
+      </p>
+
+      <ul :if={@connections != []} class="space-y-xs">
+        <li :for={c <- @connections}>
+          <p class="text-sm font-medium text-abbey">
+            {c.connected_user.first_name} {c.connected_user.last_name}
+          </p>
+          <p :if={c.note} class="text-xs text-azure italic">({c.note})</p>
+        </li>
+      </ul>
+    </div>
+    """
+  end
+
+  attr :strengths, :list, required: true
+
+  defp strengths_panel(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-abbey">Strengths</h2>
+        <button
+          type="button"
+          phx-click="open_new_strength_modal"
+          class="text-xs text-brand underline hover:text-brand-700"
+        >
+          + Strength
+        </button>
+      </div>
+
+      <p :if={@strengths == []} class="text-sm text-azure italic">
+        No strengths recorded yet.
+      </p>
+
+      <ul :if={@strengths != []} class="list-disc pl-lg space-y-xs text-sm text-abbey">
+        <li :for={s <- @strengths}>{s.description}</li>
+      </ul>
     </div>
     """
   end
