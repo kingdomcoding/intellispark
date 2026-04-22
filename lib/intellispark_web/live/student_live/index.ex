@@ -395,7 +395,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
 
   defp empty_filter_spec?(%FilterSpec{} = spec) do
     spec.tag_ids == [] and spec.status_ids == [] and spec.grade_levels == [] and
-      spec.enrollment_statuses == [] and (spec.name_contains in [nil, ""]) and
+      spec.enrollment_statuses == [] and spec.name_contains in [nil, ""] and
       not spec.no_high_five_in_30_days and not spec.has_open_survey_assignment and
       no_dimension_filters?(spec)
   end
