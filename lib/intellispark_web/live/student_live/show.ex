@@ -92,6 +92,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
          active_support_id: nil,
          support_detail_open?: false,
          new_high_five_open?: false,
+         resend_high_five_open?: false,
+         active_resend_high_five_id: nil,
          previous_high_fives_open?: false,
          strengths: load_strengths_for(student, actor, school),
          new_team_member_open?: false,
@@ -243,6 +245,22 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   def handle_event("close_new_high_five_modal", _params, socket) do
     {:noreply, assign(socket, new_high_five_open?: false)}
+  end
+
+  def handle_event("open_resend_high_five_modal", %{"id" => id}, socket) do
+    {:noreply,
+     assign(socket,
+       resend_high_five_open?: true,
+       active_resend_high_five_id: id
+     )}
+  end
+
+  def handle_event("close_resend_high_five_modal", _params, socket) do
+    {:noreply,
+     assign(socket,
+       resend_high_five_open?: false,
+       active_resend_high_five_id: nil
+     )}
   end
 
   def handle_event("open_previous_high_fives", _params, socket) do
@@ -499,6 +517,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
      socket
      |> assign(new_high_five_open?: false)
      |> put_flash(:info, "High 5 sent.")
+     |> reload_high_fives()}
+  end
+
+  def handle_info({IntellisparkWeb.StudentLive.NewHighFiveModal, :high_five_resent}, socket) do
+    {:noreply,
+     socket
+     |> assign(resend_high_five_open?: false, active_resend_high_five_id: nil)
+     |> put_flash(:info, "High 5 re-sent.")
      |> reload_high_fives()}
   end
 
@@ -767,6 +793,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
     )
     |> to_form()
   end
+
+  defp find_high_five(list, id), do: Enum.find(list, &(&1.id == id))
 
   defp load_recent_high_fives(student, actor, school) do
     HighFive
@@ -1063,6 +1091,19 @@ defmodule IntellisparkWeb.StudentLive.Show do
         :if={@new_high_five_open?}
         module={IntellisparkWeb.StudentLive.NewHighFiveModal}
         id="new-high-five-modal"
+        mode={:create}
+        student={@student}
+        actor={@current_user}
+        templates={@templates}
+        error_message={nil}
+      />
+
+      <.live_component
+        :if={@resend_high_five_open? and @active_resend_high_five_id}
+        module={IntellisparkWeb.StudentLive.NewHighFiveModal}
+        id={"resend-high-five-#{@active_resend_high_five_id}"}
+        mode={:resend}
+        high_five={find_high_five(@recent_high_fives, @active_resend_high_five_id)}
         student={@student}
         actor={@current_user}
         templates={@templates}
@@ -1880,11 +1921,24 @@ defmodule IntellisparkWeb.StudentLive.Show do
           id={"high-five-#{h.id}"}
           class="rounded-card p-sm bg-status-resolved border border-status-resolved-border/40 space-y-0.5"
         >
-          <p class="text-sm font-semibold text-abbey">{h.title}</p>
-          <p class="text-sm text-abbey whitespace-pre-line">{h.body}</p>
+          <div class="flex items-start justify-between gap-sm">
+            <p class="text-sm font-semibold text-abbey flex-1">{h.title}</p>
+            <button
+              type="button"
+              phx-click="open_resend_high_five_modal"
+              phx-value-id={h.id}
+              aria-label="Re-send this High 5"
+              title="Re-send"
+              class="text-azure hover:text-brand p-xs rounded"
+            >
+              <span class="hero-arrow-path size-4"></span>
+            </button>
+          </div>
+          <div class="text-sm text-abbey">{raw(h.body)}</div>
           <p class="text-xs text-azure pt-xs">
             Sent by <strong>{h.sent_by.email}</strong>
             · {relative_time(h.sent_at)} · viewed {h.view_count} time<span :if={h.view_count != 1}>s</span>
+            <span :if={h.resent_at}>· re-sent {relative_time(h.resent_at)}</span>
           </p>
         </li>
       </ul>
