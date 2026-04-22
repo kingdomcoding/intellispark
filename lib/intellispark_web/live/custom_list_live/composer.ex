@@ -154,21 +154,16 @@ defmodule IntellisparkWeb.CustomListLive.Composer do
 
   defp non_empty_filters(nil), do: []
 
-  defp non_empty_filters(%_{} = spec) do
-    spec
-    |> Map.from_struct()
-    |> Enum.reject(fn
-      {_, nil} -> true
-      {_, []} -> true
-      {_, ""} -> true
-      {_, false} -> true
-      _ -> false
-    end)
-    |> Enum.sort_by(&elem(&1, 0))
-  end
+  @filter_keys ~w(tag_ids status_ids grade_levels enrollment_statuses name_contains
+                  no_high_five_in_30_days has_open_survey_assignment
+                  belonging connection decision_making engagement readiness
+                  relationship_skills relationships_adult relationships_networks
+                  relationships_peer self_awareness self_management
+                  social_awareness well_being)a
 
   defp non_empty_filters(spec) when is_map(spec) do
-    spec
+    @filter_keys
+    |> Enum.map(&{&1, Map.get(spec, &1)})
     |> Enum.reject(fn
       {_, nil} -> true
       {_, []} -> true
@@ -176,7 +171,6 @@ defmodule IntellisparkWeb.CustomListLive.Composer do
       {_, false} -> true
       _ -> false
     end)
-    |> Enum.sort_by(&elem(&1, 0))
   end
 
   defp humanize_filter_key(:tag_ids), do: "Tags"
@@ -203,8 +197,10 @@ defmodule IntellisparkWeb.CustomListLive.Composer do
   defp format_filter_value(v) when is_atom(v), do: Atom.to_string(v)
   defp format_filter_value(v), do: to_string(v)
 
-  defp filters_to_params(%_{} = spec), do: Map.from_struct(spec)
-  defp filters_to_params(spec) when is_map(spec), do: spec
+  defp filters_to_params(spec) when is_map(spec) do
+    Map.new(@filter_keys, &{&1, Map.get(spec, &1)})
+  end
+
   defp filters_to_params(_), do: %{}
 
   defp title(:create), do: "Save view as…"

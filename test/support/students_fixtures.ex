@@ -96,6 +96,34 @@ defmodule Intellispark.StudentsFixtures do
     )
   end
 
+  def register_teacher!(school), do: register_role!(school, :teacher)
+  def register_admin!(school), do: register_role!(school, :admin)
+
+  defp register_role!(school, role) do
+    email = "#{role}-#{System.unique_integer([:positive])}@sandbox.edu"
+
+    user =
+      Ash.create!(
+        Intellispark.Accounts.User,
+        %{
+          email: email,
+          password: "supersecret123",
+          password_confirmation: "supersecret123"
+        },
+        action: :register_with_password,
+        authorize?: false
+      )
+
+    {:ok, _} =
+      Ash.create(
+        Intellispark.Accounts.UserSchoolMembership,
+        %{user_id: user.id, school_id: school.id, role: role, source: :manual},
+        authorize?: false
+      )
+
+    Ash.load!(user, [school_memberships: [:school]], authorize?: false)
+  end
+
   defp register!(email, password) do
     Ash.create!(
       User,

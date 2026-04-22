@@ -5,8 +5,6 @@ defmodule IntellisparkWeb.NotesPanelTest do
   import Intellispark.StudentsFixtures
   import Intellispark.SupportFixtures
 
-  alias Intellispark.Accounts.{User, UserSchoolMembership}
-
   setup tags do
     Intellispark.DataCase.setup_sandbox(tags)
     Map.merge(%{conn: Phoenix.ConnTest.build_conn()}, setup_world())
@@ -64,33 +62,5 @@ defmodule IntellisparkWeb.NotesPanelTest do
     {:ok, _lv, html} = conn |> log_in_user(teacher) |> live(~p"/students/#{student.id}")
 
     refute html =~ "HIDDEN CLINICAL"
-  end
-
-  defp register_teacher!(school) do
-    user =
-      Ash.create!(
-        User,
-        %{
-          email: "teach-#{System.unique_integer([:positive])}@sandbox.edu",
-          password: "supersecret123",
-          password_confirmation: "supersecret123"
-        },
-        action: :register_with_password,
-        authorize?: false
-      )
-
-    {:ok, _} =
-      Ash.create(
-        UserSchoolMembership,
-        %{
-          user_id: user.id,
-          school_id: school.id,
-          role: :teacher,
-          source: :manual
-        },
-        authorize?: false
-      )
-
-    Ash.load!(user, [school_memberships: [:school]], authorize?: false)
   end
 end
