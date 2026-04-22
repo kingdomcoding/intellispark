@@ -33,9 +33,8 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailPane do
            flag: flag,
            timeline: load_flag_timeline(flag, tenant),
            followup_form_open?: false,
-           close_form_open?: false,
-           close_note: "",
-           followup_date: nil
+           followup_date: nil,
+           close_date: ""
          )}
 
       _ ->
@@ -117,24 +116,15 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailPane do
 
         <div class="flex flex-wrap gap-xs pt-sm border-t border-abbey/10">
           <.transition_button
-            :if={@flag.status in [:open, :assigned] and not @close_form_open?}
+            :if={@flag.status in [:open, :assigned]}
             label="Move to Review"
             event="move_to_review"
             target={@myself}
           />
           <.transition_button
-            :if={@flag.status in [:open, :assigned, :under_review] and not @close_form_open?}
+            :if={@flag.status in [:open, :assigned, :under_review]}
             label="Set follow-up"
             event="open_followup_form"
-            target={@myself}
-          />
-          <.transition_button
-            :if={
-              @flag.status in [:open, :assigned, :under_review, :pending_followup] and
-                not @close_form_open?
-            }
-            label="Close"
-            event="open_close_form"
             target={@myself}
           />
           <.transition_button
@@ -145,20 +135,30 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailPane do
           />
         </div>
 
-        <div :if={@close_form_open?} class="pt-sm border-t border-abbey/10 space-y-xs">
-          <form phx-submit="submit_close" phx-target={@myself} class="space-y-xs">
-            <label class="text-xs font-medium text-abbey">Resolution note</label>
-            <textarea
-              name="resolution_note"
-              required
-              class="w-full rounded border border-abbey/20 p-xs text-sm"
-            ><%= @close_note %></textarea>
-            <div class="flex justify-end gap-xs">
-              <.button type="button" variant={:ghost} phx-click="cancel_close" phx-target={@myself}>
-                Cancel
-              </.button>
-              <.button type="submit" variant={:primary}>Close flag</.button>
-            </div>
+        <div
+          :if={@flag.status in [:open, :assigned, :under_review, :pending_followup]}
+          class="flex items-center gap-sm pt-sm border-t border-abbey/10"
+        >
+          <form
+            phx-submit="submit_close"
+            phx-target={@myself}
+            class="flex items-center gap-sm flex-1"
+          >
+            <label class="sr-only" for="close-date-input">Check-up date</label>
+            <input
+              type="date"
+              id="close-date-input"
+              name="followup_at"
+              placeholder="Check-up date"
+              value={@close_date}
+              class="flex-1 rounded border border-abbey/20 px-sm py-2 text-sm text-abbey placeholder:text-azure/60 focus:outline-none focus:ring-2 focus:ring-chocolate focus:border-transparent"
+            />
+            <button
+              type="submit"
+              class="inline-flex items-center bg-chocolate text-white hover:bg-chocolate/90 rounded-pill px-md py-2 text-sm font-medium"
+            >
+              Close Flag
+            </button>
           </form>
         </div>
 
@@ -225,7 +225,7 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailPane do
   end
 
   def handle_event("open_followup_form", _params, socket) do
-    {:noreply, assign(socket, followup_form_open?: true, close_form_open?: false)}
+    {:noreply, assign(socket, followup_form_open?: true)}
   end
 
   def handle_event("cancel_followup", _params, socket) do
@@ -244,28 +244,34 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailPane do
     end
   end
 
-  def handle_event("open_close_form", _params, socket) do
-    {:noreply, assign(socket, close_form_open?: true, followup_form_open?: false)}
-  end
+  def handle_event("submit_close", params, socket) do
+    followup_at = parse_followup_at(Map.get(params, "followup_at", ""))
 
-  def handle_event("cancel_close", _params, socket) do
-    {:noreply, assign(socket, close_form_open?: false)}
-  end
-
-  def handle_event("submit_close", %{"resolution_note" => note}, socket)
-      when is_binary(note) and note != "" do
     handle_transition(socket, fn flag, actor, tenant ->
-      Flags.close_flag(flag, note, actor: actor, tenant: tenant)
+      Flags.close_flag(flag, %{resolution_note: "", followup_at: followup_at},
+        actor: actor,
+        tenant: tenant
+      )
     end)
   end
-
-  def handle_event("submit_close", _, socket), do: {:noreply, socket}
 
   def handle_event("reopen_flag", _params, socket) do
     handle_transition(socket, fn flag, actor, tenant ->
       Flags.reopen_flag(flag, actor: actor, tenant: tenant)
     end)
   end
+
+  defp parse_followup_at(""), do: nil
+  defp parse_followup_at(nil), do: nil
+
+  defp parse_followup_at(raw) when is_binary(raw) do
+    case Date.from_iso8601(raw) do
+      {:ok, date} -> date
+      _ -> nil
+    end
+  end
+
+  defp parse_followup_at(_), do: nil
 
   defp handle_transition(socket, fun) do
     %{flag: flag, actor: actor, tenant: tenant} = socket.assigns
@@ -287,7 +293,6 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailPane do
          assign(socket,
            flag: reloaded,
            timeline: load_flag_timeline(reloaded, tenant),
-           close_form_open?: false,
            followup_form_open?: false
          )}
 
