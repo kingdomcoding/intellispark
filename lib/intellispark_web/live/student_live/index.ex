@@ -183,6 +183,31 @@ defmodule IntellisparkWeb.StudentLive.Index do
      |> assign_students()}
   end
 
+  def handle_info(
+        {IntellisparkWeb.StudentLive.TeamBulkModal, {:bulk_success, n}},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(active_modal: nil, selected: MapSet.new())
+     |> put_flash(:info, "Team member added to #{n} students.")
+     |> assign_students()}
+  end
+
+  def handle_info(
+        {IntellisparkWeb.StudentLive.TeamBulkModal, {:bulk_partial, ok, failed}},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(active_modal: nil, selected: MapSet.new())
+     |> put_flash(
+       :warning,
+       "#{ok} added. #{failed} failed (likely already on team)."
+     )
+     |> assign_students()}
+  end
+
   def handle_info(_other, socket), do: {:noreply, socket}
 
   defp assign_students(socket) do
@@ -368,6 +393,15 @@ defmodule IntellisparkWeb.StudentLive.Index do
           :if={@active_modal == "forms"}
           module={IntellisparkWeb.StudentLive.SurveyBulkModal}
           id="bulk-forms"
+          actor={@current_user}
+          current_school={@current_school}
+          selected_student_ids={MapSet.to_list(@selected)}
+        />
+
+        <.live_component
+          :if={@active_modal == "team"}
+          module={IntellisparkWeb.StudentLive.TeamBulkModal}
+          id="bulk-team"
           actor={@current_user}
           current_school={@current_school}
           selected_student_ids={MapSet.to_list(@selected)}

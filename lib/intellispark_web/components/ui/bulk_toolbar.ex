@@ -54,8 +54,7 @@ defmodule IntellisparkWeb.UI.BulkToolbar do
         action="team"
         icon="hero-user-plus"
         label="Assign team members"
-        enabled?={false}
-        coming_in="Phase 10"
+        enabled?={true}
       />
       <.bulk_icon
         action="settings"
