@@ -47,5 +47,19 @@ defmodule Intellispark.Teams do
     end
 
     resource Intellispark.Teams.KeyConnection.Version
+
+    resource Intellispark.Teams.Strength do
+      define :list_strengths, action: :read
+      define :get_strength, action: :read, get_by: [:id]
+
+      define :create_strength,
+        action: :create,
+        args: [:student_id, :description]
+
+      define :update_strength, action: :update
+      define :destroy_strength, action: :destroy
+    end
+
+    resource Intellispark.Teams.Strength.Version
   end
 end

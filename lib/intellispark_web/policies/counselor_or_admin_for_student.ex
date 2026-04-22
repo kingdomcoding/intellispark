@@ -14,14 +14,24 @@ defmodule IntellisparkWeb.Policies.CounselorOrAdminForStudent do
   def describe(_opts), do: "actor has a clinical role at this school"
 
   @impl true
-  def match?(%{school_memberships: memberships}, subject, _opts)
-      when is_list(memberships) do
-    tenant = subject.subject.tenant
+  def match?(nil, _context, _opts), do: false
 
-    Enum.any?(memberships, fn m ->
-      m.school_id == tenant and m.role in @clinical_roles
-    end)
+  def match?(actor, %{subject: subject}, _opts) do
+    tenant = extract_tenant(subject)
+
+    memberships =
+      actor
+      |> Map.get(:school_memberships, [])
+      |> List.wrap()
+
+    tenant != nil and
+      Enum.any?(memberships, fn m ->
+        m.school_id == tenant and m.role in @clinical_roles
+      end)
   end
 
-  def match?(_, _, _), do: false
+  def match?(_actor, _context, _opts), do: false
+
+  defp extract_tenant(%{tenant: tenant}), do: tenant
+  defp extract_tenant(_), do: nil
 end
