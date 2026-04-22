@@ -39,6 +39,7 @@ defmodule Intellispark.Students.Actions.RunCustomList do
     |> apply_name_contains(spec.name_contains)
     |> apply_no_high_five_in_30_days(Map.get(spec, :no_high_five_in_30_days, false))
     |> apply_has_open_survey_assignment(Map.get(spec, :has_open_survey_assignment, false))
+    |> apply_dimension_filters(spec)
   end
 
   defp apply_tag_ids(query, []), do: query
@@ -92,4 +93,19 @@ defmodule Intellispark.Students.Actions.RunCustomList do
   end
 
   defp apply_has_open_survey_assignment(query, _), do: query
+
+  defp apply_dimension_filters(query, spec) do
+    Enum.reduce(Intellispark.Indicators.Dimension.all(), query, fn dim, q ->
+      case Map.get(spec, dim) do
+        nil ->
+          q
+
+        level when level in [:low, :moderate, :high] ->
+          Ash.Query.filter(
+            q,
+            exists(indicator_scores, dimension == ^dim and level == ^level)
+          )
+      end
+    end)
+  end
 end

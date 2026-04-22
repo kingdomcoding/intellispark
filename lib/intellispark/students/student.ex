@@ -101,6 +101,7 @@ defmodule Intellispark.Students.Student do
     has_many :notes, Intellispark.Support.Note
     has_many :high_fives, Intellispark.Recognition.HighFive
     has_many :survey_assignments, Intellispark.Assessments.SurveyAssignment
+    has_many :indicator_scores, Intellispark.Indicators.IndicatorScore
   end
 
   aggregates do

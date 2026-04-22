@@ -22,6 +22,71 @@ defmodule Intellispark.Students.FilterSpec do
     attribute :name_contains, :string, public?: true
     attribute :no_high_five_in_30_days, :boolean, default: false, public?: true
     attribute :has_open_survey_assignment, :boolean, default: false, public?: true
+
+    attribute :belonging, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :connection, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :decision_making, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :engagement, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :readiness, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :relationship_skills, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :relationships_adult, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :relationships_networks, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :relationships_peer, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :self_awareness, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :self_management, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :social_awareness, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
+
+    attribute :well_being, :atom do
+      constraints one_of: [:low, :moderate, :high]
+      public? true
+    end
   end
 
   actions do
