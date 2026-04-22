@@ -162,8 +162,7 @@ defmodule IntellisparkWeb.Layouts do
           role="menuitem"
           class="block px-md py-sm text-sm text-abbey hover:bg-whitesmoke"
         >
-          <span class="hero-envelope-mini size-4 align-middle mr-1"></span>
-          Email preferences
+          <span class="hero-envelope-mini size-4 align-middle mr-1"></span> Email preferences
         </.link>
 
         <.link
