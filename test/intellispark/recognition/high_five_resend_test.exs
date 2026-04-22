@@ -31,6 +31,48 @@ defmodule Intellispark.Recognition.HighFiveResendTest do
     )
   end
 
+  test "resend with new title + body applies them",
+       %{school: school, admin: admin} do
+    student = create_student!(school)
+
+    hf =
+      send_high_five!(admin, school, student, %{
+        title: "Old",
+        body: "<p>old</p>",
+        recipient_email: "k@example.com"
+      })
+
+    {:ok, resent} =
+      Recognition.resend_high_five(
+        hf,
+        %{title: "New", body: "<p>new</p>"},
+        actor: admin,
+        tenant: school.id
+      )
+
+    assert resent.title == "New"
+    assert resent.body == "<p>new</p>"
+    assert resent.resent_at != nil
+  end
+
+  test "resend with empty params keeps existing title + body",
+       %{school: school, admin: admin} do
+    student = create_student!(school)
+
+    hf =
+      send_high_five!(admin, school, student, %{
+        title: "Keep",
+        body: "<p>keep</p>",
+        recipient_email: "k@example.com"
+      })
+
+    {:ok, resent} =
+      Recognition.resend_high_five(hf, %{}, actor: admin, tenant: school.id)
+
+    assert resent.title == "Keep"
+    assert resent.body == "<p>keep</p>"
+  end
+
   test "worker honors event_kind opt-out (recipient lookup)",
        %{school: school, admin: admin} do
     student = create_student!(school)
