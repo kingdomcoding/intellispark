@@ -140,14 +140,15 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailPane do
           class="flex items-center gap-sm pt-sm border-t border-abbey/10"
         >
           <form
+            id={"flag-close-pane-form-#{@flag.id}"}
             phx-submit="submit_close"
             phx-target={@myself}
             class="flex items-center gap-sm flex-1"
           >
-            <label class="sr-only" for="close-date-input">Check-up date</label>
+            <label class="sr-only" for={"close-date-input-#{@flag.id}"}>Check-up date</label>
             <input
               type="date"
-              id="close-date-input"
+              id={"close-date-input-#{@flag.id}"}
               name="followup_at"
               placeholder="Check-up date"
               value={@close_date}

@@ -80,11 +80,72 @@ defmodule Intellispark.Flags.FlagTest do
       flag = create_flag!(admin, school, student, type)
 
       assert {:error, _} =
-               Flags.close_flag(flag, "nope",
+               Flags.close_flag(flag, %{resolution_note: "nope"},
                  actor: admin,
                  tenant: school.id,
                  authorize?: false
                )
+    end
+
+    test "close_with_resolution accepts empty resolution_note", %{
+      school: school,
+      admin: admin
+    } do
+      student = create_student!(school, %{first_name: "Empty", last_name: "Note"})
+      type = create_flag_type!(school, %{name: "EmptyNoteType"})
+      flag = create_flag!(admin, school, student, type)
+      opened = open_flag!(flag, [admin.id], admin)
+
+      {:ok, closed} =
+        Flags.close_flag(opened, %{resolution_note: ""},
+          actor: admin,
+          tenant: school.id,
+          authorize?: false
+        )
+
+      assert closed.status == :closed
+      assert closed.resolution_note in [nil, ""]
+    end
+
+    test "close_with_resolution sets followup_at when provided", %{
+      school: school,
+      admin: admin
+    } do
+      student = create_student!(school, %{first_name: "With", last_name: "Followup"})
+      type = create_flag_type!(school, %{name: "WithFollowupType"})
+      flag = create_flag!(admin, school, student, type)
+      opened = open_flag!(flag, [admin.id], admin)
+      date = Date.utc_today() |> Date.add(7)
+
+      {:ok, closed} =
+        Flags.close_flag(opened, %{followup_at: date},
+          actor: admin,
+          tenant: school.id,
+          authorize?: false
+        )
+
+      assert closed.status == :closed
+      assert closed.followup_at == date
+    end
+
+    test "close_with_resolution ignores nil followup_at", %{
+      school: school,
+      admin: admin
+    } do
+      student = create_student!(school, %{first_name: "Nil", last_name: "Followup"})
+      type = create_flag_type!(school, %{name: "NilFollowupType"})
+      flag = create_flag!(admin, school, student, type)
+      opened = open_flag!(flag, [admin.id], admin)
+
+      {:ok, closed} =
+        Flags.close_flag(opened, %{followup_at: nil},
+          actor: admin,
+          tenant: school.id,
+          authorize?: false
+        )
+
+      assert closed.status == :closed
+      assert closed.followup_at == nil
     end
 
     test "full happy path: draft → open → assigned → closed → reopened", %{

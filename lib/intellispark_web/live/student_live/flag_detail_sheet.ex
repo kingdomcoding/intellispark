@@ -156,6 +156,7 @@ defmodule IntellisparkWeb.StudentLive.FlagDetailSheet do
           class="flex items-center gap-sm pt-sm border-t border-abbey/10"
         >
           <form
+            id={"flag-close-sheet-form-#{@flag.id}"}
             phx-submit="submit_close"
             phx-target={@myself}
             class="flex items-center gap-sm flex-1"

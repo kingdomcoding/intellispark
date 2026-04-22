@@ -46,7 +46,11 @@ defmodule Intellispark.FlagsFixtures do
 
   def close_flag!(flag, note, actor) do
     {:ok, closed} =
-      Flags.close_flag(flag, note, actor: actor, tenant: flag.school_id, authorize?: false)
+      Flags.close_flag(flag, %{resolution_note: note},
+        actor: actor,
+        tenant: flag.school_id,
+        authorize?: false
+      )
 
     closed
   end

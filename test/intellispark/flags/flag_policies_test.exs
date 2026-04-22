@@ -104,7 +104,10 @@ defmodule Intellispark.Flags.FlagPoliciesTest do
       opened = open_flag!(flag, [teacher.id], admin)
 
       {:ok, closed} =
-        Flags.close_flag(opened, "done", actor: teacher, tenant: school.id)
+        Flags.close_flag(opened, %{resolution_note: "done"},
+          actor: teacher,
+          tenant: school.id
+        )
 
       assert closed.status == :closed
     end
@@ -118,7 +121,10 @@ defmodule Intellispark.Flags.FlagPoliciesTest do
       other_teacher = user_with_role!(school, :teacher)
 
       assert {:error, _} =
-               Flags.close_flag(opened, "nope", actor: other_teacher, tenant: school.id)
+               Flags.close_flag(opened, %{resolution_note: "nope"},
+                 actor: other_teacher,
+                 tenant: school.id
+               )
     end
 
     test "counselor (non-assignee) CAN close", %{school: school, admin: admin} do
@@ -130,7 +136,10 @@ defmodule Intellispark.Flags.FlagPoliciesTest do
       counselor = user_with_role!(school, :counselor)
 
       {:ok, closed} =
-        Flags.close_flag(opened, "admin override", actor: counselor, tenant: school.id)
+        Flags.close_flag(opened, %{resolution_note: "admin override"},
+          actor: counselor,
+          tenant: school.id
+        )
 
       assert closed.status == :closed
     end
