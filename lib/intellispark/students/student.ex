@@ -102,6 +102,9 @@ defmodule Intellispark.Students.Student do
     has_many :high_fives, Intellispark.Recognition.HighFive
     has_many :survey_assignments, Intellispark.Assessments.SurveyAssignment
     has_many :indicator_scores, Intellispark.Indicators.IndicatorScore
+    has_many :team_memberships, Intellispark.Teams.TeamMembership
+    has_many :key_connections, Intellispark.Teams.KeyConnection
+    has_many :strengths, Intellispark.Teams.Strength
   end
 
   aggregates do
