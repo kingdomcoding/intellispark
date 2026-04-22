@@ -15,5 +15,19 @@ defmodule Intellispark.Indicators do
   end
 
   resources do
+    resource Intellispark.Indicators.IndicatorScore do
+      define :list_indicator_scores, action: :read
+      define :get_indicator_score, action: :read, get_by: [:id]
+
+      define :indicator_scores_for_student,
+        action: :for_student,
+        args: [:student_id]
+
+      define :upsert_indicator_score,
+        action: :create,
+        args: [:student_id, :dimension, :level, :score_value, :answered_count]
+    end
+
+    resource Intellispark.Indicators.IndicatorScore.Version
   end
 end
