@@ -13,6 +13,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   alias Intellispark.Support.{Action, Note}
   alias Intellispark.Support.Support, as: SupportPlan
   alias Intellispark.Teams.{KeyConnection, Strength, TeamMembership}
+  alias IntellisparkWeb.StudentLive.Tabs
 
   require Ash.Query
 
@@ -95,7 +96,9 @@ defmodule IntellisparkWeb.StudentLive.Show do
          strengths: load_strengths_for(student, actor, school),
          new_team_member_open?: false,
          new_connection_open?: false,
-         new_strength_open?: false
+         new_strength_open?: false,
+         active_tab: :profile,
+         open_tabs: []
        )
        |> allow_upload(:photo,
          accept: ~w(.png .jpg .jpeg .webp),
@@ -114,6 +117,94 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   @impl true
+  def handle_params(params, _uri, socket) do
+    active = Tabs.from_param(params["tab"])
+    open_tabs = ensure_open(socket.assigns.open_tabs, active)
+
+    {:noreply,
+     socket
+     |> assign(active_tab: active, open_tabs: open_tabs)
+     |> sync_legacy_sheet_assigns(active)}
+  end
+
+  defp ensure_open(open_tabs, :profile), do: open_tabs
+  defp ensure_open(open_tabs, :about), do: dedup_append(open_tabs, :about)
+  defp ensure_open(open_tabs, {:flag, _} = tab), do: dedup_append(open_tabs, tab)
+  defp ensure_open(open_tabs, {:support, _} = tab), do: dedup_append(open_tabs, tab)
+
+  defp dedup_append(list, item), do: if(item in list, do: list, else: list ++ [item])
+
+  defp push_patch_to_tab(socket, param) do
+    push_patch(socket, to: ~p"/students/#{socket.assigns.student.id}?tab=#{param}")
+  end
+
+  defp sync_legacy_sheet_assigns(socket, {:flag, id}) do
+    assign(socket, active_flag_id: id, flag_detail_open?: true)
+  end
+
+  defp sync_legacy_sheet_assigns(socket, {:support, id}) do
+    assign(socket, active_support_id: id, support_detail_open?: true)
+  end
+
+  defp sync_legacy_sheet_assigns(socket, _) do
+    assign(socket,
+      active_flag_id: nil,
+      flag_detail_open?: false,
+      active_support_id: nil,
+      support_detail_open?: false
+    )
+  end
+
+  @impl true
+  def handle_event("open_tab", %{"kind" => "flag", "id" => id}, socket) do
+    {:noreply, push_patch_to_tab(socket, "flag:#{id}")}
+  end
+
+  def handle_event("open_tab", %{"kind" => "support", "id" => id}, socket) do
+    {:noreply, push_patch_to_tab(socket, "support:#{id}")}
+  end
+
+  def handle_event("open_tab", %{"kind" => "about"}, socket) do
+    {:noreply, push_patch_to_tab(socket, "about")}
+  end
+
+  def handle_event("open_tab", _params, socket) do
+    {:noreply, push_patch_to_tab(socket, "profile")}
+  end
+
+  def handle_event("close_tab", %{"tab" => param}, socket) do
+    closing = Tabs.from_param(param)
+    remaining = Enum.reject(socket.assigns.open_tabs, &(&1 == closing))
+
+    next_active =
+      if socket.assigns.active_tab == closing, do: :profile, else: socket.assigns.active_tab
+
+    {:noreply,
+     socket
+     |> assign(open_tabs: remaining, active_tab: next_active)
+     |> push_patch_to_tab(Tabs.to_param(next_active))}
+  end
+
+  # DEPRECATED: alias for legacy sheet open — remove in Phase 4 retrofit.
+  def handle_event("open_flag_sheet", %{"id" => id}, socket) do
+    handle_event("open_tab", %{"kind" => "flag", "id" => id}, socket)
+  end
+
+  # DEPRECATED: alias for legacy sheet close — remove in Phase 4 retrofit.
+  def handle_event("close_flag_sheet", _params, socket) do
+    handle_event("close_tab", %{"tab" => "profile"}, socket)
+  end
+
+  # DEPRECATED: alias for legacy sheet open — remove in Phase 4 retrofit.
+  def handle_event("open_support_sheet", %{"id" => id}, socket) do
+    handle_event("open_tab", %{"kind" => "support", "id" => id}, socket)
+  end
+
+  # DEPRECATED: alias for legacy sheet close — remove in Phase 4 retrofit.
+  def handle_event("close_support_sheet", _params, socket) do
+    handle_event("close_tab", %{"tab" => "profile"}, socket)
+  end
+
   def handle_event("open_edit_modal", _params, socket) do
     form = build_edit_form(socket.assigns)
     {:noreply, assign(socket, edit_modal_open?: true, edit_form: form)}
@@ -129,14 +220,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   def handle_event("close_new_flag_modal", _params, socket) do
     {:noreply, assign(socket, new_flag_open?: false)}
-  end
-
-  def handle_event("open_flag_sheet", %{"id" => id}, socket) do
-    {:noreply, assign(socket, active_flag_id: id, flag_detail_open?: true)}
-  end
-
-  def handle_event("close_flag_sheet", _params, socket) do
-    {:noreply, assign(socket, flag_detail_open?: false, active_flag_id: nil)}
   end
 
   def handle_event("open_new_action_modal", _params, socket) do
@@ -172,14 +255,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   def handle_event("close_new_support_modal", _params, socket) do
     {:noreply, assign(socket, new_support_open?: false)}
-  end
-
-  def handle_event("open_support_sheet", %{"id" => id}, socket) do
-    {:noreply, assign(socket, active_support_id: id, support_detail_open?: true)}
-  end
-
-  def handle_event("close_support_sheet", _params, socket) do
-    {:noreply, assign(socket, support_detail_open?: false, active_support_id: nil)}
   end
 
   def handle_event("open_new_high_five_modal", _params, socket) do
