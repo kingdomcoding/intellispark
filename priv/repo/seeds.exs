@@ -713,13 +713,15 @@ if gtkm_created? do
     )
 end
 
-marcus_assignment =
+marcus_gtkm_assignment =
   Intellispark.Assessments.SurveyAssignment
-  |> Ash.Query.filter(student_id == ^marcus.id)
+  |> Ash.Query.filter(
+    student_id == ^marcus.id and survey_template_id == ^get_to_know_me.id
+  )
   |> Ash.Query.set_tenant(school.id)
   |> Ash.read_one!(authorize?: false)
 
-if is_nil(marcus_assignment) do
+if is_nil(marcus_gtkm_assignment) do
   get_to_know_me =
     Ash.load!(get_to_know_me, :current_version, tenant: school.id, authorize?: false)
 
