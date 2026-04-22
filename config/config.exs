@@ -5,6 +5,7 @@ config :intellispark,
   generators: [binary_id: true, timestamp_type: :utc_datetime_usec],
   ash_domains: [
     Intellispark.Accounts,
+    Intellispark.Billing,
     Intellispark.Students,
     Intellispark.Flags,
     Intellispark.Support,

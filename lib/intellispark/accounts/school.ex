@@ -25,6 +25,8 @@ defmodule Intellispark.Accounts.School do
     belongs_to :district, Intellispark.Accounts.District, allow_nil?: false
     has_many :memberships, Intellispark.Accounts.UserSchoolMembership
     has_many :terms, Intellispark.Accounts.SchoolTerm
+    has_one :subscription, Intellispark.Billing.SchoolSubscription
+    has_one :onboarding_state, Intellispark.Billing.SchoolOnboardingState
   end
 
   actions do
@@ -33,6 +35,7 @@ defmodule Intellispark.Accounts.School do
     create :create do
       primary? true
       accept [:name, :slug, :district_id]
+      change Intellispark.Accounts.Changes.SeedBillingState
     end
 
     update :update do
