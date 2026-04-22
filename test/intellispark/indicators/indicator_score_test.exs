@@ -24,9 +24,7 @@ defmodule Intellispark.Indicators.IndicatorScoreTest do
     test "two creates with same (student_id, dimension) produce one row; second wins",
          %{school: school, student: student} do
       {:ok, row1} =
-        Indicators.upsert_indicator_score(student.id, :belonging, :low, 2.0, 2,
-          tenant: school.id
-        )
+        Indicators.upsert_indicator_score(student.id, :belonging, :low, 2.0, 2, tenant: school.id)
 
       {:ok, row2} =
         Indicators.upsert_indicator_score(student.id, :belonging, :high, 4.5, 2,
@@ -75,9 +73,7 @@ defmodule Intellispark.Indicators.IndicatorScoreTest do
       other_school = add_second_school!(district, "Other Ind", "other-ind")
 
       {:ok, _} =
-        Indicators.upsert_indicator_score(student.id, :belonging, :low, 2.0, 2,
-          tenant: school.id
-        )
+        Indicators.upsert_indicator_score(student.id, :belonging, :low, 2.0, 2, tenant: school.id)
 
       rows =
         IndicatorScore
@@ -95,14 +91,10 @@ defmodule Intellispark.Indicators.IndicatorScoreTest do
       other = create_student!(school)
 
       {:ok, _} =
-        Indicators.upsert_indicator_score(student.id, :belonging, :low, 2.0, 2,
-          tenant: school.id
-        )
+        Indicators.upsert_indicator_score(student.id, :belonging, :low, 2.0, 2, tenant: school.id)
 
       {:ok, _} =
-        Indicators.upsert_indicator_score(other.id, :belonging, :high, 4.5, 2,
-          tenant: school.id
-        )
+        Indicators.upsert_indicator_score(other.id, :belonging, :high, 4.5, 2, tenant: school.id)
 
       scores =
         Indicators.indicator_scores_for_student!(student.id,
@@ -121,9 +113,7 @@ defmodule Intellispark.Indicators.IndicatorScoreTest do
       admin_loaded = Ash.load!(admin, [school_memberships: [:school]], authorize?: false)
 
       {:ok, _} =
-        Indicators.upsert_indicator_score(student.id, :belonging, :low, 2.0, 2,
-          tenant: school.id
-        )
+        Indicators.upsert_indicator_score(student.id, :belonging, :low, 2.0, 2, tenant: school.id)
 
       assert {:ok, [_row]} =
                IndicatorScore

@@ -53,7 +53,11 @@ defmodule Intellispark.IndicatorsFixtures do
     end)
 
     {:ok, published} =
-      Assessments.publish_survey_template(tmpl, actor: actor, tenant: school.id, authorize?: false)
+      Assessments.publish_survey_template(tmpl,
+        actor: actor,
+        tenant: school.id,
+        authorize?: false
+      )
 
     published
   end

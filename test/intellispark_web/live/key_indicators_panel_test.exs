@@ -20,6 +20,7 @@ defmodule IntellisparkWeb.KeyIndicatorsPanelTest do
       conn |> log_in_user(admin) |> live(~p"/students/#{student.id}")
 
     assert html =~ "Key SEL &amp; Well-Being Indicators"
+
     for dim <- Dimension.all() do
       assert html =~ Dimension.humanize(dim)
     end
@@ -38,9 +39,7 @@ defmodule IntellisparkWeb.KeyIndicatorsPanelTest do
       )
 
     {:ok, _} =
-      Indicators.upsert_indicator_score(student.id, :well_being, :high, 4.5, 2,
-        tenant: school.id
-      )
+      Indicators.upsert_indicator_score(student.id, :well_being, :high, 4.5, 2, tenant: school.id)
 
     {:ok, _lv, html} =
       conn |> log_in_user(admin) |> live(~p"/students/#{student.id}")
@@ -78,9 +77,7 @@ defmodule IntellisparkWeb.KeyIndicatorsPanelTest do
       conn |> log_in_user(admin) |> live(~p"/students/#{student.id}")
 
     {:ok, _} =
-      Indicators.upsert_indicator_score(student.id, :belonging, :high, 4.5, 2,
-        tenant: school.id
-      )
+      Indicators.upsert_indicator_score(student.id, :belonging, :high, 4.5, 2, tenant: school.id)
 
     Phoenix.PubSub.broadcast(
       Intellispark.PubSub,

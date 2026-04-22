@@ -76,7 +76,9 @@ defmodule Intellispark.Repo.Migrations.AddIndicatorScores do
           name: "indicator_scores_school_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :student_id,
@@ -85,7 +87,9 @@ defmodule Intellispark.Repo.Migrations.AddIndicatorScores do
           name: "indicator_scores_student_id_fkey",
           type: :uuid,
           prefix: "public"
-        ), null: false)
+        ),
+        null: false
+      )
 
       add(
         :source_survey_assignment_id,

@@ -715,9 +715,7 @@ end
 
 marcus_gtkm_assignment =
   Intellispark.Assessments.SurveyAssignment
-  |> Ash.Query.filter(
-    student_id == ^marcus.id and survey_template_id == ^get_to_know_me.id
-  )
+  |> Ash.Query.filter(student_id == ^marcus.id and survey_template_id == ^get_to_know_me.id)
   |> Ash.Query.set_tenant(school.id)
   |> Ash.read_one!(authorize?: false)
 
@@ -817,9 +815,7 @@ end
 
 marcus_insightfull_assignment =
   Intellispark.Assessments.SurveyAssignment
-  |> Ash.Query.filter(
-    student_id == ^marcus.id and survey_template_id == ^insightfull.id
-  )
+  |> Ash.Query.filter(student_id == ^marcus.id and survey_template_id == ^insightfull.id)
   |> Ash.Query.set_tenant(school.id)
   |> Ash.read_one!(authorize?: false)
 

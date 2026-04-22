@@ -65,7 +65,9 @@ defmodule Intellispark.Indicators.ObanTest do
         )
 
       {:ok, _} =
-        Assessments.save_survey_progress(assignment, hd_question_id(published, school.id),
+        Assessments.save_survey_progress(
+          assignment,
+          hd_question_id(published, school.id),
           "anything",
           nil,
           tenant: school.id,

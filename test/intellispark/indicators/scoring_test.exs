@@ -195,8 +195,10 @@ defmodule Intellispark.Indicators.ScoringTest do
         :high -> 2
       end
 
-      check all a <- float(min: 1.0, max: 5.0),
-                b <- float(min: 1.0, max: 5.0) do
+      check all(
+              a <- float(min: 1.0, max: 5.0),
+              b <- float(min: 1.0, max: 5.0)
+            ) do
         [lo, hi] = Enum.sort([a, b])
         assert level_order.(Scoring.bucket(lo)) <= level_order.(Scoring.bucket(hi))
       end
@@ -209,7 +211,7 @@ defmodule Intellispark.Indicators.ScoringTest do
     } do
       template = insightfull_template!(school, admin, items_per_dimension: 1)
 
-      check all n <- integer(1..5), max_runs: 5 do
+      check all(n <- integer(1..5), max_runs: 5) do
         assignment = submit_all!(admin, school, student, template, n)
         :ok = Indicators.compute_for_assignment(assignment.id, school.id)
 

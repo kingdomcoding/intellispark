@@ -87,9 +87,14 @@ defmodule Intellispark.Indicators.Scoring do
 
   defp load_assignment(id, school_id) when is_binary(school_id) do
     case Ash.get(SurveyAssignment, id, tenant: school_id, authorize?: false) do
-      {:ok, a} -> {:ok, a}
-      {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{} | _]}} -> {:error, :assignment_not_found}
-      err -> err
+      {:ok, a} ->
+        {:ok, a}
+
+      {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{} | _]}} ->
+        {:error, :assignment_not_found}
+
+      err ->
+        err
     end
   end
 
