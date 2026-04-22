@@ -523,7 +523,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
         tenant: school.id
       )
 
-    assign(socket, student: reloaded)
+    assign(socket, student: reloaded, timeline: load_timeline(student, school))
   end
 
   defp load_staff(school) do
@@ -692,12 +692,20 @@ defmodule IntellisparkWeb.StudentLive.Show do
       |> Ash.read!(authorize?: false)
       |> Enum.map(&Map.put(&1, :__kind__, :survey_event))
 
+    indicator_versions =
+      Intellispark.Indicators.IndicatorScore.Version
+      |> Ash.Query.filter(student_id == ^student.id)
+      |> Ash.Query.set_tenant(school.id)
+      |> Ash.read!(authorize?: false)
+      |> Enum.map(&Map.put(&1, :__kind__, :indicator_event))
+
     (student_versions ++
        tag_versions ++
        status_versions ++
        note_versions ++
        high_five_versions ++
-       survey_versions)
+       survey_versions ++
+       indicator_versions)
     |> Enum.sort_by(& &1.version_inserted_at, {:desc, DateTime})
     |> Enum.take(20)
   end
@@ -944,6 +952,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp icon_for(:note_event), do: "hero-document-text"
   defp icon_for(:recognition_event), do: "hero-hand-raised"
   defp icon_for(:survey_event), do: "hero-clipboard-document"
+  defp icon_for(:indicator_event), do: "hero-chart-bar"
 
   defp summarise(%{__kind__: :student_event, version_action_name: name}) do
     case name do
@@ -996,6 +1005,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
     do: "Survey expired"
 
   defp summarise(%{__kind__: :survey_event}), do: "Survey progress"
+
+  defp summarise(%{__kind__: :indicator_event, version_action_name: :create}),
+    do: "Indicators computed"
+
+  defp summarise(%{__kind__: :indicator_event, version_action_name: :update}),
+    do: "Indicators refreshed"
+
+  defp summarise(%{__kind__: :indicator_event}), do: "Indicator update"
 
   defp relative_time(%DateTime{} = ts) do
     diff = DateTime.diff(DateTime.utc_now(), ts, :second)
