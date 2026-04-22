@@ -20,6 +20,8 @@ defmodule Intellispark.StudentsFixtures do
         authorize?: false
       )
 
+    school = Ash.load!(school, [:subscription, :onboarding_state], authorize?: false)
+
     admin =
       register!("admin@sandbox.edu", "supersecret123")
       |> attach_district!(district.id)
@@ -32,7 +34,31 @@ defmodule Intellispark.StudentsFixtures do
     {:ok, s} =
       Ash.create(School, %{name: name, slug: slug, district_id: district.id}, authorize?: false)
 
-    s
+    Ash.load!(s, [:subscription, :onboarding_state], authorize?: false)
+  end
+
+  def set_school_tier!(school, tier) when tier in [:starter, :plus, :pro] do
+    sub =
+      Intellispark.Billing.get_subscription_by_school!(school.id,
+        tenant: school.id,
+        authorize?: false
+      )
+
+    {:ok, updated} = Intellispark.Billing.set_tier(sub, tier, tenant: school.id, authorize?: false)
+    updated
+  end
+
+  def complete_onboarding_for!(school) do
+    state =
+      Intellispark.Billing.get_onboarding_state_by_school!(school.id,
+        tenant: school.id,
+        authorize?: false
+      )
+
+    {:ok, completed} =
+      Intellispark.Billing.complete_onboarding(state, tenant: school.id, authorize?: false)
+
+    completed
   end
 
   def create_student!(school, attrs \\ %{}) do

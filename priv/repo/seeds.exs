@@ -43,6 +43,40 @@ end
 school = ensure_school.("Sandbox High School", "sandbox-high")
 middle_school = ensure_school.("Sandbox Middle School", "sandbox-middle")
 
+# Upgrade demo schools to PRO tier so the switcher badge + tier-gated
+# features are visible in the demo session. Onboarding state is auto-
+# completed so the Get Started pill doesn't nag. These calls are no-ops
+# if the subscription already reflects this state.
+for s <- [school, middle_school] do
+  case Intellispark.Billing.get_subscription_by_school(s.id,
+         tenant: s.id,
+         authorize?: false
+       ) do
+    {:ok, %{tier: :pro}} ->
+      :ok
+
+    {:ok, sub} ->
+      {:ok, _} = Intellispark.Billing.set_tier(sub, :pro, tenant: s.id, authorize?: false)
+
+    _ ->
+      :ok
+  end
+
+  case Intellispark.Billing.get_onboarding_state_by_school(s.id,
+         tenant: s.id,
+         authorize?: false
+       ) do
+    {:ok, %{current_step: :done}} ->
+      :ok
+
+    {:ok, state} ->
+      {:ok, _} = Intellispark.Billing.complete_onboarding(state, tenant: s.id, authorize?: false)
+
+    _ ->
+      :ok
+  end
+end
+
 unless SchoolTerm
        |> Ash.Query.filter(school_id == ^school.id and name == "2026 Spring")
        |> Ash.read_one!(authorize?: false) do
