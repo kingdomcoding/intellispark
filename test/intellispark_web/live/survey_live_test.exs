@@ -47,7 +47,7 @@ defmodule IntellisparkWeb.SurveyLiveTest do
     html =
       lv
       |> element("textarea[phx-blur='save_answer']")
-      |> render_blur(%{"question_id" => q1.id, "answer_text" => "Marcus"})
+      |> render_blur(%{"question_id" => q1.id, "value" => "Marcus"})
 
     assert html =~ "1 of 3 answered"
   end
@@ -96,7 +96,7 @@ defmodule IntellisparkWeb.SurveyLiveTest do
     _ =
       lv
       |> element("textarea[phx-blur='save_answer']")
-      |> render_blur(%{"question_id" => q1.id, "answer_text" => "Marcus"})
+      |> render_blur(%{"question_id" => q1.id, "value" => "Marcus"})
 
     _ = lv |> element("button", "Next") |> render_click()
     _ = lv |> element("button", "Next") |> render_click()
@@ -108,5 +108,17 @@ defmodule IntellisparkWeb.SurveyLiveTest do
   test "unknown token renders Survey not found fallback", %{conn: conn} do
     {:ok, _lv, html} = live(conn, ~p"/surveys/garbage-token-xyz")
     assert html =~ "Survey not found"
+  end
+
+  test "phx-change form submit (answer_text key) also saves the response",
+       %{conn: conn, assignment: a, q1: q1} do
+    {:ok, lv, _html} = live(conn, ~p"/surveys/#{a.token}")
+
+    html =
+      lv
+      |> element("form[phx-change='save_answer']")
+      |> render_change(%{"question_id" => q1.id, "answer_text" => "Ada"})
+
+    assert html =~ "1 of 3 answered"
   end
 end

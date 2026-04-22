@@ -57,8 +57,11 @@ defmodule IntellisparkWeb.SurveyLive.Show do
   end
 
   @impl true
-  def handle_event("save_answer", params, socket) do
-    %{"question_id" => qid, "answer_text" => text} = params
+  def handle_event("save_answer", %{"question_id" => qid, "answer_text" => text}, socket) do
+    save_and_stay(socket, qid, text, [])
+  end
+
+  def handle_event("save_answer", %{"question_id" => qid, "value" => text}, socket) do
     save_and_stay(socket, qid, text, [])
   end
 
