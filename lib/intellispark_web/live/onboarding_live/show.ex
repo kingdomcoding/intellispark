@@ -47,7 +47,12 @@ defmodule IntellisparkWeb.OnboardingLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_user={@current_user} current_school={@current_school}>
+    <Layouts.app
+      flash={@flash}
+      current_user={@current_user}
+      current_school={@current_school}
+      onboarding_incomplete?={@onboarding_incomplete?}
+    >
       <section class="container-lg py-xl space-y-md">
         <h1 class="text-display-md text-brand">Get Started</h1>
 

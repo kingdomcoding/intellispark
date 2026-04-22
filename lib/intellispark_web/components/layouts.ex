@@ -11,6 +11,7 @@ defmodule IntellisparkWeb.Layouts do
   attr :current_school, :map, default: nil
   attr :breadcrumb, :map, default: nil
   attr :flash, :map, default: %{}
+  attr :onboarding_incomplete?, :boolean, default: false
   slot :inner_block, required: true
 
   def app(assigns) do
@@ -31,6 +32,14 @@ defmodule IntellisparkWeb.Layouts do
         </div>
 
         <div class="flex items-center gap-sm">
+          <.link
+            :if={@onboarding_incomplete? and @current_user}
+            navigate={~p"/onboarding"}
+            class="rounded-pill bg-brand text-white text-xs font-medium px-md py-1 hover:bg-brand-700"
+          >
+            Get Started
+          </.link>
+
           <.school_switcher current_user={@current_user} current_school={@current_school} />
           <a
             :if={@current_user}

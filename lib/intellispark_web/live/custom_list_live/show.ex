@@ -55,6 +55,7 @@ defmodule IntellisparkWeb.CustomListLive.Show do
       current_user={@current_user}
       current_school={@current_school}
       breadcrumb={%{label: "Back to my lists", path: ~p"/lists"}}
+      onboarding_incomplete?={@onboarding_incomplete?}
     >
       <section class="container-lg py-xl space-y-md">
         <div class="flex items-center justify-between">

@@ -438,6 +438,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
       current_user={@current_user}
       current_school={@current_school}
       breadcrumb={%{label: "Back to my lists", path: ~p"/lists"}}
+      onboarding_incomplete?={@onboarding_incomplete?}
     >
       <section class="container-lg py-xl space-y-md">
         <h1 class="text-display-md text-brand">All Students</h1>

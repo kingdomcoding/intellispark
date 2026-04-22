@@ -37,7 +37,12 @@ defmodule IntellisparkWeb.UserSettingsLive.EmailPreferences do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_user={@current_user} current_school={@current_school}>
+    <Layouts.app
+      flash={@flash}
+      current_user={@current_user}
+      current_school={@current_school}
+      onboarding_incomplete?={@onboarding_incomplete?}
+    >
       <section class="container-md py-xl space-y-md">
         <h1 class="text-display-md text-brand">Email preferences</h1>
         <p class="text-sm text-azure">

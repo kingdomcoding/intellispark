@@ -986,6 +986,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       current_user={@current_user}
       current_school={@current_school}
       breadcrumb={@breadcrumb}
+      onboarding_incomplete?={@onboarding_incomplete?}
     >
       <section class="container-lg py-xl space-y-md">
         <.header_card student={@student} uploads={@uploads} />

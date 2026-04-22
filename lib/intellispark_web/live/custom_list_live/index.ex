@@ -66,7 +66,12 @@ defmodule IntellisparkWeb.CustomListLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_user={@current_user} current_school={@current_school}>
+    <Layouts.app
+      flash={@flash}
+      current_user={@current_user}
+      current_school={@current_school}
+      onboarding_incomplete?={@onboarding_incomplete?}
+    >
       <section class="container-lg py-xl space-y-md">
         <header class="flex items-center justify-between">
           <h1 class="text-display-md text-brand">My Lists</h1>

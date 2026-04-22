@@ -49,7 +49,12 @@ defmodule IntellisparkWeb.InsightsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_user={@current_user} current_school={@current_school}>
+    <Layouts.app
+      flash={@flash}
+      current_user={@current_user}
+      current_school={@current_school}
+      onboarding_incomplete?={@onboarding_incomplete?}
+    >
       <section class="fixed inset-0 z-50 bg-abbey/40 overflow-auto">
         <div class="min-h-screen flex items-start justify-center p-md">
           <div class="bg-white rounded-card shadow-elevated w-full max-w-6xl my-xl">

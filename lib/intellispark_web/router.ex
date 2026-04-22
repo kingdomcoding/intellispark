@@ -38,7 +38,10 @@ defmodule IntellisparkWeb.Router do
     pipe_through :browser
 
     ash_authentication_live_session :authenticated_user,
-      on_mount: {IntellisparkWeb.LiveUserAuth, :live_user_required} do
+      on_mount: [
+        {IntellisparkWeb.LiveUserAuth, :live_user_required},
+        IntellisparkWeb.LiveHooks.LoadOnboardingState
+      ] do
       post "/set-school", SchoolController, :set_active
 
       live "/students", StudentLive.Index
