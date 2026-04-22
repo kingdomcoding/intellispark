@@ -1976,7 +1976,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
           </span>
           <div class="flex-1">
             <p class="text-sm text-abbey">
-              {m.user.first_name} {m.user.last_name}
+              {user_display_name(m.user)}
             </p>
             <p class="text-xs text-azure">{humanize_team_role(m.role)}</p>
           </div>
@@ -1986,10 +1986,23 @@ defmodule IntellisparkWeb.StudentLive.Show do
     """
   end
 
-  defp user_initials(%{first_name: first, last_name: last}) do
-    String.upcase(String.first(first || "?")) <>
-      String.upcase(String.first(last || "?"))
+  defp user_display_name(%{first_name: first, last_name: last})
+       when is_binary(first) and is_binary(last) and first != "" and last != "",
+       do: "#{first} #{last}"
+
+  defp user_display_name(%{email: email}) when is_binary(email), do: email
+  defp user_display_name(_), do: "Unknown"
+
+  defp user_initials(%{first_name: first, last_name: last})
+       when is_binary(first) and is_binary(last) and first != "" and last != "" do
+    String.upcase(String.first(first)) <> String.upcase(String.first(last))
   end
+
+  defp user_initials(%{email: email}) when is_binary(email) and email != "" do
+    String.upcase(String.first(email))
+  end
+
+  defp user_initials(_), do: "?"
 
   defp humanize_team_role(:teacher), do: "Teacher"
   defp humanize_team_role(:coach), do: "Coach"
@@ -2025,7 +2038,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       <ul :if={@connections != []} class="space-y-xs">
         <li :for={c <- @connections}>
           <p class="text-sm font-medium text-abbey">
-            {c.connected_user.first_name} {c.connected_user.last_name}
+            {user_display_name(c.connected_user)}
           </p>
           <p :if={c.note} class="text-xs text-azure italic">({c.note})</p>
         </li>
