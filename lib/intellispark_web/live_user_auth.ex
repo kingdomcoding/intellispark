@@ -93,7 +93,7 @@ defmodule IntellisparkWeb.LiveUserAuth do
 
       school_id = session["current_school_id"] ->
         case load_school_for_user(user, school_id) do
-          {:ok, school} -> assign(socket, :current_school, school)
+          {:ok, school} -> assign_school(socket, school)
           :error -> assign_default_school(socket, user)
         end
 
@@ -102,9 +102,18 @@ defmodule IntellisparkWeb.LiveUserAuth do
     end
   end
 
+  defp assign_school(socket, school) do
+    user = socket.assigns[:current_user]
+    user_with_school = Map.put(user, :current_school, school)
+
+    socket
+    |> assign(:current_school, school)
+    |> assign(:current_user, user_with_school)
+  end
+
   defp load_school_for_user(user, school_id) do
     if Enum.any?(user.school_memberships || [], &(&1.school_id == school_id)) do
-      case Ash.get(School, school_id, authorize?: false) do
+      case Ash.get(School, school_id, load: [:subscription, :onboarding_state], authorize?: false) do
         {:ok, school} -> {:ok, school}
         _ -> :error
       end
@@ -116,8 +125,8 @@ defmodule IntellisparkWeb.LiveUserAuth do
   defp assign_default_school(socket, user) do
     case user.school_memberships do
       [%UserSchoolMembership{school_id: id} | _] ->
-        case Ash.get(School, id, authorize?: false) do
-          {:ok, school} -> assign(socket, :current_school, school)
+        case Ash.get(School, id, load: [:subscription, :onboarding_state], authorize?: false) do
+          {:ok, school} -> assign_school(socket, school)
           _ -> assign(socket, :current_school, nil)
         end
 

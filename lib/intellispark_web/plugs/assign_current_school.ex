@@ -34,8 +34,10 @@ defmodule IntellisparkWeb.Plugs.AssignCurrentSchool do
           resolve_school(user, school_id) ||
             resolve_default_school(user)
 
+        user_with_school = if school, do: Map.put(user, :current_school, school), else: user
+
         conn
-        |> assign(:current_user, user)
+        |> assign(:current_user, user_with_school)
         |> assign(:current_school, school)
     end
   end
@@ -44,7 +46,7 @@ defmodule IntellisparkWeb.Plugs.AssignCurrentSchool do
 
   defp resolve_school(user, school_id) do
     if Enum.any?(user.school_memberships, &(&1.school_id == school_id)) do
-      case Ash.get(School, school_id, authorize?: false) do
+      case Ash.get(School, school_id, load: [:subscription, :onboarding_state], authorize?: false) do
         {:ok, school} -> school
         _ -> nil
       end
@@ -52,7 +54,7 @@ defmodule IntellisparkWeb.Plugs.AssignCurrentSchool do
   end
 
   defp resolve_default_school(%{school_memberships: [%UserSchoolMembership{school_id: id} | _]}) do
-    case Ash.get(School, id, authorize?: false) do
+    case Ash.get(School, id, load: [:subscription, :onboarding_state], authorize?: false) do
       {:ok, school} -> school
       _ -> nil
     end
