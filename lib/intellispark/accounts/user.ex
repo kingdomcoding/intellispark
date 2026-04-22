@@ -144,6 +144,10 @@ defmodule Intellispark.Accounts.User do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfUser
     end
 
+    policy action(:set_email_preference) do
+      authorize_if expr(id == ^actor(:id))
+    end
+
     policy action(:destroy) do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfUser
     end

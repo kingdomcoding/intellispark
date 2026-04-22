@@ -62,6 +62,8 @@ defmodule Intellispark.Recognition.HighFive do
       default: 0,
       public?: true
 
+    attribute :resent_at, :utc_datetime_usec, public?: true
+
     timestamps()
   end
 
@@ -116,6 +118,12 @@ defmodule Intellispark.Recognition.HighFive do
       change Intellispark.Recognition.Changes.LogView
     end
 
+    update :resend do
+      accept []
+      require_atomic? false
+      change Intellispark.Recognition.Changes.RecordResend
+    end
+
     action :bulk_send_to_students, :struct do
       constraints instance_of: Ash.BulkResult
 
@@ -144,6 +152,10 @@ defmodule Intellispark.Recognition.HighFive do
     end
 
     policy action(:bulk_send_to_students) do
+      authorize_if IntellisparkWeb.Policies.CanSendHighFive
+    end
+
+    policy action(:resend) do
       authorize_if IntellisparkWeb.Policies.CanSendHighFive
     end
 

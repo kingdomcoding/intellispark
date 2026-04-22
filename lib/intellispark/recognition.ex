@@ -47,6 +47,8 @@ defmodule Intellispark.Recognition do
         action: :record_view,
         args: [:user_agent, :ip_hash]
 
+      define :resend_high_five, action: :resend
+
       define :archive_high_five, action: :destroy
     end
 
