@@ -151,6 +151,7 @@ defmodule Intellispark.Assessments.SurveyAssignment do
       change Intellispark.Assessments.Changes.ValidateRequiredResponses
       change set_attribute(:submitted_at, &DateTime.utc_now/0)
       change transition_state(:submitted)
+      change Intellispark.Assessments.Changes.EnqueueIndicatorScoring
     end
 
     update :expire do
