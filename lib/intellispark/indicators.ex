@@ -30,4 +30,7 @@ defmodule Intellispark.Indicators do
 
     resource Intellispark.Indicators.IndicatorScore.Version
   end
+
+  defdelegate compute_for_assignment(assignment_id),
+    to: Intellispark.Indicators.Scoring
 end
