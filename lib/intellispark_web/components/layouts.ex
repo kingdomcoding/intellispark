@@ -87,9 +87,13 @@ defmodule IntellisparkWeb.Layouts do
         aria-expanded="false"
       >
         {@current_school.name}
+        <.tier_badge tier={subscription_tier(@current_school)} />
         <span class="hero-chevron-down-mini"></span>
       </button>
-      <span :if={!@multi?} class="text-azure text-sm">{@current_school.name}</span>
+      <span :if={!@multi?} class="text-azure text-sm inline-flex items-center gap-1">
+        {@current_school.name}
+        <.tier_badge tier={subscription_tier(@current_school)} />
+      </span>
 
       <div
         :if={@multi?}
@@ -128,6 +132,31 @@ defmodule IntellisparkWeb.Layouts do
 
   defp membership_label(%{school: %{name: name}}) when is_binary(name), do: name
   defp membership_label(%{school_id: id}), do: "School #{String.slice(to_string(id), 0..7)}"
+
+  attr :tier, :atom, default: :starter
+
+  defp tier_badge(%{tier: :starter} = assigns), do: ~H""
+
+  defp tier_badge(%{tier: :plus} = assigns) do
+    ~H"""
+    <span class="rounded-pill bg-brand/10 text-brand text-[10px] font-semibold px-1.5 py-0.5 uppercase tracking-wide">
+      Plus
+    </span>
+    """
+  end
+
+  defp tier_badge(%{tier: :pro} = assigns) do
+    ~H"""
+    <span class="rounded-pill bg-brand text-white text-[10px] font-semibold px-1.5 py-0.5 uppercase tracking-wide">
+      Pro
+    </span>
+    """
+  end
+
+  defp tier_badge(assigns), do: ~H""
+
+  defp subscription_tier(%{subscription: %{tier: t}}) when is_atom(t), do: t
+  defp subscription_tier(_), do: :starter
 
   attr :current_user, :map, default: nil
 
