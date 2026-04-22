@@ -916,11 +916,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
             />
             <.key_indicators_panel student={@student} />
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-              <.strengths_panel strengths={@strengths} />
-              <.key_connections_panel connections={@student.key_connections || []} />
-            </div>
-
             <.team_members_panel
               memberships={@student.team_memberships || []}
               student={@student}
@@ -937,6 +932,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
           <div class="space-y-md">
             <.profile_card student={@student} />
+
+            <.strengths_panel strengths={@strengths} />
+
+            <.key_connections_panel connections={@student.key_connections || []} />
 
             <.flags_panel flags={@flags} />
 
