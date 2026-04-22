@@ -99,7 +99,11 @@ defmodule Intellispark.Billing.SchoolSubscription do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchool
     end
 
-    policy action_type([:create, :update]) do
+    policy action_type(:create) do
+      authorize_if IntellisparkWeb.Policies.DistrictAdminForSchoolScopedCreate
+    end
+
+    policy action_type(:update) do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchool
     end
   end

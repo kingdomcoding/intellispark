@@ -63,7 +63,11 @@ defmodule Intellispark.Accounts.UserSchoolMembership do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfMembership
     end
 
-    policy action_type([:create, :destroy]) do
+    policy action_type(:create) do
+      authorize_if IntellisparkWeb.Policies.DistrictAdminForSchoolScopedCreate
+    end
+
+    policy action_type(:destroy) do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfMembership
     end
 

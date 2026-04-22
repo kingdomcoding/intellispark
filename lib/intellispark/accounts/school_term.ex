@@ -56,7 +56,11 @@ defmodule Intellispark.Accounts.SchoolTerm do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchoolTerm
     end
 
-    policy action_type([:create, :update, :destroy]) do
+    policy action_type(:create) do
+      authorize_if IntellisparkWeb.Policies.DistrictAdminForSchoolScopedCreate
+    end
+
+    policy action_type([:update, :destroy]) do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchoolTerm
     end
   end
