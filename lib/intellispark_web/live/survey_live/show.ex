@@ -37,6 +37,7 @@ defmodule IntellisparkWeb.SurveyLive.Show do
            not_found?: false,
            submitted?: hydrated.state == :submitted,
            expired?: hydrated.state == :expired,
+           submit_error: nil,
            page_title: hydrated.survey_template_version.schema["name"] || "Survey"
          )}
 
@@ -51,6 +52,7 @@ defmodule IntellisparkWeb.SurveyLive.Show do
            not_found?: true,
            submitted?: false,
            expired?: false,
+           submit_error: nil,
            page_title: "Survey not found"
          )}
     end
@@ -73,11 +75,20 @@ defmodule IntellisparkWeb.SurveyLive.Show do
 
   def handle_event("next", _params, socket) do
     last = length(socket.assigns.questions) - 1
-    {:noreply, assign(socket, current_index: min(socket.assigns.current_index + 1, last))}
+
+    {:noreply,
+     assign(socket,
+       current_index: min(socket.assigns.current_index + 1, last),
+       submit_error: nil
+     )}
   end
 
   def handle_event("previous", _params, socket) do
-    {:noreply, assign(socket, current_index: max(socket.assigns.current_index - 1, 0))}
+    {:noreply,
+     assign(socket,
+       current_index: max(socket.assigns.current_index - 1, 0),
+       submit_error: nil
+     )}
   end
 
   def handle_event("submit", _params, socket) do
@@ -85,15 +96,16 @@ defmodule IntellisparkWeb.SurveyLive.Show do
 
     case Assessments.submit_survey(a, tenant: a.school_id, authorize?: false) do
       {:ok, _} ->
-        {:noreply, assign(socket, submitted?: true)}
+        {:noreply, assign(socket, submitted?: true, submit_error: nil)}
 
       {:error, _err} ->
-        {:noreply,
-         put_flash(
-           socket,
-           :error,
-           "Please answer all required questions before submitting."
-         )}
+        missing =
+          missing_required_prompts(
+            socket.assigns.questions,
+            socket.assigns.responses_by_q
+          )
+
+        {:noreply, assign(socket, submit_error: %{missing: missing})}
     end
   end
 
@@ -111,10 +123,25 @@ defmodule IntellisparkWeb.SurveyLive.Show do
             "answer_values" => values
           })
 
-        {:noreply, assign(socket, responses_by_q: new_map)}
+        {:noreply, assign(socket, responses_by_q: new_map, submit_error: nil)}
 
       {:error, _err} ->
         {:noreply, socket}
+    end
+  end
+
+  defp missing_required_prompts(questions, responses_by_q) do
+    questions
+    |> Enum.filter(& &1["required?"])
+    |> Enum.reject(&answered?(responses_by_q, &1["id"]))
+    |> Enum.map(& &1["prompt"])
+  end
+
+  defp answered?(map, qid) do
+    case Map.get(map, qid) do
+      %{"answer_text" => t} when is_binary(t) and t != "" -> true
+      %{"answer_values" => vs} when is_list(vs) and vs != [] -> true
+      _ -> false
     end
   end
 
@@ -180,6 +207,8 @@ defmodule IntellisparkWeb.SurveyLive.Show do
       <div class="container-sm bg-white rounded-card shadow-elevated p-lg space-y-md">
         <.progress_bar answered={@answered} total={@total} />
 
+        <.submit_error_banner :if={@submit_error} error={@submit_error} />
+
         <.question_card question={@current_q} current={@current_answer} />
 
         <div class="flex items-center justify-between pt-md">
@@ -202,6 +231,24 @@ defmodule IntellisparkWeb.SurveyLive.Show do
         </div>
       </div>
     </main>
+    """
+  end
+
+  attr :error, :map, required: true
+
+  defp submit_error_banner(assigns) do
+    ~H"""
+    <div
+      role="alert"
+      class="rounded-card border border-chocolate bg-chocolate/5 p-sm space-y-xs"
+    >
+      <p class="text-sm font-semibold text-chocolate">
+        Please answer all required questions before submitting.
+      </p>
+      <ul :if={@error[:missing] != []} class="list-disc pl-lg text-sm text-chocolate">
+        <li :for={prompt <- @error[:missing]}>{prompt}</li>
+      </ul>
+    </div>
     """
   end
 
@@ -345,14 +392,7 @@ defmodule IntellisparkWeb.SurveyLive.Show do
   end
 
   defp answered_count(map, questions) do
-    Enum.count(questions, fn q ->
-      case Map.get(map, q["id"]) do
-        nil -> false
-        %{"answer_text" => t} when is_binary(t) and t != "" -> true
-        %{"answer_values" => vs} when is_list(vs) and vs != [] -> true
-        _ -> false
-      end
-    end)
+    Enum.count(questions, &answered?(map, &1["id"]))
   end
 
   defp current_answer(_map, nil), do: %{"answer_text" => nil, "answer_values" => []}

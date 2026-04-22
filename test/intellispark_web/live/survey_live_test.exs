@@ -70,7 +70,7 @@ defmodule IntellisparkWeb.SurveyLiveTest do
     assert html =~ "What&#39;s your name?"
   end
 
-  test "Submit with required missing keeps assignment unsubmitted",
+  test "Submit with required missing renders banner + keeps assignment unsubmitted",
        %{conn: conn, assignment: a, school: school} do
     {:ok, lv, _html} = live(conn, ~p"/surveys/#{a.token}")
 
@@ -79,6 +79,8 @@ defmodule IntellisparkWeb.SurveyLiveTest do
     html = lv |> element("button", "Submit") |> render_click()
 
     refute html =~ "Thanks for your response"
+    assert html =~ "Please answer all required questions before submitting."
+    assert html =~ "your name?"
 
     reloaded =
       Ash.get!(Intellispark.Assessments.SurveyAssignment, a.id,
@@ -87,6 +89,18 @@ defmodule IntellisparkWeb.SurveyLiveTest do
       )
 
     refute reloaded.state == :submitted
+  end
+
+  test "submit banner clears on next navigation",
+       %{conn: conn, assignment: a} do
+    {:ok, lv, _html} = live(conn, ~p"/surveys/#{a.token}")
+
+    _ = lv |> element("button", "Next") |> render_click()
+    _ = lv |> element("button", "Next") |> render_click()
+    _ = lv |> element("button", "Submit") |> render_click()
+    html = lv |> element("button", "Previous") |> render_click()
+
+    refute html =~ "Please answer all required questions before submitting."
   end
 
   test "Submit with all required answered transitions to thank-you screen",
