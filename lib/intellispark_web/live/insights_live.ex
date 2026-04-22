@@ -157,7 +157,8 @@ defmodule IntellisparkWeb.InsightsLive do
         <tbody>
           <tr
             :for={row <- @individual}
-            class="border-b border-abbey/5 hover:bg-whitesmoke"
+            phx-click={JS.navigate(~p"/students/#{row.id}")}
+            class="border-b border-abbey/5 hover:bg-whitesmoke cursor-pointer"
           >
             <td class="py-sm">
               <.link navigate={~p"/students/#{row.id}"} class="text-abbey hover:text-brand">
