@@ -121,7 +121,12 @@ defmodule Intellispark.Recognition.HighFive do
 
     update :resend do
       accept []
+      argument :title, :string, allow_nil?: true, default: nil
+      argument :body, :string, allow_nil?: true, default: nil
       require_atomic? false
+
+      change Intellispark.Recognition.Changes.MaybeApplyResendEdits
+      change Intellispark.Recognition.Changes.SanitizeBody
       change Intellispark.Recognition.Changes.RecordResend
     end
 
