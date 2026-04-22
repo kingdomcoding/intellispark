@@ -45,10 +45,12 @@ defmodule Intellispark.Support.Oban.SupportExpirationReminderWorker do
     |> Enum.each(fn {_user_id, supports_for_user} ->
       user = List.first(supports_for_user).provider_staff
 
-      try do
-        SupportExpiring.send(user, supports_for_user)
-      rescue
-        _ -> :ok
+      if Intellispark.Accounts.EmailPreferences.opted_in?(user, "action_due") do
+        try do
+          SupportExpiring.send(user, supports_for_user)
+        rescue
+          _ -> :ok
+        end
       end
     end)
 

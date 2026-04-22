@@ -11,6 +11,7 @@ defmodule Intellispark.Flags.Oban.DailyFollowupReminderWorker do
 
   require Ash.Query
 
+  alias Intellispark.Accounts.EmailPreferences
   alias Intellispark.Flags.Emails.FollowupDigest
   alias Intellispark.Flags.Flag
 
@@ -47,10 +48,12 @@ defmodule Intellispark.Flags.Oban.DailyFollowupReminderWorker do
       {user, _} = List.first(pairs)
       flags_for_user = Enum.map(pairs, fn {_u, f} -> f end)
 
-      try do
-        FollowupDigest.send(user, flags_for_user)
-      rescue
-        _ -> :ok
+      if EmailPreferences.opted_in?(user, "flag_followup") do
+        try do
+          FollowupDigest.send(user, flags_for_user)
+        rescue
+          _ -> :ok
+        end
       end
     end)
 

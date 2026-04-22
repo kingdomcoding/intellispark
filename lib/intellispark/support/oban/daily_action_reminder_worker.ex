@@ -38,10 +38,12 @@ defmodule Intellispark.Support.Oban.DailyActionReminderWorker do
     |> Enum.each(fn {_user_id, actions_for_user} ->
       user = List.first(actions_for_user).assignee
 
-      try do
-        ActionDigest.send(user, actions_for_user)
-      rescue
-        _ -> :ok
+      if Intellispark.Accounts.EmailPreferences.opted_in?(user, "action_due") do
+        try do
+          ActionDigest.send(user, actions_for_user)
+        rescue
+          _ -> :ok
+        end
       end
     end)
 

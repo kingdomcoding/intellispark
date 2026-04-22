@@ -8,6 +8,7 @@ defmodule Intellispark.Flags.Notifiers.Emails do
 
   use Ash.Notifier
 
+  alias Intellispark.Accounts.EmailPreferences
   alias Intellispark.Flags.Emails.{FlagAssigned, FlagAutoClosed}
 
   @impl true
@@ -19,7 +20,8 @@ defmodule Intellispark.Flags.Notifiers.Emails do
       when name in [:open_flag, :assign] do
     with {:ok, flag} <- load_for_email(flag),
          {:ok, opener} <- fetch_opener(flag) do
-      for assignment <- active_assignments(flag) do
+      for assignment <- active_assignments(flag),
+          EmailPreferences.opted_in?(assignment.user, "flag_assigned") do
         FlagAssigned.send(assignment.user, flag, opener)
       end
 
@@ -35,7 +37,8 @@ defmodule Intellispark.Flags.Notifiers.Emails do
         data: flag
       }) do
     with {:ok, flag} <- load_for_email(flag) do
-      for assignment <- active_assignments(flag) do
+      for assignment <- active_assignments(flag),
+          EmailPreferences.opted_in?(assignment.user, "flag_assigned") do
         FlagAutoClosed.send(assignment.user, flag)
       end
 
