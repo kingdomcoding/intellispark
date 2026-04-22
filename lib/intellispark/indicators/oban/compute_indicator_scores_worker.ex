@@ -9,7 +9,7 @@ defmodule Intellispark.Indicators.Oban.ComputeIndicatorScoresWorker do
   use Oban.Worker, queue: :indicators, max_attempts: 5
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"assignment_id" => id}}) do
-    Intellispark.Indicators.compute_for_assignment(id)
+  def perform(%Oban.Job{args: %{"assignment_id" => id, "school_id" => school_id}}) do
+    Intellispark.Indicators.compute_for_assignment(id, school_id)
   end
 end

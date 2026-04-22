@@ -14,9 +14,9 @@ defmodule Intellispark.Indicators.Scoring do
   @low_threshold 2.5
   @high_threshold 3.75
 
-  @spec compute_for_assignment(Ash.UUID.t()) :: :ok | {:error, term()}
-  def compute_for_assignment(assignment_id) do
-    with {:ok, assignment} <- load_assignment(assignment_id),
+  @spec compute_for_assignment(Ash.UUID.t(), Ash.UUID.t() | nil) :: :ok | {:error, term()}
+  def compute_for_assignment(assignment_id, school_id \\ nil) do
+    with {:ok, assignment} <- load_assignment(assignment_id, school_id),
          {:ok, version} <- load_version(assignment),
          {:ok, responses} <- load_responses(assignment) do
       scores = score_responses(version, responses)
@@ -85,14 +85,23 @@ defmodule Intellispark.Indicators.Scoring do
 
   defp parse_likert_int(_), do: nil
 
-  defp load_assignment(id) do
-    case SurveyAssignment
-         |> Ash.Query.filter(id == ^id)
-         |> Ash.read_one(authorize?: false) do
-      {:ok, nil} -> {:error, :assignment_not_found}
+  defp load_assignment(id, school_id) when is_binary(school_id) do
+    case Ash.get(SurveyAssignment, id, tenant: school_id, authorize?: false) do
       {:ok, a} -> {:ok, a}
+      {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{} | _]}} -> {:error, :assignment_not_found}
       err -> err
     end
+  end
+
+  defp load_assignment(id, nil) do
+    Intellispark.Accounts.School
+    |> Ash.read!(authorize?: false)
+    |> Enum.find_value({:error, :assignment_not_found}, fn school ->
+      case Ash.get(SurveyAssignment, id, tenant: school.id, authorize?: false) do
+        {:ok, a} -> {:ok, a}
+        _ -> false
+      end
+    end)
   end
 
   defp load_version(%SurveyAssignment{survey_template_version_id: vid, school_id: school_id}) do

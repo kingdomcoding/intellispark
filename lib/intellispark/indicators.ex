@@ -33,4 +33,7 @@ defmodule Intellispark.Indicators do
 
   defdelegate compute_for_assignment(assignment_id),
     to: Intellispark.Indicators.Scoring
+
+  defdelegate compute_for_assignment(assignment_id, school_id),
+    to: Intellispark.Indicators.Scoring
 end
