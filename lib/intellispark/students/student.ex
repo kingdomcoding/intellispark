@@ -272,7 +272,8 @@ defmodule Intellispark.Students.Student do
 
   policies do
     policy action_type(:read) do
-      authorize_if IntellisparkWeb.Policies.StaffReadsStudentsInSchool
+      authorize_if IntellisparkWeb.Policies.AdminOrClinicalRoleInSchool
+      authorize_if IntellisparkWeb.Policies.TeacherOnlySeesTeamStudents
     end
 
     policy action_type(:create) do

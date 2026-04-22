@@ -53,6 +53,14 @@ defmodule IntellisparkWeb.NotesPanelTest do
 
     teacher = register_teacher!(school)
 
+    # Phase 10 teacher scoping: add the teacher to the student's team so
+    # they can see the hub at all; sensitive-note filtering still applies.
+    {:ok, _} =
+      Intellispark.Teams.create_team_membership(student.id, teacher.id, :teacher,
+        actor: admin,
+        tenant: school.id
+      )
+
     {:ok, _lv, html} = conn |> log_in_user(teacher) |> live(~p"/students/#{student.id}")
 
     refute html =~ "HIDDEN CLINICAL"
