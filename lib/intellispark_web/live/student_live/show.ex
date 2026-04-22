@@ -34,6 +34,11 @@ defmodule IntellisparkWeb.StudentLive.Show do
           Intellispark.PubSub,
           "survey_assignments:student:#{student.id}"
         )
+
+        Phoenix.PubSub.subscribe(
+          Intellispark.PubSub,
+          "indicator_scores:student:#{student.id}"
+        )
       end
 
       {:ok,
@@ -434,6 +439,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, reload_survey_assignments(socket)}
   end
 
+  def handle_info({:indicator_scores_updated, _student_id}, socket) do
+    {:noreply, reload_indicators(socket)}
+  end
+
   def handle_info(%Ash.Notifier.Notification{}, socket) do
     {:noreply, reload_student(socket)}
   end
@@ -501,6 +510,20 @@ defmodule IntellisparkWeb.StudentLive.Show do
       survey_assignments: load_survey_assignments(student, actor, school),
       timeline: load_timeline(student, school)
     )
+  end
+
+  defp reload_indicators(socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    reloaded =
+      Ash.load!(
+        student,
+        Intellispark.Indicators.Dimension.all(),
+        actor: actor,
+        tenant: school.id
+      )
+
+    assign(socket, student: reloaded)
   end
 
   defp load_staff(school) do
@@ -691,7 +714,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
         :open_supports_count,
         :recent_high_fives_count,
         tags: [:id, :name, :color]
-      ],
+      ] ++ Intellispark.Indicators.Dimension.all(),
       actor: actor,
       tenant: school.id
     )
