@@ -15,22 +15,24 @@ defmodule IntellisparkWeb.UserSettingsLive.EmailPreferences do
   end
 
   @impl true
-  def handle_event("toggle", %{"kind" => kind} = params, socket) do
-    enabled? = Map.get(params, "value") == "on"
+  def handle_event("toggle", %{"kind" => kind}, socket) do
+    user = socket.assigns.current_user
+    enabled? = not EmailPreferences.opted_in?(user, kind)
 
-    case Accounts.set_email_preference(socket.assigns.current_user, kind, enabled?,
-           actor: socket.assigns.current_user
-         ) do
+    case Accounts.set_email_preference(user, kind, enabled?, actor: user) do
       {:ok, updated} ->
         {:noreply,
          socket
          |> assign(current_user: updated)
-         |> put_flash(:info, "Preference updated.")}
+         |> put_flash(:info, flash_for(kind, enabled?))}
 
       _ ->
         {:noreply, put_flash(socket, :error, "Could not update preference.")}
     end
   end
+
+  defp flash_for(kind, true), do: "#{humanize(kind)}: on"
+  defp flash_for(kind, false), do: "#{humanize(kind)}: off"
 
   @impl true
   def render(assigns) do
@@ -66,7 +68,7 @@ defmodule IntellisparkWeb.UserSettingsLive.EmailPreferences do
     <label class="flex items-start gap-sm cursor-pointer p-xs hover:bg-whitesmoke rounded">
       <input
         type="checkbox"
-        phx-change="toggle"
+        phx-click="toggle"
         phx-value-kind={@kind}
         checked={@opted_in?}
         class="mt-1"

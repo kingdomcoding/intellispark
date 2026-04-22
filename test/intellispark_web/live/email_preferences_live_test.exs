@@ -27,7 +27,7 @@ defmodule IntellisparkWeb.EmailPreferencesLiveTest do
 
     lv
     |> element(~s|input[phx-value-kind="weekly_digest"]|)
-    |> render_change(%{"kind" => "weekly_digest"})
+    |> render_click()
 
     reloaded = Ash.reload!(admin, authorize?: false)
     assert reloaded.email_preferences["weekly_digest"] == false
