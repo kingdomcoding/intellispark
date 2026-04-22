@@ -185,26 +185,6 @@ defmodule IntellisparkWeb.StudentLive.Show do
      |> push_patch_to_tab(Tabs.to_param(next_active))}
   end
 
-  # DEPRECATED: alias for legacy sheet open — remove in Phase 4 retrofit.
-  def handle_event("open_flag_sheet", %{"id" => id}, socket) do
-    handle_event("open_tab", %{"kind" => "flag", "id" => id}, socket)
-  end
-
-  # DEPRECATED: alias for legacy sheet close — remove in Phase 4 retrofit.
-  def handle_event("close_flag_sheet", _params, socket) do
-    handle_event("close_tab", %{"tab" => "profile"}, socket)
-  end
-
-  # DEPRECATED: alias for legacy sheet open — remove in Phase 4 retrofit.
-  def handle_event("open_support_sheet", %{"id" => id}, socket) do
-    handle_event("open_tab", %{"kind" => "support", "id" => id}, socket)
-  end
-
-  # DEPRECATED: alias for legacy sheet close — remove in Phase 4 retrofit.
-  def handle_event("close_support_sheet", _params, socket) do
-    handle_event("close_tab", %{"tab" => "profile"}, socket)
-  end
-
   def handle_event("open_edit_modal", _params, socket) do
     form = build_edit_form(socket.assigns)
     {:noreply, assign(socket, edit_modal_open?: true, edit_form: form)}

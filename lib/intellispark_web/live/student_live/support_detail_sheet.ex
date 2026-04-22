@@ -44,7 +44,7 @@ defmodule IntellisparkWeb.StudentLive.SupportDetailSheet do
     ~H"""
     <aside class="fixed inset-y-0 right-0 w-full max-w-[32rem] bg-white shadow-prominent z-40 p-md overflow-y-auto">
       <p class="text-sm text-azure italic">Support not found.</p>
-      <.button variant={:ghost} phx-click="close_support_sheet">Close</.button>
+      <.button variant={:ghost} phx-click="close_tab" phx-value-tab="profile">Close</.button>
     </aside>
     """
   end
@@ -66,7 +66,8 @@ defmodule IntellisparkWeb.StudentLive.SupportDetailSheet do
         </div>
         <button
           type="button"
-          phx-click="close_support_sheet"
+          phx-click="close_tab"
+          phx-value-tab="profile"
           aria-label="Close"
           class="text-azure hover:text-abbey"
         >
