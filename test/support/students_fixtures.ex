@@ -48,6 +48,14 @@ defmodule Intellispark.StudentsFixtures do
     updated
   end
 
+  def create_user_with_role!(school, role, email \\ nil) do
+    email = email || "user#{System.unique_integer([:positive])}@example.com"
+
+    email
+    |> register!("supersecret123")
+    |> with_membership!(school.id, role)
+  end
+
   def complete_onboarding_for!(school) do
     state =
       Intellispark.Billing.get_onboarding_state_by_school!(school.id,
