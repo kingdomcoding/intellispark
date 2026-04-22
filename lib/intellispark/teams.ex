@@ -33,5 +33,19 @@ defmodule Intellispark.Teams do
     end
 
     resource Intellispark.Teams.TeamMembership.Version
+
+    resource Intellispark.Teams.KeyConnection do
+      define :list_key_connections, action: :read
+      define :get_key_connection, action: :read, get_by: [:id]
+
+      define :create_key_connection,
+        action: :create,
+        args: [:student_id, :connected_user_id]
+
+      define :update_key_connection, action: :update
+      define :destroy_key_connection, action: :destroy
+    end
+
+    resource Intellispark.Teams.KeyConnection.Version
   end
 end
