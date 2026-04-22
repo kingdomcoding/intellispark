@@ -19,7 +19,7 @@ defmodule Intellispark.Recognition.Emails.HighFiveNotification do
         body_html: """
         <p style="font-size:16px;color:#2b4366;font-weight:500;">Hi #{first_name(student)},</p>
         <p>#{sender_name} sent you a High-5 for:</p>
-        <p style="white-space:pre-line;">#{high_five.body}</p>
+        <div>#{high_five.body}</div>
         """,
         cta_url: url,
         cta_label: "See your High 5",
