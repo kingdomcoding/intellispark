@@ -12,6 +12,10 @@ defmodule Intellispark.Accounts do
       define :list_users, action: :read
       define :get_user_by_id, action: :read, get_by: [:id]
       define :update_profile, action: :update_profile
+
+      define :set_email_preference,
+        action: :set_email_preference,
+        args: [:event_kind, :enabled?]
     end
 
     resource Intellispark.Accounts.Token

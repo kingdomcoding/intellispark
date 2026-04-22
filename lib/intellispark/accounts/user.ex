@@ -43,6 +43,8 @@ defmodule Intellispark.Accounts.User do
     attribute :first_name, :string, public?: true
     attribute :last_name, :string, public?: true
 
+    attribute :email_preferences, :map, default: %{}, public?: false
+
     attribute :confirmed_at, :utc_datetime_usec
 
     timestamps()
@@ -108,6 +110,13 @@ defmodule Intellispark.Accounts.User do
     update :set_district do
       accept [:district_id]
       require_atomic? false
+    end
+
+    update :set_email_preference do
+      argument :event_kind, :string, allow_nil?: false
+      argument :enabled?, :boolean, allow_nil?: false
+      require_atomic? false
+      change Intellispark.Accounts.User.Changes.SetEmailPreference
     end
 
     destroy :destroy do
