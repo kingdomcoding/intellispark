@@ -57,7 +57,15 @@ defmodule IntellisparkWeb.CustomListLive.Show do
       breadcrumb={%{label: "Back to my lists", path: ~p"/lists"}}
     >
       <section class="container-lg py-xl space-y-md">
-        <h1 class="text-display-md text-brand">{@list.name}</h1>
+        <div class="flex items-center justify-between">
+          <h1 class="text-display-md text-brand">{@list.name}</h1>
+          <.link
+            navigate={~p"/insights?list_id=#{@list.id}&return_to=#{~p"/lists/#{@list.id}"}"}
+            class="text-sm text-brand hover:underline"
+          >
+            View insights →
+          </.link>
+        </div>
         <p :if={@list.description} class="text-azure">{@list.description}</p>
 
         <div class="bg-white rounded-card shadow-card overflow-hidden">
