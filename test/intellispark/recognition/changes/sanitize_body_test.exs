@@ -51,7 +51,12 @@ defmodule Intellispark.Recognition.Changes.SanitizeBodyTest do
 
   test "sanitizes on :resend with edited body", %{school: school, admin: admin} do
     student = create_student!(school)
-    hf = send_high_five!(admin, school, student, %{body: "<p>old</p>", recipient_email: "k@example.com"})
+
+    hf =
+      send_high_five!(admin, school, student, %{
+        body: "<p>old</p>",
+        recipient_email: "k@example.com"
+      })
 
     {:ok, resent} =
       Recognition.resend_high_five(

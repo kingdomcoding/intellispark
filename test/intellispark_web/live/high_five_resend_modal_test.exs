@@ -26,9 +26,7 @@ defmodule IntellisparkWeb.HighFiveResendModalTest do
 
     html =
       lv
-      |> element(
-        ~s|button[phx-click="open_resend_high_five_modal"][phx-value-id="#{hf.id}"]|
-      )
+      |> element(~s|button[phx-click="open_resend_high_five_modal"][phx-value-id="#{hf.id}"]|)
       |> render_click()
 
     assert html =~ "Re-send High 5 to"
@@ -50,9 +48,7 @@ defmodule IntellisparkWeb.HighFiveResendModalTest do
     {:ok, lv, _html} = conn |> log_in_user(admin) |> live(~p"/students/#{student.id}")
 
     lv
-    |> element(
-      ~s|button[phx-click="open_resend_high_five_modal"][phx-value-id="#{hf.id}"]|
-    )
+    |> element(~s|button[phx-click="open_resend_high_five_modal"][phx-value-id="#{hf.id}"]|)
     |> render_click()
 
     lv
