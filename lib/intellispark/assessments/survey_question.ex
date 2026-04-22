@@ -42,7 +42,8 @@ defmodule Intellispark.Assessments.SurveyQuestion do
                     :long_text,
                     :single_choice,
                     :multi_choice,
-                    :likert_5
+                    :likert_5,
+                    :dimension_rating
                   ]
 
       public? true
@@ -74,12 +75,15 @@ defmodule Intellispark.Assessments.SurveyQuestion do
         :question_type,
         :metadata
       ]
+
+      change Intellispark.Assessments.Changes.ValidateDimensionMetadata
     end
 
     update :update do
       primary? true
       accept [:prompt, :help_text, :position, :required?, :question_type, :metadata]
       require_atomic? false
+      change Intellispark.Assessments.Changes.ValidateDimensionMetadata
     end
   end
 

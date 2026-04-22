@@ -379,6 +379,32 @@ defmodule IntellisparkWeb.SurveyLive.Show do
     """
   end
 
+  defp answer_input(%{question: %{"question_type" => "dimension_rating"}} = assigns) do
+    labels =
+      assigns.question["metadata"]["scale_labels"] ||
+        ["Never", "Rarely", "Sometimes", "Often", "Always"]
+
+    assigns = assign(assigns, labels: labels)
+
+    ~H"""
+    <form phx-change="save_answer" class="flex items-center justify-between gap-xs">
+      <input type="hidden" name="question_id" value={@question["id"]} />
+      <label
+        :for={{label, idx} <- Enum.with_index(@labels)}
+        class="flex flex-col items-center gap-xs text-xs text-abbey cursor-pointer flex-1"
+      >
+        <input
+          type="radio"
+          name="answer_text"
+          value={Integer.to_string(idx + 1)}
+          checked={@current["answer_text"] == Integer.to_string(idx + 1)}
+        />
+        <span>{label}</span>
+      </label>
+    </form>
+    """
+  end
+
   attr :title, :string, required: true
   attr :body, :string, required: true
 
