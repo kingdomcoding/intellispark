@@ -22,9 +22,7 @@ defmodule IntellisparkWeb.InsightsControllerTest do
       )
 
     {:ok, _} =
-      Indicators.upsert_indicator_score(s3.id, :belonging, :high, 4.5, 2,
-        tenant: world.school.id
-      )
+      Indicators.upsert_indicator_score(s3.id, :belonging, :high, 4.5, 2, tenant: world.school.id)
 
     Map.merge(
       %{conn: Phoenix.ConnTest.build_conn(), students: [s1, s2, s3]},

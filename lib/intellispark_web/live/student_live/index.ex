@@ -64,8 +64,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
   def handle_event("open_bulk_modal", %{"action" => "insights"}, socket) do
     ids = socket.assigns.selected |> MapSet.to_list() |> Enum.join(",")
 
-    {:noreply,
-     push_navigate(socket, to: ~p"/insights?student_ids=#{ids}&return_to=/students")}
+    {:noreply, push_navigate(socket, to: ~p"/insights?student_ids=#{ids}&return_to=/students")}
   end
 
   def handle_event("open_bulk_modal", %{"action" => action}, socket) do

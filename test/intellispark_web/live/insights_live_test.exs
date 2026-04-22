@@ -23,9 +23,7 @@ defmodule IntellisparkWeb.InsightsLiveTest do
       )
 
     {:ok, _} =
-      Indicators.upsert_indicator_score(s3.id, :belonging, :high, 4.5, 2,
-        tenant: world.school.id
-      )
+      Indicators.upsert_indicator_score(s3.id, :belonging, :high, 4.5, 2, tenant: world.school.id)
 
     Map.merge(
       %{conn: Phoenix.ConnTest.build_conn(), students: [s1, s2, s3]},
@@ -77,8 +75,10 @@ defmodule IntellisparkWeb.InsightsLiveTest do
     {:ok, list} =
       Ash.create(
         CustomList,
-        %{name: "Test-Insights-#{:erlang.unique_integer([:positive])}",
-          filters: %{name_contains: "Alice"}},
+        %{
+          name: "Test-Insights-#{:erlang.unique_integer([:positive])}",
+          filters: %{name_contains: "Alice"}
+        },
         tenant: school_id,
         actor: admin_loaded,
         authorize?: false

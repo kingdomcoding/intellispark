@@ -211,9 +211,24 @@ defmodule IntellisparkWeb.InsightsLive do
         </tr>
       </thead>
       <tbody>
-        <.legend_row label="High" count={@summary.high} total={@summary.total} color="bg-indicator-high-text" />
-        <.legend_row label="Moderate" count={@summary.moderate} total={@summary.total} color="bg-indicator-moderate-text" />
-        <.legend_row label="Low" count={@summary.low} total={@summary.total} color="bg-indicator-low-text" />
+        <.legend_row
+          label="High"
+          count={@summary.high}
+          total={@summary.total}
+          color="bg-indicator-high-text"
+        />
+        <.legend_row
+          label="Moderate"
+          count={@summary.moderate}
+          total={@summary.total}
+          color="bg-indicator-moderate-text"
+        />
+        <.legend_row
+          label="Low"
+          count={@summary.low}
+          total={@summary.total}
+          color="bg-indicator-low-text"
+        />
       </tbody>
     </table>
     """
