@@ -100,6 +100,15 @@ defmodule IntellisparkWeb.StyleguideLive do
         </section>
 
         <section>
+          <h2 class="text-display-sm mb-md">Donut (Insights)</h2>
+          <div class="flex gap-xl items-center">
+            <.donut summary={%{high: 0, moderate: 0, low: 0, unscored: 0, total: 0}} />
+            <.donut summary={%{high: 2, moderate: 1, low: 1, unscored: 0, total: 4}} />
+            <.donut summary={%{high: 8, moderate: 3, low: 2, unscored: 0, total: 13}} />
+          </div>
+        </section>
+
+        <section>
           <h2 class="text-display-sm mb-md">Status Badges</h2>
           <div class="flex gap-sm">
             <.status_badge label="SST - Followup" variant={:followup} />

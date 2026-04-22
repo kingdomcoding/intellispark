@@ -45,7 +45,10 @@ defmodule IntellisparkWeb.Router do
       live "/students/:id", StudentLive.Show
       live "/lists", CustomListLive.Index
       live "/lists/:id", CustomListLive.Show
+      live "/insights", InsightsLive
     end
+
+    get "/insights/export.csv", InsightsController, :export
   end
 
   scope "/" do

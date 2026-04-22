@@ -79,6 +79,7 @@ defmodule Intellispark.MixProject do
       {:swoosh, "~> 1.25"},
       {:req, "~> 0.5"},
       {:finch, "~> 0.21"},
+      {:nimble_csv, "~> 1.2"},
       {:cloak, "~> 1.1"},
       {:cloak_ecto, "~> 1.3"},
       {:hammer, "~> 7.3"},
