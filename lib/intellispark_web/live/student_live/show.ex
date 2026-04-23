@@ -1441,11 +1441,297 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   defp about_tab_pane(assigns) do
+    outer = assigns.outer
+    on_pro? = on_pro_school?(outer.current_school)
+    xello = outer.xello_profile
+    skill_scores = outer.resiliency_skill_scores || []
+
+    assigns =
+      assigns
+      |> assign(:on_pro?, on_pro?)
+      |> assign(:xello, xello)
+      |> assign(:skill_scores, skill_scores)
+      |> assign(:risk_index, Map.get(outer.student, :academic_risk_index))
+      |> assign(:contributing_factors, Map.get(outer.student, :contributing_factors) || [])
+
     ~H"""
-    <div class="bg-white rounded-card shadow-card p-md">
+    <div class="space-y-md">
+      <.about_hero_row xello={@xello} on_pro?={@on_pro?} />
+      <.about_overview_grid
+        xello={@xello}
+        skill_scores={@skill_scores}
+        risk_index={@risk_index}
+        contributing_factors={@contributing_factors}
+        on_pro?={@on_pro?}
+      />
+      <.about_suggested_clusters
+        :if={@on_pro? && @xello && @xello.suggested_clusters != []}
+        clusters={@xello.suggested_clusters}
+      />
+    </div>
+    """
+  end
+
+  attr :xello, :any, required: true
+  attr :on_pro?, :boolean, required: true
+
+  defp about_hero_row(assigns) do
+    ~H"""
+    <div :if={@on_pro?} class="grid grid-cols-1 md:grid-cols-3 gap-md">
+      <.personality_card xello={@xello} />
+      <.learning_card xello={@xello} />
+      <.lessons_card xello={@xello} />
+    </div>
+    <div :if={!@on_pro?} class="bg-white rounded-card shadow-card p-md text-center">
       <p class="text-sm text-azure italic">
-        About the Student lands in Phase 11/14 (Xello + ScholarCentric integration).
+        ScholarCentric + Xello require a PRO plan.
       </p>
+    </div>
+    """
+  end
+
+  attr :xello, :any, required: true
+
+  defp personality_card(assigns) do
+    traits = personality_traits(assigns.xello)
+    summary = personality_donut_summary(assigns.xello)
+    assigns = assign(assigns, traits: traits, summary: summary)
+
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <h3 class="text-xs uppercase text-azure tracking-wide">Personality Style</h3>
+      <div :if={@xello && @traits != []} class="flex items-center gap-sm">
+        <.donut summary={@summary} class="h-16 w-16" />
+        <ul class="space-y-xs text-sm text-abbey">
+          <li :for={{label, category} <- @traits}>
+            <span class="font-medium">{label}</span> / {category}
+          </li>
+        </ul>
+      </div>
+      <p :if={!@xello || @traits == []} class="text-xs text-azure italic">
+        Connect Xello to populate.
+      </p>
+    </div>
+    """
+  end
+
+  attr :xello, :any, required: true
+
+  defp learning_card(assigns) do
+    label = learning_style_label(assigns.xello)
+    color = learning_style_color(assigns.xello)
+    assigns = assigns |> assign(:label, label) |> assign(:color, color)
+
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <h3 class="text-xs uppercase text-azure tracking-wide">Learning Style</h3>
+      <div :if={@xello && @label} class="flex items-center gap-sm">
+        <span class={["inline-flex h-16 w-16 rounded-full", @color]}></span>
+        <p class="text-sm text-abbey font-medium">{@label}</p>
+      </div>
+      <p :if={!@xello || !@label} class="text-xs text-azure italic">
+        Connect Xello to populate.
+      </p>
+    </div>
+    """
+  end
+
+  attr :xello, :any, required: true
+
+  defp lessons_card(assigns) do
+    count = lessons_completed_count(assigns.xello)
+    assigns = assign(assigns, :count, count)
+
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <h3 class="text-xs uppercase text-azure tracking-wide">Lessons Complete</h3>
+      <div :if={@xello} class="flex items-center gap-sm">
+        <span class="inline-flex h-16 w-16 rounded-full bg-whitesmoke"></span>
+        <p class="text-sm text-abbey font-medium">{@count} of 8</p>
+      </div>
+      <p :if={!@xello} class="text-xs text-azure italic">
+        Connect Xello to populate.
+      </p>
+    </div>
+    """
+  end
+
+  attr :xello, :any, required: true
+  attr :skill_scores, :list, required: true
+  attr :risk_index, :any, required: true
+  attr :contributing_factors, :list, required: true
+  attr :on_pro?, :boolean, required: true
+
+  defp about_overview_grid(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md grid grid-cols-1 md:grid-cols-2 gap-lg">
+      <div class="space-y-md">
+        <.overview_row icon="MS" label="Education Goals" value={@xello && @xello.education_goals} />
+        <.overview_row
+          icon="CC"
+          label="Favorite Career Clusters"
+          value={list_join(@xello && @xello.favorite_career_clusters)}
+        />
+        <.overview_row icon="SK" label="Saved Skills" value={list_join(@xello && @xello.skills)} />
+        <.overview_row
+          icon="IN"
+          label="Saved Interests"
+          value={list_join(@xello && @xello.interests)}
+        />
+      </div>
+      <div class="space-y-md">
+        <.places_row xello={@xello} />
+        <.resiliency_row scores={@skill_scores} on_pro?={@on_pro?} />
+        <.risk_row
+          index={@risk_index}
+          factors={@contributing_factors}
+          on_pro?={@on_pro?}
+        />
+      </div>
+    </div>
+    """
+  end
+
+  attr :icon, :string, required: true
+  attr :label, :string, required: true
+  attr :value, :any, required: true
+
+  defp overview_row(assigns) do
+    ~H"""
+    <div class="flex gap-sm items-start">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-whitesmoke text-azure text-xs shrink-0 font-medium">
+        {@icon}
+      </span>
+      <div class="flex-1 space-y-xs">
+        <p class="text-xs text-azure">{@label}</p>
+        <p class="text-sm text-abbey">{@value || "—"}</p>
+      </div>
+    </div>
+    """
+  end
+
+  attr :xello, :any, required: true
+
+  defp places_row(assigns) do
+    ~H"""
+    <div class="flex gap-sm items-start">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-whitesmoke text-azure text-xs shrink-0 font-medium">
+        PL
+      </span>
+      <div class="flex-1 space-y-xs">
+        <p class="text-xs text-azure">Places</p>
+        <p :if={@xello && @xello.birthplace} class="text-sm text-abbey">
+          <span class="text-azure">Birthplace:</span> {@xello.birthplace}
+        </p>
+        <p :if={@xello && @xello.live_in} class="text-sm text-abbey">
+          <span class="text-azure">Live in:</span> {@xello.live_in}
+        </p>
+        <p :if={@xello && @xello.family_roots} class="text-sm text-abbey">
+          <span class="text-azure">Family roots:</span> {@xello.family_roots}
+        </p>
+        <p
+          :if={
+            !@xello ||
+              (@xello.birthplace == nil && @xello.live_in == nil && @xello.family_roots == nil)
+          }
+          class="text-sm text-azure italic"
+        >
+          Nothing to report yet.
+        </p>
+      </div>
+    </div>
+    """
+  end
+
+  attr :scores, :list, required: true
+  attr :on_pro?, :boolean, required: true
+
+  defp resiliency_row(assigns) do
+    ~H"""
+    <div class="flex gap-sm items-start">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-whitesmoke text-azure text-xs shrink-0 font-medium">
+        RS
+      </span>
+      <div class="flex-1 space-y-xs">
+        <p class="text-xs text-azure">Resiliency Skills</p>
+        <div :if={@on_pro? && @scores != []} class="grid grid-cols-1 gap-xs">
+          <span :for={s <- @scores} class="text-sm text-abbey">
+            <strong>{humanize_skill(s.skill)}:</strong>
+            <span class={[
+              "inline-flex items-center rounded-pill px-2 py-0.5 text-xs font-medium ml-1",
+              resiliency_level_class(s.level)
+            ]}>
+              {humanize_risk_band(s.level)}
+            </span>
+          </span>
+        </div>
+        <p :if={!@on_pro?} class="text-sm italic text-azure">
+          ScholarCentric requires a PRO plan.
+        </p>
+        <p :if={@on_pro? && @scores == []} class="text-sm italic text-azure">
+          Assign a resiliency survey to populate.
+        </p>
+      </div>
+    </div>
+    """
+  end
+
+  attr :index, :any, required: true
+  attr :factors, :list, required: true
+  attr :on_pro?, :boolean, required: true
+
+  defp risk_row(assigns) do
+    ~H"""
+    <div class="flex gap-sm items-start">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-whitesmoke text-azure text-xs shrink-0 font-medium">
+        AR
+      </span>
+      <div class="flex-1 space-y-xs">
+        <p class="text-xs text-azure">Academic Risk Index</p>
+        <div :if={@on_pro? && @index} class="flex items-center gap-sm flex-wrap">
+          <.risk_band_pill band={@index} />
+          <span :if={@factors != []} class="text-sm text-abbey">
+            {factors_label(@factors)}
+          </span>
+        </div>
+        <p :if={!@on_pro?} class="text-sm italic text-azure">
+          ScholarCentric requires a PRO plan.
+        </p>
+        <p :if={@on_pro? && !@index} class="text-sm italic text-azure">
+          Not yet scored.
+        </p>
+      </div>
+    </div>
+    """
+  end
+
+  attr :band, :atom, required: true
+
+  defp risk_band_pill(assigns) do
+    ~H"""
+    <span class={[
+      "inline-flex items-center rounded-pill px-sm py-0.5 text-xs font-medium",
+      risk_pill_class(@band)
+    ]}>
+      {humanize_risk_band(@band)}
+    </span>
+    """
+  end
+
+  attr :clusters, :list, required: true
+
+  defp about_suggested_clusters(assigns) do
+    ~H"""
+    <div class="bg-white rounded-card shadow-card p-md space-y-sm">
+      <h3 class="text-xs uppercase text-azure tracking-wide">Suggested Clusters</h3>
+      <div class="flex flex-wrap gap-xs">
+        <span
+          :for={c <- @clusters}
+          class="inline-flex items-center rounded-pill bg-whitesmoke text-abbey text-xs px-sm py-0.5"
+        >
+          {c}
+        </span>
+      </div>
     </div>
     """
   end
@@ -2739,4 +3025,136 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp humanize_error(error) when is_exception(error), do: Exception.message(error)
 
   defp humanize_error(_), do: "Something went wrong."
+
+  defp on_pro_school?(%{subscription: %{tier: :pro}}), do: true
+  defp on_pro_school?(_), do: false
+
+  defp humanize_skill(:confidence), do: "Confidence"
+  defp humanize_skill(:persistence), do: "Persistence"
+  defp humanize_skill(:organization), do: "Organization"
+  defp humanize_skill(:getting_along), do: "Getting Along"
+  defp humanize_skill(:resilience), do: "Resilience"
+  defp humanize_skill(:curiosity), do: "Curiosity"
+
+  defp humanize_skill(other) when is_atom(other),
+    do: other |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
+
+  defp humanize_risk_band(:low), do: "Low"
+  defp humanize_risk_band(:moderate), do: "Moderate"
+  defp humanize_risk_band(:high), do: "High"
+  defp humanize_risk_band(:critical), do: "Critical"
+  defp humanize_risk_band(_), do: "—"
+
+  defp risk_pill_class(:low), do: "bg-green-100 text-green-900"
+  defp risk_pill_class(:moderate), do: "bg-yellow-100 text-yellow-900"
+  defp risk_pill_class(:high), do: "bg-orange-100 text-orange-900"
+  defp risk_pill_class(:critical), do: "bg-chocolate/10 text-chocolate"
+  defp risk_pill_class(_), do: "bg-whitesmoke text-azure"
+
+  defp resiliency_level_class(:high), do: "bg-green-100 text-green-900"
+  defp resiliency_level_class(:moderate), do: "bg-yellow-100 text-yellow-900"
+  defp resiliency_level_class(:low), do: "bg-chocolate/10 text-chocolate"
+  defp resiliency_level_class(_), do: "bg-whitesmoke text-azure"
+
+  @personality_vocab %{
+    "helper" => {"Helper", "Social"},
+    "organizer" => {"Organizer", "Conventional"},
+    "persuader" => {"Persuader", "Enterprising"},
+    "builder" => {"Builder", "Realistic"},
+    "creator" => {"Creator", "Artistic"},
+    "thinker" => {"Thinker", "Investigative"}
+  }
+
+  defp personality_traits(nil), do: []
+
+  defp personality_traits(%{personality_style: ps}) when is_map(ps) and map_size(ps) > 0 do
+    ps
+    |> Enum.sort_by(fn {_k, v} -> -(v || 0) end)
+    |> Enum.map(fn {k, _v} ->
+      Map.get(@personality_vocab, k, {String.capitalize(k), "—"})
+    end)
+    |> Enum.take(3)
+  end
+
+  defp personality_traits(_), do: []
+
+  defp personality_donut_summary(nil), do: %{low: 0, moderate: 0, high: 0, total: 0}
+
+  defp personality_donut_summary(%{personality_style: ps}) when is_map(ps) and map_size(ps) > 0 do
+    values = ps |> Map.values() |> Enum.map(&(&1 || 0.0)) |> Enum.sort(:desc)
+
+    case values do
+      [top, mid, bot | _] ->
+        %{
+          high: round(top * 100),
+          moderate: round(mid * 100),
+          low: round(bot * 100),
+          total: round((top + mid + bot) * 100)
+        }
+
+      [top, mid] ->
+        %{
+          high: round(top * 100),
+          moderate: round(mid * 100),
+          low: 0,
+          total: round((top + mid) * 100)
+        }
+
+      [top] ->
+        %{high: round(top * 100), moderate: 0, low: 0, total: round(top * 100)}
+
+      _ ->
+        %{low: 0, moderate: 0, high: 0, total: 0}
+    end
+  end
+
+  defp personality_donut_summary(_), do: %{low: 0, moderate: 0, high: 0, total: 0}
+
+  defp learning_style_label(nil), do: nil
+
+  defp learning_style_label(%{learning_style: ls}) when is_map(ls) and map_size(ls) > 0 do
+    case Enum.max_by(ls, fn {_k, v} -> v || 0 end, fn -> nil end) do
+      {"visual", _} -> "Visual Learner"
+      {"auditory", _} -> "Auditory Learner"
+      {"tactile", _} -> "Tactile Learner"
+      {label, _} when is_binary(label) -> "#{String.capitalize(label)} Learner"
+      _ -> nil
+    end
+  end
+
+  defp learning_style_label(_), do: nil
+
+  defp learning_style_color(nil), do: "bg-whitesmoke"
+
+  defp learning_style_color(%{learning_style: ls}) when is_map(ls) and map_size(ls) > 0 do
+    case Enum.max_by(ls, fn {_k, v} -> v || 0 end, fn -> nil end) do
+      {"visual", _} -> "bg-green-500"
+      {"auditory", _} -> "bg-blue-500"
+      {"tactile", _} -> "bg-brand"
+      _ -> "bg-whitesmoke"
+    end
+  end
+
+  defp learning_style_color(_), do: "bg-whitesmoke"
+
+  defp lessons_completed_count(nil), do: 0
+
+  defp lessons_completed_count(%{completed_lessons: lessons}) when is_list(lessons),
+    do: length(lessons)
+
+  defp lessons_completed_count(_), do: 0
+
+  defp list_join(nil), do: nil
+  defp list_join([]), do: nil
+  defp list_join(list) when is_list(list), do: Enum.join(list, ", ")
+  defp list_join(other), do: to_string(other)
+
+  defp factors_label([]), do: ""
+
+  defp factors_label(factors) do
+    factors
+    |> Enum.map(&humanize_skill/1)
+    |> Enum.join(", ")
+    |> then(&"Top contributors: #{&1}")
+  end
 end
