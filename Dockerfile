@@ -35,6 +35,9 @@ ENV MIX_ENV=prod
 COPY priv priv
 COPY lib lib
 COPY assets assets
+# docs/ holds the ADRs + phase plans that the engineering-journal LV
+# reads at request time; bundle them so they survive into the runtime image.
+COPY docs docs
 # Needed for mix landing.record_build_info (git log, git tag) during build.
 COPY .git .git
 
