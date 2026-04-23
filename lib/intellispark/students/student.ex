@@ -328,6 +328,18 @@ defmodule Intellispark.Students.Student do
       require_atomic? false
       change Intellispark.Students.Changes.RemoveTag
     end
+
+    update :archive do
+      accept []
+      require_atomic? false
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
+    end
+
+    update :unarchive do
+      accept []
+      require_atomic? false
+      change set_attribute(:archived_at, nil)
+    end
   end
 
   policies do
@@ -340,8 +352,20 @@ defmodule Intellispark.Students.Student do
       authorize_if IntellisparkWeb.Policies.ActorBelongsToTenantSchool
     end
 
-    policy action_type([:update, :destroy]) do
+    policy action_type(:destroy) do
       authorize_if IntellisparkWeb.Policies.StaffEditsStudentsInSchool
+    end
+
+    policy action_type(:update) do
+      authorize_if IntellisparkWeb.Policies.StaffEditsStudentsInSchool
+    end
+
+    policy action(:archive) do
+      authorize_if IntellisparkWeb.Policies.AdminOrClinicalRoleInSchool
+    end
+
+    policy action(:unarchive) do
+      authorize_if IntellisparkWeb.Policies.AdminOrClinicalRoleInSchool
     end
   end
 end

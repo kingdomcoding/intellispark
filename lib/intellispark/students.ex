@@ -22,7 +22,10 @@ defmodule Intellispark.Students do
         args: [:first_name, :last_name, :grade_level]
 
       define :update_student, action: :update
-      define :archive_student, action: :destroy
+      define :destroy_student, action: :destroy
+
+      define :archive_student, action: :archive
+      define :unarchive_student, action: :unarchive
 
       define :set_student_status, action: :set_status, args: [:status_id]
       define :clear_student_status, action: :clear_status
