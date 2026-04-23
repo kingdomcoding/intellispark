@@ -72,6 +72,10 @@ defmodule Intellispark.Integrations.IntegrationSyncRun do
       destination_attribute: :sync_run_id
   end
 
+  calculations do
+    calculate :district_id, :uuid, expr(school.district_id)
+  end
+
   actions do
     defaults [:read]
 

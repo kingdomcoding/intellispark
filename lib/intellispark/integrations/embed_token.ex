@@ -52,6 +52,10 @@ defmodule Intellispark.Integrations.EmbedToken do
     belongs_to :created_by, Intellispark.Accounts.User, allow_nil?: false
   end
 
+  calculations do
+    calculate :district_id, :uuid, expr(school.district_id)
+  end
+
   actions do
     defaults [:read]
 
@@ -93,7 +97,6 @@ defmodule Intellispark.Integrations.EmbedToken do
       argument :token, :string, allow_nil?: false
       filter expr(token == ^arg(:token))
       multitenancy :bypass
-      get? true
     end
   end
 
@@ -106,7 +109,11 @@ defmodule Intellispark.Integrations.EmbedToken do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchool
     end
 
-    policy action_type([:create, :update]) do
+    policy action_type(:create) do
+      authorize_if IntellisparkWeb.Policies.DistrictAdminForSchoolScopedCreate
+    end
+
+    policy action_type(:update) do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchool
     end
   end

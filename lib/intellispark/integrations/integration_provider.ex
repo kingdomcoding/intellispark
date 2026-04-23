@@ -120,6 +120,13 @@ defmodule Intellispark.Integrations.IntegrationProvider do
       require_atomic? false
       change {Intellispark.Integrations.Changes.EnqueueSyncRun, trigger_source: :manual}
     end
+
+    read :webhook_lookup do
+      argument :provider_id, :uuid, allow_nil?: false
+      filter expr(id == ^arg(:provider_id))
+      multitenancy :bypass
+      get? true
+    end
   end
 
   policies do
@@ -129,8 +136,11 @@ defmodule Intellispark.Integrations.IntegrationProvider do
     end
 
     policy action(:create) do
-      authorize_if IntellisparkWeb.Policies.RequiresTierForXello
       authorize_if IntellisparkWeb.Policies.DistrictAdminForSchoolScopedCreate
+    end
+
+    policy action(:create) do
+      authorize_if IntellisparkWeb.Policies.RequiresTierForXello
     end
 
     policy action_type(:update) do
@@ -139,6 +149,10 @@ defmodule Intellispark.Integrations.IntegrationProvider do
 
     policy action(:run_now) do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchool
+    end
+
+    policy action(:webhook_lookup) do
+      authorize_if always()
     end
   end
 end

@@ -23,6 +23,11 @@ defmodule Intellispark.Integrations do
       define :activate_provider, action: :activate
       define :deactivate_provider, action: :deactivate
       define :run_sync_now, action: :run_now
+
+      define :lookup_provider_for_webhook,
+        action: :webhook_lookup,
+        args: [:provider_id],
+        get?: true
     end
 
     resource Intellispark.Integrations.IntegrationProvider.Version
@@ -59,7 +64,6 @@ defmodule Intellispark.Integrations do
     resource Intellispark.Integrations.XelloProfile.Version
 
     resource Intellispark.Integrations.EmbedToken do
-      define :get_embed_token, action: :by_token, args: [:token], get?: true
       define :list_embed_tokens, action: :read
       define :mint_embed_token, action: :mint
       define :regenerate_embed_token, action: :regenerate

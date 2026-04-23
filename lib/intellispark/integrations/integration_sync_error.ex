@@ -43,6 +43,10 @@ defmodule Intellispark.Integrations.IntegrationSyncError do
     belongs_to :sync_run, Intellispark.Integrations.IntegrationSyncRun, allow_nil?: false
   end
 
+  calculations do
+    calculate :district_id, :uuid, expr(school.district_id)
+  end
+
   actions do
     defaults [:read]
 

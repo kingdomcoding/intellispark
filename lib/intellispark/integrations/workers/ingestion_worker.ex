@@ -51,9 +51,11 @@ defmodule Intellispark.Integrations.Workers.IngestionWorker do
     do: %{processed: 0, created: 0, updated: 0, failed: 0}
 
   defp bulk_upsert(payloads, school_id, run) do
+    stripped = Enum.map(payloads, &Map.drop(&1, [:school_id]))
+
     result =
       Ash.bulk_create(
-        payloads,
+        stripped,
         Student,
         :upsert_from_sis,
         return_records?: true,

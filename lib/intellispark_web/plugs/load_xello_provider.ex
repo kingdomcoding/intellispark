@@ -7,8 +7,6 @@ defmodule IntellisparkWeb.Plugs.LoadXelloProvider do
 
   import Plug.Conn
 
-  alias Intellispark.Integrations.IntegrationProvider
-
   def init(opts), do: opts
 
   def call(conn, _opts) do
@@ -23,7 +21,7 @@ defmodule IntellisparkWeb.Plugs.LoadXelloProvider do
   defp lookup(nil), do: :error
 
   defp lookup(provider_id) do
-    case Ash.get(IntegrationProvider, provider_id, authorize?: false) do
+    case Intellispark.Integrations.lookup_provider_for_webhook(provider_id, authorize?: false) do
       {:ok, %{provider_type: :xello} = provider} -> {:ok, provider}
       _ -> :error
     end

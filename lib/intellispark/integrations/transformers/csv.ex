@@ -70,8 +70,6 @@ defmodule Intellispark.Integrations.Transformers.Csv do
 
   defp parse_gender("M"), do: :male
   defp parse_gender("F"), do: :female
-  defp parse_gender("NB"), do: :nonbinary
-  defp parse_gender(nil), do: :unspecified
-  defp parse_gender(""), do: :unspecified
-  defp parse_gender(_), do: :unspecified
+  defp parse_gender("NB"), do: :non_binary
+  defp parse_gender(_), do: nil
 end

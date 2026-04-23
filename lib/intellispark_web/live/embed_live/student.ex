@@ -14,7 +14,7 @@ defmodule IntellisparkWeb.EmbedLive.Student do
   alias Intellispark.Flags.Flag
   alias Intellispark.Indicators.Dimension
   alias Intellispark.Indicators.IndicatorScore
-  alias Intellispark.Integrations
+  alias Intellispark.Integrations.EmbedToken
   alias Intellispark.Students.Student
 
   @impl true
@@ -26,7 +26,12 @@ defmodule IntellisparkWeb.EmbedLive.Student do
   end
 
   defp load(socket, token) do
-    case Integrations.get_embed_token(token) do
+    query =
+      EmbedToken
+      |> Ash.Query.for_read(:by_token, %{token: token})
+
+    case Ash.read_one(query, authorize?: false) do
+      {:ok, nil} -> assign(socket, state: :not_found)
       {:ok, embed_token} -> hydrate(socket, embed_token)
       _ -> assign(socket, state: :not_found)
     end
@@ -75,31 +80,31 @@ defmodule IntellisparkWeb.EmbedLive.Student do
   @impl true
   def render(%{state: :revoked} = assigns) do
     ~H"""
-    <Layouts.embed>
+    <div>
       <div class="p-lg text-center text-sm text-abbey">This embed has been revoked.</div>
-    </Layouts.embed>
+    </div>
     """
   end
 
   def render(%{state: :expired} = assigns) do
     ~H"""
-    <Layouts.embed>
+    <div>
       <div class="p-lg text-center text-sm text-abbey">This embed has expired.</div>
-    </Layouts.embed>
+    </div>
     """
   end
 
   def render(%{state: :not_found} = assigns) do
     ~H"""
-    <Layouts.embed>
+    <div>
       <div class="p-lg text-center text-sm text-abbey">Embed not found.</div>
-    </Layouts.embed>
+    </div>
     """
   end
 
   def render(%{state: :ok} = assigns) do
     ~H"""
-    <Layouts.embed>
+    <div>
       <div class="bg-white p-md space-y-md">
         <section>
           <h2 class="text-lg font-semibold text-abbey mb-sm">SEL &amp; Well-Being Indicators</h2>
@@ -141,7 +146,7 @@ defmodule IntellisparkWeb.EmbedLive.Student do
           </table>
         </section>
       </div>
-    </Layouts.embed>
+    </div>
     """
   end
 

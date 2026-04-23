@@ -54,6 +54,10 @@ defmodule Intellispark.Integrations.XelloProfile do
     belongs_to :student, Intellispark.Students.Student, allow_nil?: false
   end
 
+  calculations do
+    calculate :district_id, :uuid, expr(school.district_id)
+  end
+
   actions do
     defaults [:read]
 
