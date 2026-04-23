@@ -29,8 +29,16 @@ defmodule Intellispark.Integrations.IntegrationProvider do
         worker_module_name Intellispark.Integrations.IntegrationProvider.AshOban.Worker.ScheduledSync
 
         scheduler_module_name Intellispark.Integrations.IntegrationProvider.AshOban.Scheduler.ScheduledSync
+
+        list_tenants(&Intellispark.Integrations.IntegrationProvider.list_school_tenants/0)
       end
     end
+  end
+
+  def list_school_tenants do
+    Intellispark.Accounts.School
+    |> Ash.read!(authorize?: false)
+    |> Enum.map(& &1.id)
   end
 
   multitenancy do
