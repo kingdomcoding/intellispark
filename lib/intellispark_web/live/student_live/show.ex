@@ -56,6 +56,16 @@ defmodule IntellisparkWeb.StudentLive.Show do
           Intellispark.PubSub,
           "strengths:student:#{student.id}"
         )
+
+        Phoenix.PubSub.subscribe(
+          Intellispark.PubSub,
+          "xello_profiles:student:#{student.id}"
+        )
+
+        Phoenix.PubSub.subscribe(
+          Intellispark.PubSub,
+          "resiliency_skill_scores:student:#{student.id}"
+        )
       end
 
       {:ok,
@@ -103,7 +113,9 @@ defmodule IntellisparkWeb.StudentLive.Show do
          open_tabs: [],
          confirm_modal: nil,
          transfer_schools: [],
-         can_transfer?: can_transfer?(actor, school)
+         can_transfer?: can_transfer?(actor, school),
+         xello_profile: load_xello_profile(student, actor, school),
+         resiliency_skill_scores: load_resiliency_skill_scores(student, actor, school)
        )
        |> allow_upload(:photo,
          accept: ~w(.png .jpg .jpeg .webp),
@@ -669,6 +681,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, reload_strengths(socket)}
   end
 
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "xello_profiles:" <> _}, socket) do
+    {:noreply, reload_about(socket)}
+  end
+
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "resiliency_skill_scores:" <> _}, socket) do
+    {:noreply, reload_about(socket)}
+  end
+
   def handle_info({IntellisparkWeb.StudentLive.NewTeamMemberModal, :team_member_added}, socket) do
     {:noreply,
      socket
@@ -810,6 +830,18 @@ defmodule IntellisparkWeb.StudentLive.Show do
     assign(socket,
       strengths: load_strengths_for(student, actor, school),
       timeline: load_timeline(student, school)
+    )
+  end
+
+  defp reload_about(socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    {:ok, reloaded} = load_student(student, actor, school)
+
+    assign(socket,
+      student: reloaded,
+      xello_profile: load_xello_profile(student, actor, school),
+      resiliency_skill_scores: load_resiliency_skill_scores(student, actor, school)
     )
   end
 
@@ -1034,6 +1066,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
         :open_flags_count,
         :open_supports_count,
         :recent_high_fives_count,
+        :academic_risk_index,
+        :contributing_factors,
         tags: [:id, :name, :color],
         team_memberships: [:user, :added_by],
         key_connections: [:connected_user, :connected_external_person]
@@ -1041,6 +1075,29 @@ defmodule IntellisparkWeb.StudentLive.Show do
       actor: actor,
       tenant: school.id
     )
+  end
+
+  defp load_xello_profile(student, actor, school) do
+    Intellispark.Integrations.XelloProfile
+    |> Ash.Query.filter(student_id == ^student.id)
+    |> Ash.Query.set_tenant(school.id)
+    |> Ash.read_one(actor: actor)
+    |> case do
+      {:ok, profile} -> profile
+      _ -> nil
+    end
+  end
+
+  defp load_resiliency_skill_scores(student, actor, school) do
+    Intellispark.Assessments.Resiliency.SkillScore
+    |> Ash.Query.filter(student_id == ^student.id)
+    |> Ash.Query.sort(:skill)
+    |> Ash.Query.set_tenant(school.id)
+    |> Ash.read(actor: actor)
+    |> case do
+      {:ok, scores} -> scores
+      _ -> []
+    end
   end
 
   defp load_strengths_for(student, actor, school) do

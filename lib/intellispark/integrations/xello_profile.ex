@@ -36,6 +36,7 @@ defmodule Intellispark.Integrations.XelloProfile do
     attribute :live_in, :string, public?: true
     attribute :family_roots, :string, public?: true
     attribute :suggested_clusters, {:array, :string}, default: [], public?: true
+    attribute :completed_lessons, {:array, :string}, default: [], public?: true
 
     attribute :last_synced_at, :utc_datetime_usec,
       allow_nil?: false,
@@ -76,6 +77,7 @@ defmodule Intellispark.Integrations.XelloProfile do
         :live_in,
         :family_roots,
         :suggested_clusters,
+        :completed_lessons,
         :last_synced_at
       ]
     end
@@ -92,7 +94,8 @@ defmodule Intellispark.Integrations.XelloProfile do
         :birthplace,
         :live_in,
         :family_roots,
-        :suggested_clusters
+        :suggested_clusters,
+        :completed_lessons
       ]
 
       upsert? true
@@ -109,6 +112,7 @@ defmodule Intellispark.Integrations.XelloProfile do
         :live_in,
         :family_roots,
         :suggested_clusters,
+        :completed_lessons,
         :last_synced_at,
         :updated_at
       ]
@@ -127,7 +131,8 @@ defmodule Intellispark.Integrations.XelloProfile do
         :birthplace,
         :live_in,
         :family_roots,
-        :suggested_clusters
+        :suggested_clusters,
+        :completed_lessons
       ]
 
       require_atomic? false
