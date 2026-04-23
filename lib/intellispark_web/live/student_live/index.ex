@@ -469,7 +469,16 @@ defmodule IntellisparkWeb.StudentLive.Index do
       onboarding_incomplete?={@onboarding_incomplete?}
     >
       <section class="container-lg py-xl space-y-md">
-        <h1 class="text-display-md text-brand">All Students</h1>
+        <div class="flex items-center justify-between">
+          <h1 class="text-display-md text-brand">All Students</h1>
+          <.link
+            :if={risk_dashboard_available?(@current_school)}
+            navigate={~p"/students/risk"}
+            class="text-sm text-brand hover:underline"
+          >
+            View Risk Dashboard →
+          </.link>
+        </div>
 
         <.filter_bar
           search={@filter_spec.name_contains || ""}
@@ -624,4 +633,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
     </Layouts.app>
     """
   end
+
+  defp risk_dashboard_available?(%{subscription: %{tier: :pro}}), do: true
+  defp risk_dashboard_available?(_), do: false
 end

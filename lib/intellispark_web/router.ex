@@ -62,6 +62,7 @@ defmodule IntellisparkWeb.Router do
       post "/set-school", SchoolController, :set_active
 
       live "/students", StudentLive.Index
+      live "/students/risk", RiskDashboardLive.Index, :show
       live "/students/:id", StudentLive.Show
       live "/lists", CustomListLive.Index
       live "/lists/:id", CustomListLive.Show
