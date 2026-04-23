@@ -53,9 +53,14 @@ WORKDIR /app
 RUN addgroup -S app && adduser -S -G app app && chown app:app /app
 
 COPY --from=builder --chown=app:app /app/_build/prod/rel/intellispark ./
+COPY --chown=app:app rel/overlays/bin/start.sh /app/bin/start.sh
+RUN chmod +x /app/bin/start.sh
 
 USER app
 EXPOSE 4800
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
+  CMD curl -fsS http://127.0.0.1:${PORT:-4800}/healthz || exit 1
+
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["sh", "-c", "/app/bin/intellispark eval 'Intellispark.Release.migrate()' && /app/bin/intellispark start"]
+CMD ["/app/bin/start.sh"]
