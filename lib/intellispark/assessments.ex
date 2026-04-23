@@ -84,5 +84,42 @@ defmodule Intellispark.Assessments do
     end
 
     resource Intellispark.Assessments.SurveyAssignment.Version
+
+    resource Intellispark.Assessments.Resiliency.Assessment do
+      define :list_resiliency_assessments, action: :read
+      define :get_resiliency_assessment, action: :read, get_by: [:id]
+
+      define :get_resiliency_assessment_by_token,
+        action: :by_token,
+        args: [:token],
+        get?: true
+
+      define :assign_resiliency, action: :assign, args: [:student_id, :grade_band]
+      define :start_resiliency, action: :start
+      define :submit_resiliency, action: :submit
+      define :expire_resiliency, action: :expire
+    end
+
+    resource Intellispark.Assessments.Resiliency.Assessment.Version
+
+    resource Intellispark.Assessments.Resiliency.Response do
+      define :list_resiliency_responses, action: :read
+
+      define :upsert_resiliency_response,
+        action: :upsert_answer,
+        args: [:assessment_id, :question_id, :value]
+    end
+
+    resource Intellispark.Assessments.Resiliency.Response.Version
+
+    resource Intellispark.Assessments.Resiliency.SkillScore do
+      define :list_resiliency_skill_scores, action: :read
+
+      define :upsert_resiliency_skill_score,
+        action: :upsert,
+        args: [:student_id, :skill, :score_value, :level, :answered_count]
+    end
+
+    resource Intellispark.Assessments.Resiliency.SkillScore.Version
   end
 end
