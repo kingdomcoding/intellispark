@@ -34,6 +34,23 @@ defmodule IntellisparkWeb.Router do
     plug :load_from_bearer
   end
 
+  pipeline :embed do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {IntellisparkWeb.Layouts, :root}
+    plug :put_embed_csp
+  end
+
+  defp put_embed_csp(conn, _opts) do
+    conn
+    |> Plug.Conn.put_resp_header(
+      "content-security-policy",
+      "frame-ancestors *.xello.com *.app.xello.com;"
+    )
+    |> Plug.Conn.delete_resp_header("x-frame-options")
+  end
+
   scope "/", IntellisparkWeb do
     pipe_through :browser
 
@@ -119,6 +136,14 @@ defmodule IntellisparkWeb.Router do
     pipe_through [:api, IntellisparkWeb.Plugs.LoadXelloProvider]
 
     post "/xello/webhook", XelloWebhookController, :receive
+  end
+
+  scope "/embed", IntellisparkWeb do
+    pipe_through :embed
+
+    live_session :embed, on_mount: [] do
+      live "/student/:embed_token", EmbedLive.Student, :show
+    end
   end
 
   if Application.compile_env(:intellispark, :dev_routes) do
