@@ -279,6 +279,18 @@ defmodule IntellisparkWeb.StudentLive.Index do
   defp assign_students(socket) do
     %{current_user: actor, current_school: school, filter_spec: spec} = socket.assigns
 
+    open_flags_query =
+      Intellispark.Flags.Flag
+      |> Ash.Query.filter(status != :closed)
+      |> Ash.Query.sort(inserted_at: :desc)
+      |> Ash.Query.select([:id, :description, :short_description, :inserted_at])
+
+    open_supports_query =
+      Intellispark.Support.Support
+      |> Ash.Query.filter(status in [:offered, :in_progress])
+      |> Ash.Query.sort(inserted_at: :desc)
+      |> Ash.Query.select([:id, :title, :inserted_at])
+
     students =
       Student
       |> Ash.Query.load([
@@ -287,6 +299,8 @@ defmodule IntellisparkWeb.StudentLive.Index do
         :open_flags_count,
         :open_supports_count,
         :recent_high_fives_count,
+        {:flags, open_flags_query},
+        {:supports, open_supports_query},
         tags: [:id, :name, :color]
       ])
       |> apply_filter_spec(spec)
@@ -430,6 +444,20 @@ defmodule IntellisparkWeb.StudentLive.Index do
     "Bulk #{verb} applied; #{error_count} record(s) could not be updated"
   end
 
+  defp flag_entries(flags) do
+    Enum.map(flags, fn f ->
+      f.short_description || truncate_text(f.description, 60)
+    end)
+  end
+
+  defp support_entries(supports), do: Enum.map(supports, & &1.title)
+
+  defp truncate_text(nil, _), do: ""
+
+  defp truncate_text(text, max) when is_binary(text) do
+    if String.length(text) > max, do: String.slice(text, 0, max) <> "…", else: text
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -495,17 +523,17 @@ defmodule IntellisparkWeb.StudentLive.Index do
                     {s.display_name}
                   </.link>
                 </td>
-                <td
-                  class="px-md py-sm text-center cursor-pointer"
-                  phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
-                >
+                <td class="px-md py-sm text-center">
                   <.count_badge value={s.recent_high_fives_count} variant={:high_fives} />
                 </td>
-                <td
-                  class="px-md py-sm text-center cursor-pointer"
-                  phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
-                >
-                  <.count_badge value={s.open_flags_count} variant={:flags} />
+                <td class="px-md py-sm text-center">
+                  <.count_badge_with_popover
+                    id={"student-#{s.id}-flags"}
+                    value={s.open_flags_count}
+                    variant={:flags}
+                    entries={flag_entries(s.flags || [])}
+                    empty_label="No open flags"
+                  />
                 </td>
                 <td
                   class="px-md py-sm text-center cursor-pointer"
@@ -513,11 +541,14 @@ defmodule IntellisparkWeb.StudentLive.Index do
                 >
                   <.status_chip_for_status :if={s.current_status} status={s.current_status} />
                 </td>
-                <td
-                  class="px-md py-sm text-center cursor-pointer"
-                  phx-click={JS.navigate(~p"/students/#{s.id}?return_to=/students")}
-                >
-                  <.count_badge value={s.open_supports_count} variant={:supports} />
+                <td class="px-md py-sm text-center">
+                  <.count_badge_with_popover
+                    id={"student-#{s.id}-supports"}
+                    value={s.open_supports_count}
+                    variant={:supports}
+                    entries={support_entries(s.supports || [])}
+                    empty_label="No open supports"
+                  />
                 </td>
                 <td
                   class="px-md py-sm cursor-pointer"

@@ -4,6 +4,9 @@ defmodule IntellisparkWeb.StudentLiveTest do
   import Phoenix.LiveViewTest
   import Intellispark.StudentsFixtures
 
+  import Intellispark.FlagsFixtures
+  import Intellispark.SupportFixtures
+
   setup tags do
     Intellispark.DataCase.setup_sandbox(tags)
     Map.merge(%{conn: Phoenix.ConnTest.build_conn()}, setup_world())
@@ -72,6 +75,32 @@ defmodule IntellisparkWeb.StudentLiveTest do
       assert html =~ "Grade"
       assert html =~ "Enrollment"
       assert html =~ "Save view as"
+    end
+
+    test "Phase 3 retrofit C — popover renders top-3 open flags + supports for a row", %{
+      conn: conn,
+      school: school,
+      admin: admin
+    } do
+      student = create_student!(school, %{first_name: "Pop", last_name: "Over"})
+      type = create_flag_type!(school, %{name: "Academic"})
+
+      for desc <- ["Late assignments", "Skipping math", "Behavior outburst"] do
+        create_flag!(admin, school, student, type, %{
+          description: desc,
+          short_description: desc
+        })
+      end
+
+      create_support!(admin, school, student, %{title: "Daily check-in"})
+      create_support!(admin, school, student, %{title: "Tutoring slot"})
+
+      {:ok, _lv, html} = conn |> log_in_user(admin) |> live(~p"/students")
+
+      assert html =~ ~s(id="student-#{student.id}-flags-popover")
+      assert html =~ ~s(id="student-#{student.id}-supports-popover")
+      assert html =~ "Late assignments"
+      assert html =~ "Daily check-in"
     end
 
     test "only students in the current school are visible", %{
