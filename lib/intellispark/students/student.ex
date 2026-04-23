@@ -68,6 +68,26 @@ defmodule Intellispark.Students.Student do
     attribute :external_id, :string, public?: true
     attribute :photo_url, :string, public?: true
     attribute :email, :string, public?: true
+    attribute :phone, :string, public?: true
+
+    attribute :gender, :atom do
+      constraints one_of: [:male, :female, :non_binary, :prefer_not_to_say, :other]
+      public? true
+    end
+
+    attribute :ethnicity_race, :atom do
+      constraints one_of: [
+                    :american_indian_or_alaska_native,
+                    :asian,
+                    :black_or_african_american,
+                    :hispanic_or_latino,
+                    :native_hawaiian_or_pacific_islander,
+                    :white,
+                    :two_or_more_races,
+                    :prefer_not_to_say
+                  ]
+      public? true
+    end
 
     timestamps()
   end
@@ -224,7 +244,10 @@ defmodule Intellispark.Students.Student do
         :enrollment_status,
         :external_id,
         :photo_url,
-        :email
+        :email,
+        :phone,
+        :gender,
+        :ethnicity_race
       ]
     end
 
@@ -240,7 +263,10 @@ defmodule Intellispark.Students.Student do
         :enrollment_status,
         :external_id,
         :photo_url,
-        :email
+        :email,
+        :phone,
+        :gender,
+        :ethnicity_race
       ]
 
       require_atomic? false
