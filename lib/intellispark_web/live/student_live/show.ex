@@ -721,7 +721,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
     reloaded =
       Ash.load!(
         student,
-        [key_connections: [:connected_user]],
+        [key_connections: [:connected_user, :connected_external_person]],
         actor: actor,
         tenant: school.id
       )
@@ -961,7 +961,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
         :recent_high_fives_count,
         tags: [:id, :name, :color],
         team_memberships: [:user, :added_by],
-        key_connections: [:connected_user]
+        key_connections: [:connected_user, :connected_external_person]
       ] ++ Intellispark.Indicators.Dimension.all(),
       actor: actor,
       tenant: school.id
@@ -2326,6 +2326,20 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   defp user_display_name(_), do: "Unknown"
 
+  defp connection_display_name(%{connected_user: %{} = user}), do: user_display_name(user)
+
+  defp connection_display_name(%{connected_external_person: %{first_name: f, last_name: l}})
+       when is_binary(f) and is_binary(l),
+       do: "#{f} #{l}"
+
+  defp connection_display_name(_), do: "Unknown"
+
+  defp connection_subtitle(%{connected_external_person: %{relationship_kind: kind}})
+       when is_atom(kind) and not is_nil(kind),
+       do: kind |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
+
+  defp connection_subtitle(_), do: nil
+
   defp user_initials(%{first_name: first, last_name: last})
        when is_binary(first) and is_binary(last) and first != "" and last != "" do
     String.upcase(String.first(first)) <> String.upcase(String.first(last))
@@ -2380,7 +2394,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
       <ul :if={@connections != []} class="space-y-xs">
         <li :for={c <- @connections}>
           <p class="text-sm font-medium text-abbey">
-            {user_display_name(c.connected_user)}
+            {connection_display_name(c)}
+          </p>
+          <p :if={connection_subtitle(c)} class="text-xs text-azure">
+            {connection_subtitle(c)}
           </p>
           <p :if={c.note} class="text-xs text-azure italic">({c.note})</p>
         </li>
