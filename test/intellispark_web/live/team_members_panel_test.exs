@@ -44,7 +44,7 @@ defmodule IntellisparkWeb.TeamMembersPanelTest do
     html = lv |> element("button", "+ Team member") |> render_click()
 
     assert html =~ "New team member"
-    assert html =~ "Staff person"
-    assert html =~ "Role"
+    assert html =~ "Family / community members"
+    assert html =~ "School staff"
   end
 end
