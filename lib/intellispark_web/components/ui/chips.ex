@@ -102,25 +102,32 @@ defmodule IntellisparkWeb.UI.Chips do
 
   def count_badge_with_popover(assigns) do
     ~H"""
-    <span class="group relative inline-block">
-      <span aria-describedby={"#{@id}-popover"}>
-        <.count_badge value={@value} variant={@variant} />
-      </span>
-      <span
-        :if={@value > 0}
-        id={"#{@id}-popover"}
-        role="tooltip"
-        class="hidden group-hover:block group-focus-within:block absolute left-1/2 top-full z-20 mt-1 w-56 -translate-x-1/2 rounded-card bg-white p-sm text-left shadow-elevated"
-      >
-        <ul class="space-y-1 text-xs text-abbey">
-          <li :for={entry <- Enum.take(@entries, 3)} class="truncate">{entry}</li>
-          <li :if={@entries == []} class="italic text-azure">{@empty_label}</li>
-          <li :if={length(@entries) > 3} class="pt-1 text-azure">
-            + {length(@entries) - 3} more
-          </li>
-        </ul>
-      </span>
+    <span
+      :if={@value > 0}
+      id={"#{@id}-trigger"}
+      tabindex="0"
+      phx-hook="Popover"
+      data-popover-target={"#{@id}-popover"}
+      aria-describedby={"#{@id}-popover"}
+      class="inline-block cursor-default"
+    >
+      <.count_badge value={@value} variant={@variant} />
     </span>
+    <.count_badge :if={@value == 0} value={@value} variant={@variant} />
+    <div
+      :if={@value > 0}
+      id={"#{@id}-popover"}
+      role="tooltip"
+      class="hidden w-56 rounded-card bg-white p-sm text-left shadow-elevated"
+    >
+      <ul class="space-y-1 text-xs text-abbey">
+        <li :for={entry <- Enum.take(@entries, 3)} class="truncate">{entry}</li>
+        <li :if={@entries == []} class="italic text-azure">{@empty_label}</li>
+        <li :if={length(@entries) > 3} class="pt-1 text-azure">
+          + {length(@entries) - 3} more
+        </li>
+      </ul>
+    </div>
     """
   end
 
