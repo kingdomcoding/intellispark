@@ -114,10 +114,6 @@ defmodule IntellisparkWeb.Router do
     live_session :public, on_mount: [] do
       live "/", LandingLive.Show
       live "/demo", DemoLive.Show
-      live "/engineering-journal", JournalLive.Index
-      live "/engineering-journal/adr/:id", JournalLive.AdrShow
-      live "/engineering-journal/phase/:slug", JournalLive.PhaseShow
-      live "/about", AboutLive.Show
     end
 
     post "/demo/:persona", DemoController, :create_session

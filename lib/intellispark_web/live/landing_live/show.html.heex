@@ -22,13 +22,6 @@
         Open the app as a demo admin
         <span class="hero-arrow-right-mini size-4"></span>
       </.link>
-
-      <.link
-        navigate={~p"/engineering-journal"}
-        class="inline-flex items-center gap-2 px-lg py-md rounded-md border border-abbey/20 text-abbey hover:bg-white"
-      >
-        Read the engineering journal
-      </.link>
     </div>
 
     <form action={~p"/demo/district_admin"} method="post" class="mt-md">
@@ -37,5 +30,20 @@
         Skip the picker → sign me in as district admin
       </button>
     </form>
+
+    <div class="mt-2xl text-left space-y-md max-w-2xl mx-auto">
+      <h2 class="text-2xl font-semibold text-abbey">What is this?</h2>
+      <p class="text-abbey">
+        Intellispark is a faithful reconstruction of a K-12 student-support platform,
+        rebuilt from public screenshots and documentation as a portfolio project.
+        It runs here as a live demo — click the button above to sign in as a district
+        admin and explore.
+      </p>
+      <p class="text-abbey">
+        The stack is Elixir / Phoenix / LiveView / Ash. The product surface is 10
+        domains, 48+ Ash resources, and {@proof.tests} tests across 22+ phase
+        releases.
+      </p>
+    </div>
   </section>
 </Layouts.public>

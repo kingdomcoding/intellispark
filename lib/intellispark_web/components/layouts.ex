@@ -236,8 +236,6 @@ defmodule IntellisparkWeb.Layouts do
           <.logo />
         </.link>
         <nav class="flex items-center gap-md text-sm text-azure">
-          <.link navigate={~p"/engineering-journal"} class="hover:text-abbey">Journal</.link>
-          <.link navigate={~p"/about"} class="hover:text-abbey">About</.link>
           <.link
             :if={@signed_in?}
             navigate={~p"/students"}
