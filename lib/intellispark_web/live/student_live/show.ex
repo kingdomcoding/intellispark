@@ -274,7 +274,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       {:ok, _archived_source} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Student transferred. Redirecting…")
+         |> put_flash(:info, "Student transferred.")
          |> push_navigate(to: ~p"/students")}
 
       {:error, error} ->
@@ -1644,7 +1644,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
         </div>
         <div class="flex justify-between gap-sm">
           <dt class="text-azure">Enrollment</dt>
-          <dd class="text-abbey">{@student.enrollment_status}</dd>
+          <dd class="text-abbey">{humanize_enrollment_status(@student.enrollment_status)}</dd>
         </div>
         <div class="flex justify-between gap-sm">
           <dt class="text-azure">External ID</dt>
@@ -1797,7 +1797,18 @@ defmodule IntellisparkWeb.StudentLive.Show do
       <div class="flex-1 min-w-[20rem] space-y-sm">
         <div class="flex items-start justify-between gap-sm">
           <div>
-            <h1 class="text-display-sm text-brand">{@student.display_name}</h1>
+            <div class="flex items-center gap-sm flex-wrap">
+              <h1 class="text-display-sm text-brand">{@student.display_name}</h1>
+              <span
+                :if={@student.enrollment_status != :active}
+                class={[
+                  "inline-flex items-center rounded-pill px-sm py-0.5 text-xs font-medium",
+                  enrollment_pill_class(@student.enrollment_status)
+                ]}
+              >
+                {humanize_enrollment_status(@student.enrollment_status)}
+              </span>
+            </div>
             <p class="text-azure text-sm">
               Grade {@student.grade_level}<span :if={@student.external_id}> · {@student.external_id}</span>
             </p>
@@ -2538,6 +2549,17 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp to_string_or_nil(s) when is_binary(s), do: s
   defp to_string_or_nil(%Ash.CiString{} = s), do: Ash.CiString.value(s)
   defp to_string_or_nil(other), do: to_string(other)
+
+  defp humanize_enrollment_status(:active), do: "Active"
+  defp humanize_enrollment_status(:inactive), do: "Inactive"
+  defp humanize_enrollment_status(:graduated), do: "Graduated"
+  defp humanize_enrollment_status(:withdrawn), do: "Withdrawn"
+  defp humanize_enrollment_status(other), do: to_string(other)
+
+  defp enrollment_pill_class(:withdrawn), do: "bg-chocolate/10 text-chocolate"
+  defp enrollment_pill_class(:graduated), do: "bg-brand/10 text-brand"
+  defp enrollment_pill_class(:inactive), do: "bg-abbey/10 text-abbey"
+  defp enrollment_pill_class(_), do: "bg-whitesmoke text-azure"
 
   defp humanize_team_role(:teacher), do: "Teacher"
   defp humanize_team_role(:coach), do: "Coach"
