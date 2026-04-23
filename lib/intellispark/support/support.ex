@@ -76,6 +76,10 @@ defmodule Intellispark.Support.Support do
     belongs_to :student, Intellispark.Students.Student, allow_nil?: false
     belongs_to :offered_by, Intellispark.Accounts.User, allow_nil?: false
     belongs_to :provider_staff, Intellispark.Accounts.User
+
+    belongs_to :intervention_library_item,
+               Intellispark.Support.InterventionLibraryItem,
+               allow_nil?: true
   end
 
   actions do
@@ -122,6 +126,22 @@ defmodule Intellispark.Support.Support do
       require_atomic? false
       change transition_state(:completed)
     end
+
+    create :create_from_intervention do
+      argument :intervention_library_item_id, :uuid, allow_nil?: false
+
+      accept [
+        :student_id,
+        :title,
+        :description,
+        :starts_at,
+        :ends_at,
+        :provider_staff_id
+      ]
+
+      change Intellispark.Support.Changes.StampOfferedBy
+      change Intellispark.Support.Changes.PrefillFromIntervention
+    end
   end
 
   policies do
@@ -131,6 +151,10 @@ defmodule Intellispark.Support.Support do
 
     policy action_type(:create) do
       authorize_if IntellisparkWeb.Policies.ActorBelongsToTenantSchool
+    end
+
+    policy action(:create_from_intervention) do
+      authorize_if {IntellisparkWeb.Policies.RequiresTier, tier: :pro}
     end
 
     policy action([:accept, :decline, :complete, :update]) do

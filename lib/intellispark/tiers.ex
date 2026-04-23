@@ -15,7 +15,10 @@ defmodule Intellispark.Tiers do
     custom_lists: %{min_tier: :starter, cap: 5},
     weekly_digest: %{min_tier: :starter, cap: nil},
     bulk_high_fives: %{min_tier: :plus, cap: nil},
-    api_access: %{min_tier: :pro, cap: nil}
+    api_access: %{min_tier: :pro, cap: nil},
+    scholarcentric: %{min_tier: :pro, cap: nil},
+    academic_risk: %{min_tier: :pro, cap: nil},
+    intervention_library: %{min_tier: :pro, cap: nil}
   }
 
   @tier_caps %{
