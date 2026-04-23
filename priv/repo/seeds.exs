@@ -978,118 +978,117 @@ Logger.info("Seeding Phase 11 integrations (CSV + Xello providers, sync runs, em
 alias Intellispark.Integrations
 alias Intellispark.Integrations.{EmbedToken, IntegrationProvider, IntegrationSyncRun}
 
-# CSV provider on Sandbox High — idempotent by (school_id, provider_type).
-csv_provider =
-  case IntegrationProvider
-       |> Ash.Query.filter(provider_type == :csv)
-       |> Ash.Query.set_tenant(school.id)
-       |> Ash.read_one(authorize?: false) do
-    {:ok, %IntegrationProvider{} = p} ->
-      p
+# Seed CSV + Xello providers on every school whose subscription is :pro
+# so multi-school admins see content on /admin/integrations regardless
+# of their current switcher selection. Starter-tier schools get nothing.
+phase_11_schools = [school, middle_school]
 
-    {:ok, nil} ->
-      {:ok, p} =
-        Integrations.create_provider(
-          %{provider_type: :csv, name: "Roster CSV", credentials: %{}},
-          tenant: school.id,
-          authorize?: false
-        )
+for sch <- phase_11_schools do
+  csv_p =
+    case IntegrationProvider
+         |> Ash.Query.filter(provider_type == :csv)
+         |> Ash.Query.set_tenant(sch.id)
+         |> Ash.read_one(authorize?: false) do
+      {:ok, %IntegrationProvider{} = p} ->
+        p
 
-      p
-  end
+      {:ok, nil} ->
+        {:ok, p} =
+          Integrations.create_provider(
+            %{provider_type: :csv, name: "Roster CSV", credentials: %{}},
+            tenant: sch.id,
+            authorize?: false
+          )
 
-# Xello provider — only sensible when school is on :pro. Sandbox High is
-# seeded PRO above; still guard in case someone edits that earlier.
-xello_provider =
-  case Intellispark.Billing.get_subscription_by_school!(school.id,
-         tenant: school.id,
+        p
+    end
+
+  case Intellispark.Billing.get_subscription_by_school!(sch.id,
+         tenant: sch.id,
          authorize?: false
        ) do
     %{tier: :pro} ->
       case IntegrationProvider
            |> Ash.Query.filter(provider_type == :xello)
-           |> Ash.Query.set_tenant(school.id)
+           |> Ash.Query.set_tenant(sch.id)
            |> Ash.read_one(authorize?: false) do
-        {:ok, %IntegrationProvider{} = p} ->
-          p
+        {:ok, %IntegrationProvider{}} ->
+          :ok
 
         {:ok, nil} ->
-          {:ok, p} =
+          {:ok, _} =
             Integrations.create_provider(
               %{
                 provider_type: :xello,
                 name: "Xello (demo)",
                 credentials: %{"webhook_secret" => "dev-xello-secret"}
               },
-              tenant: school.id,
+              tenant: sch.id,
               authorize?: false
             )
-
-          p
       end
 
     _ ->
-      nil
+      :ok
   end
 
-# A completed sync run for the CSV provider so /admin/integrations shows
-# something on first boot. Idempotent — only seed if no runs exist yet.
-case IntegrationSyncRun
-     |> Ash.Query.filter(provider_id == ^csv_provider.id)
-     |> Ash.Query.set_tenant(school.id)
-     |> Ash.read_one(authorize?: false) do
-  {:ok, nil} ->
-    {:ok, run} =
-      Ash.create(
-        IntegrationSyncRun,
-        %{provider_id: csv_provider.id, trigger_source: :manual},
-        tenant: school.id,
-        authorize?: false
-      )
+  # A completed sync run per CSV provider so /admin/integrations shows
+  # activity history on first boot. Idempotent.
+  case IntegrationSyncRun
+       |> Ash.Query.filter(provider_id == ^csv_p.id)
+       |> Ash.Query.set_tenant(sch.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, nil} ->
+      {:ok, run} =
+        Ash.create(
+          IntegrationSyncRun,
+          %{provider_id: csv_p.id, trigger_source: :manual},
+          tenant: sch.id,
+          authorize?: false
+        )
 
-    {:ok, started} =
-      Ash.update(run, %{}, action: :start, tenant: school.id, authorize?: false)
+      {:ok, started} =
+        Ash.update(run, %{}, action: :start, tenant: sch.id, authorize?: false)
 
-    {:ok, _} =
-      Ash.update(
-        started,
-        %{records_processed: 5, records_created: 2, records_updated: 3},
-        action: :succeed,
-        tenant: school.id,
-        authorize?: false
-      )
+      {:ok, _} =
+        Ash.update(
+          started,
+          %{records_processed: 5, records_created: 2, records_updated: 3},
+          action: :succeed,
+          tenant: sch.id,
+          authorize?: false
+        )
 
-  _ ->
-    :ok
+    _ ->
+      :ok
+  end
 end
 
-# Mint an embed token for Ava (PRO school student) so the /embed demo
-# URL is ready to paste into an iframe. The DistrictAdminForSchoolScopedCreate
-# policy reads `actor.school_memberships`, so preload it.
-if xello_provider do
-  existing_embed =
-    case EmbedToken
-         |> Ash.Query.filter(student_id == ^ava.id and audience == :xello)
-         |> Ash.Query.set_tenant(school.id)
-         |> Ash.read_one(authorize?: false) do
-      {:ok, et} -> et
-      _ -> nil
-    end
+# Mint an embed token for Ava on Sandbox High so the /embed demo URL is
+# ready to paste into an iframe. The DistrictAdminForSchoolScopedCreate
+# policy reads `actor.school_memberships`, so preload them.
+admin_with_memberships = Ash.load!(admin, [:school_memberships], authorize?: false)
 
-  if existing_embed == nil do
-    admin_with_memberships = Ash.load!(admin, [:school_memberships], authorize?: false)
-
-    {:ok, token} =
-      Integrations.mint_embed_token(
-        %{student_id: ava.id, audience: :xello},
-        actor: admin_with_memberships,
-        tenant: school.id
-      )
-
-    Logger.info("  embed URL:     http://localhost:4800/embed/student/#{token.token}")
-  else
-    Logger.info("  embed URL:     http://localhost:4800/embed/student/#{existing_embed.token}")
+existing_embed =
+  case EmbedToken
+       |> Ash.Query.filter(student_id == ^ava.id and audience == :xello)
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, et} -> et
+    _ -> nil
   end
+
+if existing_embed == nil do
+  {:ok, token} =
+    Integrations.mint_embed_token(
+      %{student_id: ava.id, audience: :xello},
+      actor: admin_with_memberships,
+      tenant: school.id
+    )
+
+  Logger.info("  embed URL:     http://localhost:4800/embed/student/#{token.token}")
+else
+  Logger.info("  embed URL:     http://localhost:4800/embed/student/#{existing_embed.token}")
 end
 
 Logger.info("Seed complete.")
