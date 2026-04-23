@@ -58,6 +58,9 @@ WORKDIR /app
 RUN addgroup -S app && adduser -S -G app app && chown app:app /app
 
 COPY --from=builder --chown=app:app /app/_build/prod/rel/intellispark ./
+# Bundle docs/ into the runtime image so the engineering-journal LV can
+# read the ADRs + phase plans at request time via Path.wildcard.
+COPY --from=builder --chown=app:app /app/docs /app/docs
 COPY --chown=app:app rel/overlays/bin/start.sh /app/bin/start.sh
 RUN chmod +x /app/bin/start.sh
 
