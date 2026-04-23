@@ -196,6 +196,20 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, assign(socket, edit_modal_open?: false, edit_form: nil)}
   end
 
+  # Phase 3 retrofit B — student-level lifecycle actions are stubbed pending Phase 11.5.
+  def handle_event("student_action_attempt", %{"action" => action}, socket) do
+    label =
+      case action do
+        "archive" -> "Archive"
+        "transfer" -> "Transfer"
+        "withdraw" -> "Mark withdrawn"
+        "report" -> "Generate report"
+        _ -> "Action"
+      end
+
+    {:noreply, put_flash(socket, :info, "#{label} — coming in Phase 11.5 (student lifecycle).")}
+  end
+
   def handle_event("open_new_flag_modal", _params, socket) do
     {:noreply, assign(socket, new_flag_open?: true)}
   end
@@ -1520,6 +1534,81 @@ defmodule IntellisparkWeb.StudentLive.Show do
     |> Enum.map_join(" ", &String.capitalize/1)
   end
 
+  attr :id, :string, required: true
+
+  defp actions_menu(assigns) do
+    ~H"""
+    <div class="relative inline-block">
+      <button
+        type="button"
+        id={"#{@id}-trigger"}
+        phx-click={JS.toggle(to: "##{@id}")}
+        class="inline-flex items-center gap-1 rounded-pill border border-abbey/20 bg-white px-sm py-xs text-sm text-abbey hover:bg-whitesmoke"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-controls={@id}
+      >
+        Actions <span class="hero-chevron-down-mini"></span>
+      </button>
+      <.student_action_items id={@id} />
+    </div>
+    """
+  end
+
+  attr :id, :string, required: true
+
+  defp status_overflow_menu(assigns) do
+    ~H"""
+    <div class="relative inline-block">
+      <button
+        type="button"
+        id={"#{@id}-trigger"}
+        phx-click={JS.toggle(to: "##{@id}")}
+        class="inline-flex h-6 w-6 items-center justify-center rounded-full text-azure hover:bg-whitesmoke"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-controls={@id}
+        aria-label="Status options"
+      >
+        <span class="hero-ellipsis-horizontal-mini"></span>
+      </button>
+      <.student_action_items id={@id} />
+    </div>
+    """
+  end
+
+  attr :id, :string, required: true
+
+  defp student_action_items(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      class="hidden absolute right-0 top-full mt-1 w-48 rounded-card bg-white shadow-elevated py-1 z-10"
+      role="menu"
+    >
+      <button
+        :for={
+          {label, action} <- [
+            {"Archive", "archive"},
+            {"Transfer", "transfer"},
+            {"Mark withdrawn", "withdraw"},
+            {"Generate report", "report"}
+          ]
+        }
+        type="button"
+        phx-click={
+          JS.push("student_action_attempt", value: %{action: action})
+          |> JS.hide(to: "##{@id}")
+        }
+        class="block w-full text-left px-md py-xs text-sm text-abbey hover:bg-whitesmoke"
+        role="menuitem"
+      >
+        {label}
+      </button>
+    </div>
+    """
+  end
+
   attr :student, :map, required: true
   attr :uploads, :map, required: true
 
@@ -1555,17 +1644,24 @@ defmodule IntellisparkWeb.StudentLive.Show do
               Grade {@student.grade_level}<span :if={@student.external_id}> · {@student.external_id}</span>
             </p>
           </div>
-          <button
-            type="button"
-            phx-click="open_edit_modal"
-            class="text-sm text-brand underline hover:text-brand-700"
-          >
-            Edit profile
-          </button>
+          <div class="flex items-center gap-sm">
+            <button
+              type="button"
+              phx-click="open_edit_modal"
+              class="text-sm text-brand underline hover:text-brand-700"
+            >
+              Edit profile
+            </button>
+            <.actions_menu id="student-actions-menu" />
+          </div>
         </div>
 
         <div class="flex items-center gap-sm flex-wrap">
           <.status_chip_for_status :if={@student.current_status} status={@student.current_status} />
+          <.status_overflow_menu
+            :if={@student.current_status}
+            id="student-status-overflow"
+          />
           <.tag_chip :for={tag <- @student.tags || []} label={tag.name} />
         </div>
 

@@ -100,6 +100,66 @@ defmodule IntellisparkWeb.StudentShowTest do
     end
   end
 
+  describe "Phase 3 retrofit B — Actions menu + status overflow" do
+    test "Actions header button renders four stub items", %{
+      conn: conn,
+      school: school,
+      admin: admin
+    } do
+      student = create_student!(school, %{first_name: "Act", last_name: "Ions"})
+      {:ok, _lv, html} = conn |> log_in_user(admin) |> live(~p"/students/#{student.id}")
+
+      assert html =~ ~s(id="student-actions-menu")
+      assert html =~ "Archive"
+      assert html =~ "Transfer"
+      assert html =~ "Mark withdrawn"
+      assert html =~ "Generate report"
+    end
+
+    test "stub action click flashes Phase 11.5 message", %{
+      conn: conn,
+      school: school,
+      admin: admin
+    } do
+      student = create_student!(school, %{first_name: "Stub", last_name: "Click"})
+      {:ok, lv, _html} = conn |> log_in_user(admin) |> live(~p"/students/#{student.id}")
+
+      html =
+        render_hook(lv, "student_action_attempt", %{"action" => "archive"})
+
+      assert html =~ "Archive"
+      assert html =~ "Phase 11.5"
+    end
+
+    test "status overflow menu renders only when student has a current_status", %{
+      conn: conn,
+      school: school,
+      admin: admin
+    } do
+      no_status = create_student!(school, %{first_name: "No", last_name: "Status"})
+
+      {:ok, _lv, html} =
+        conn |> log_in_user(admin) |> live(~p"/students/#{no_status.id}")
+
+      refute html =~ ~s(id="student-status-overflow")
+
+      with_status = create_student!(school, %{first_name: "Has", last_name: "Status"})
+      status = create_status!(school, %{name: "Watch"})
+
+      {:ok, _} =
+        Students.set_student_status(with_status, status.id,
+          tenant: school.id,
+          actor: admin,
+          authorize?: false
+        )
+
+      {:ok, _lv, html} =
+        conn |> log_in_user(admin) |> live(~p"/students/#{with_status.id}")
+
+      assert html =~ ~s(id="student-status-overflow")
+    end
+  end
+
   describe "inline tag editor" do
     test "adding a tag produces a StudentTag row", %{
       conn: conn,
