@@ -213,6 +213,48 @@ if Enum.empty?(existing_invite) do
   Logger.info("  invitation id: #{invitation.id}")
 end
 
+# Direct counselor user for the landing page's :counselor demo persona —
+# bypasses the invitation flow so /demo/counselor can sign in immediately.
+counselor_email = "counselor@sandboxhigh.edu"
+
+counselor =
+  case User |> Ash.Query.filter(email == ^counselor_email) |> Ash.read_one(authorize?: false) do
+    {:ok, %User{} = u} ->
+      u
+
+    {:ok, nil} ->
+      {:ok, u} =
+        User
+        |> Ash.Changeset.for_create(:register_with_password, %{
+          email: counselor_email,
+          password: "phase1-demo-pass",
+          password_confirmation: "phase1-demo-pass"
+        })
+        |> Ash.create(authorize?: false)
+
+      u
+  end
+
+case UserSchoolMembership
+     |> Ash.Query.filter(user_id == ^counselor.id and school_id == ^school.id)
+     |> Ash.read_one(authorize?: false) do
+  {:ok, nil} ->
+    {:ok, _} =
+      UserSchoolMembership
+      |> Ash.Changeset.for_create(:create, %{
+        user_id: counselor.id,
+        school_id: school.id,
+        role: :counselor,
+        source: :manual
+      })
+      |> Ash.create(authorize?: false)
+
+  _ ->
+    :ok
+end
+
+Logger.info("  counselor:    #{counselor_email} / phase1-demo-pass")
+
 Logger.info("Seeding Phase 2 students, tags, statuses, lists…")
 
 alias Intellispark.Students

@@ -160,7 +160,7 @@ defmodule Intellispark.StudentsFixtures do
     Ash.load!(user, [school_memberships: [:school]], authorize?: false)
   end
 
-  defp register!(email, password) do
+  def register!(email, password) do
     Ash.create!(
       User,
       %{email: email, password: password, password_confirmation: password},
@@ -169,14 +169,14 @@ defmodule Intellispark.StudentsFixtures do
     )
   end
 
-  defp attach_district!(user, district_id) do
+  def attach_district!(user, district_id) do
     Ash.update!(user, %{district_id: district_id},
       action: :set_district,
       authorize?: false
     )
   end
 
-  defp with_membership!(user, school_id, role) do
+  def with_membership!(user, school_id, role) do
     {:ok, _} =
       Ash.create(
         UserSchoolMembership,

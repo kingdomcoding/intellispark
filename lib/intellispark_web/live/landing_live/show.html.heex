@@ -26,5 +26,12 @@
         Read the engineering journal
       </.link>
     </div>
+
+    <form action={~p"/demo/district_admin"} method="post" class="mt-md">
+      <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+      <button type="submit" class="text-xs text-azure underline hover:text-abbey">
+        Skip the picker → sign me in as district admin
+      </button>
+    </form>
   </section>
 </Layouts.public>

@@ -10,10 +10,10 @@ defmodule IntellisparkWeb.LiveUserAuth do
   import Phoenix.Component, only: [assign: 3]
 
   alias Intellispark.Accounts
-  alias Intellispark.Accounts.{School, UserSchoolMembership}
+  alias Intellispark.Accounts.{DemoSession, School, UserSchoolMembership}
 
   def on_mount(:live_user_required, _params, session, socket) do
-    socket = assign_current_user(socket, session)
+    socket = socket |> assign_current_user(session) |> assign_demo_session(session)
 
     if socket.assigns[:current_user] do
       {:cont, assign_current_school(socket, session)}
@@ -23,12 +23,12 @@ defmodule IntellisparkWeb.LiveUserAuth do
   end
 
   def on_mount(:live_user_optional, _params, session, socket) do
-    socket = assign_current_user(socket, session)
+    socket = socket |> assign_current_user(session) |> assign_demo_session(session)
     {:cont, assign_current_school(socket, session)}
   end
 
   def on_mount(:live_no_user, _params, session, socket) do
-    socket = assign_current_user(socket, session)
+    socket = socket |> assign_current_user(session) |> assign_demo_session(session)
 
     if socket.assigns[:current_user] do
       {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/")}
@@ -81,6 +81,26 @@ defmodule IntellisparkWeb.LiveUserAuth do
       {:ok, user}
     else
       _ -> :error
+    end
+  end
+
+  defp assign_demo_session(socket, session) do
+    case session["demo_session_id"] do
+      nil ->
+        assign(socket, :demo_session, nil)
+
+      id ->
+        case Ash.get(DemoSession, id, authorize?: false) do
+          {:ok, %DemoSession{expires_at: exp} = demo} ->
+            if DateTime.after?(DateTime.utc_now(), exp) do
+              assign(socket, :demo_session, nil)
+            else
+              assign(socket, :demo_session, demo)
+            end
+
+          _ ->
+            assign(socket, :demo_session, nil)
+        end
     end
   end
 

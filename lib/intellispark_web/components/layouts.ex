@@ -3,6 +3,7 @@ defmodule IntellisparkWeb.Layouts do
   use IntellisparkWeb, :html
 
   import IntellisparkWeb.BrandComponents
+  import IntellisparkWeb.Components.SandboxBanner
 
   embed_templates "layouts/*"
 

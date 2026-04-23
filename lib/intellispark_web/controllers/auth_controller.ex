@@ -25,10 +25,18 @@ defmodule IntellisparkWeb.AuthController do
   end
 
   def sign_out(conn, _params) do
-    return_to = ~p"/sign-in"
+    demo_id = get_session(conn, :demo_session_id)
+
+    if demo_id do
+      case Ash.get(Intellispark.Accounts.DemoSession, demo_id, authorize?: false) do
+        {:ok, demo} -> Ash.destroy!(demo, authorize?: false)
+        _ -> :ok
+      end
+    end
 
     conn
     |> clear_session(:intellispark)
-    |> redirect(to: return_to)
+    |> delete_session(:demo_session_id)
+    |> redirect(to: ~p"/")
   end
 end

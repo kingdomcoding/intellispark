@@ -26,6 +26,7 @@ defmodule IntellisparkWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :load_from_session
+    plug IntellisparkWeb.Plugs.LoadDemoSession
     plug IntellisparkWeb.Plugs.AssignCurrentSchool
     plug IntellisparkWeb.Plugs.SetAdminActorCookies
   end
