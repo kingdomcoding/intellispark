@@ -115,7 +115,8 @@ defmodule IntellisparkWeb.StudentLive.Show do
          transfer_schools: [],
          can_transfer?: can_transfer?(actor, school),
          xello_profile: load_xello_profile(student, actor, school),
-         resiliency_skill_scores: load_resiliency_skill_scores(student, actor, school)
+         resiliency_skill_scores: load_resiliency_skill_scores(student, actor, school),
+         new_intervention_open?: false
        )
        |> allow_upload(:photo,
          accept: ~w(.png .jpg .jpeg .webp),
@@ -338,6 +339,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   def handle_event("close_new_support_modal", _params, socket) do
     {:noreply, assign(socket, new_support_open?: false)}
+  end
+
+  def handle_event("open_new_intervention_modal", _params, socket) do
+    {:noreply, assign(socket, new_intervention_open?: true)}
+  end
+
+  def handle_event("close_new_intervention_modal", _params, socket) do
+    {:noreply, assign(socket, new_intervention_open?: false)}
   end
 
   def handle_event("open_new_high_five_modal", _params, socket) do
@@ -599,6 +608,14 @@ defmodule IntellisparkWeb.StudentLive.Show do
      socket
      |> assign(new_support_open?: false)
      |> put_flash(:info, "Support offered.")
+     |> reload_student()}
+  end
+
+  def handle_info({IntellisparkWeb.StudentLive.NewInterventionModal, :support_added}, socket) do
+    {:noreply,
+     socket
+     |> assign(new_intervention_open?: false)
+     |> put_flash(:info, "Intervention started.")
      |> reload_student()}
   end
 
@@ -1255,6 +1272,15 @@ defmodule IntellisparkWeb.StudentLive.Show do
         staff={@staff}
       />
 
+      <.live_component
+        :if={@new_intervention_open?}
+        module={IntellisparkWeb.StudentLive.NewInterventionModal}
+        id="new-intervention-modal"
+        student={@student}
+        actor={@current_user}
+        staff={@staff}
+      />
+
       <div :if={@support_detail_open? and @active_support_id} class="md:hidden">
         <.live_component
           module={IntellisparkWeb.StudentLive.SupportDetailSheet}
@@ -1777,7 +1803,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
             has_completed?={@outer.has_completed_actions?}
           />
 
-          <.supports_panel supports={@outer.supports} />
+          <.supports_panel supports={@outer.supports} on_pro?={on_pro_school?(@outer.current_school)} />
 
           <div class="bg-white rounded-card shadow-card p-md space-y-sm">
             <h2 class="text-sm font-semibold text-abbey">Status</h2>
@@ -2356,6 +2382,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   attr :supports, :list, required: true
+  attr :on_pro?, :boolean, default: false
 
   defp supports_panel(assigns) do
     ~H"""
@@ -2364,13 +2391,23 @@ defmodule IntellisparkWeb.StudentLive.Show do
         <h2 class="text-sm font-semibold text-abbey">
           Supports ({length(@supports)})
         </h2>
-        <button
-          type="button"
-          phx-click="open_new_support_modal"
-          class="text-xs text-brand underline hover:text-brand-700"
-        >
-          + Support
-        </button>
+        <div class="flex items-center gap-sm">
+          <button
+            :if={@on_pro?}
+            type="button"
+            phx-click="open_new_intervention_modal"
+            class="text-xs text-brand underline hover:text-brand-700"
+          >
+            + Intervention
+          </button>
+          <button
+            type="button"
+            phx-click="open_new_support_modal"
+            class="text-xs text-brand underline hover:text-brand-700"
+          >
+            + Support
+          </button>
+        </div>
       </div>
 
       <ol :if={@supports != []} class="space-y-sm">
