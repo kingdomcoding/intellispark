@@ -36,10 +36,12 @@ COPY priv priv
 COPY lib lib
 COPY assets assets
 
-RUN mix assets.deploy
-
+# Compile first so Phoenix 1.8 can generate the colocated-hooks
+# directory (phoenix-colocated/intellispark) that esbuild needs to
+# resolve when bundling js/app.js.
 COPY config/runtime.exs config/
 RUN mix compile
+RUN mix assets.deploy
 RUN mix release
 
 # ----- Stage 4: runtime -----
