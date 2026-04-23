@@ -62,6 +62,38 @@ defmodule Intellispark.Students.StudentLifecycleTest do
     end
   end
 
+  describe ":mark_withdrawn" do
+    test "sets enrollment_status to :withdrawn", %{admin: admin, school: school} do
+      student =
+        create_student!(school, %{
+          first_name: "With",
+          last_name: "Drawn",
+          enrollment_status: :active
+        })
+
+      {:ok, updated} =
+        Students.mark_student_withdrawn(student, actor: admin, tenant: school.id)
+
+      assert updated.enrollment_status == :withdrawn
+
+      admin_reloaded = Ash.load!(admin, [:school_memberships], authorize?: false)
+
+      visible_ids =
+        Students.list_students!(actor: admin_reloaded, tenant: school.id)
+        |> Enum.map(& &1.id)
+
+      assert student.id in visible_ids
+    end
+
+    test "teachers cannot mark withdrawn", %{school: school} do
+      student = create_student!(school, %{first_name: "Teach", last_name: "NoWithdraw"})
+      teacher = register_teacher!(school)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Students.mark_student_withdrawn(student, actor: teacher, tenant: school.id)
+    end
+  end
+
   describe ":unarchive" do
     test "clears archived_at; restored student reappears", %{admin: admin, school: school} do
       student = create_student!(school, %{first_name: "Un", last_name: "Archive"})

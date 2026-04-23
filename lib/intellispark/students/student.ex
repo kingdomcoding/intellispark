@@ -340,6 +340,12 @@ defmodule Intellispark.Students.Student do
       require_atomic? false
       change set_attribute(:archived_at, nil)
     end
+
+    update :mark_withdrawn do
+      accept []
+      require_atomic? false
+      change set_attribute(:enrollment_status, :withdrawn)
+    end
   end
 
   policies do
@@ -365,6 +371,10 @@ defmodule Intellispark.Students.Student do
     end
 
     policy action(:unarchive) do
+      authorize_if IntellisparkWeb.Policies.AdminOrClinicalRoleInSchool
+    end
+
+    policy action(:mark_withdrawn) do
       authorize_if IntellisparkWeb.Policies.AdminOrClinicalRoleInSchool
     end
   end
