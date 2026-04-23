@@ -1,0 +1,24 @@
+name: intellispark-prod
+
+services:
+  app:
+    image: ghcr.io/kingdomcoding/intellispark:${IMAGE_TAG:-latest}
+    container_name: intellispark-prod
+    restart: unless-stopped
+    network_mode: host
+    env_file: /srv/intellispark/.env.prod
+    environment:
+      PHX_SERVER: "true"
+      PORT: "4810"
+      PHX_HOST: "intellispark.josboxoffice.com"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:4810/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
