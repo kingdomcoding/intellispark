@@ -3,6 +3,7 @@ defmodule IntellisparkWeb.Router do
   use AshAuthentication.Phoenix.Router
 
   import AshAdmin.Router
+  import Phoenix.LiveDashboard.Router
 
   @doc """
   Session hook passed to the `ash_admin` macro. AshAdmin's router builds its
@@ -73,6 +74,17 @@ defmodule IntellisparkWeb.Router do
     end
 
     get "/insights/export.csv", InsightsController, :export
+  end
+
+  scope "/admin" do
+    pipe_through [:browser]
+
+    live_dashboard "/dashboard",
+      metrics: IntellisparkWeb.Telemetry,
+      on_mount: [
+        {IntellisparkWeb.LiveUserAuth, :live_user_required},
+        {IntellisparkWeb.LiveUserAuth, :require_district_admin}
+      ]
   end
 
   scope "/" do
