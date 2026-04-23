@@ -40,7 +40,16 @@ if config_env() == :prod do
     http: [ip: {0, 0, 0, 0}, port: port],
     secret_key_base: secret_key_base
 
-  config :intellispark, Intellispark.Mailer,
-    adapter: Swoosh.Adapters.Resend,
-    api_key: System.get_env("RESEND_API_KEY") || ""
+  case System.get_env("RESEND_API_KEY") do
+    nil ->
+      config :intellispark, Intellispark.Mailer, adapter: Swoosh.Adapters.Local
+
+    "" ->
+      config :intellispark, Intellispark.Mailer, adapter: Swoosh.Adapters.Local
+
+    key ->
+      config :intellispark, Intellispark.Mailer,
+        adapter: Swoosh.Adapters.Resend,
+        api_key: key
+  end
 end

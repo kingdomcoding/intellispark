@@ -1196,10 +1196,13 @@ existing_resiliency =
     _ -> nil
   end
 
+school_with_sub = Ash.load!(school, [:subscription], authorize?: false)
+actor_with_school = Map.put(admin_with_memberships, :current_school, school_with_sub)
+
 if is_nil(existing_resiliency) do
   {:ok, assignment} =
     Intellispark.Assessments.assign_resiliency(ava.id, :grades_9_12,
-      actor: admin_with_memberships,
+      actor: actor_with_school,
       tenant: school.id
     )
 
@@ -1227,7 +1230,7 @@ if is_nil(existing_resiliency) do
 
   {:ok, _} =
     Intellispark.Assessments.submit_resiliency(assignment,
-      actor: admin_with_memberships,
+      actor: actor_with_school,
       tenant: school.id
     )
 
