@@ -43,10 +43,16 @@ end
 school = ensure_school.("Sandbox High School", "sandbox-high")
 middle_school = ensure_school.("Sandbox Middle School", "sandbox-middle")
 
-# Upgrade demo schools to PRO tier so the switcher badge + tier-gated
-# features are visible in the demo session. Onboarding state is auto-
-# completed so the Get Started pill doesn't nag. These calls are no-ops
-# if the subscription already reflects this state.
+# Fresh school that hasn't been onboarded yet — used to demo the
+# /onboarding wizard + Get Started pill. Stays on :starter tier with
+# `current_step: :school_profile` so the flow is visible for district
+# admins whose `district_id` matches this district.
+fresh_school = ensure_school.("Sandbox Elementary (Fresh)", "sandbox-elementary")
+
+# Upgrade the 2 established demo schools to PRO tier so the switcher
+# badge + tier-gated features are visible. Mark their onboarding state
+# :done so the Get Started pill doesn't nag for them. Idempotent:
+# pattern-matches on current state and no-ops when already set.
 for s <- [school, middle_school] do
   case Intellispark.Billing.get_subscription_by_school(s.id,
          tenant: s.id,
@@ -75,6 +81,48 @@ for s <- [school, middle_school] do
     _ ->
       :ok
   end
+end
+
+# Reset the fresh school's onboarding state back to :school_profile
+# if a previous seeds run (or manual wizard walk-through) already
+# advanced it. Leave its subscription on :starter — don't upgrade.
+case Intellispark.Billing.get_onboarding_state_by_school(fresh_school.id,
+       tenant: fresh_school.id,
+       authorize?: false
+     ) do
+  {:ok, %{current_step: :school_profile, completed_at: nil}} ->
+    :ok
+
+  {:ok, state} ->
+    {:ok, _} =
+      state
+      |> Ash.Changeset.for_update(
+        :advance_step,
+        %{step: :school_profile},
+        authorize?: false,
+        tenant: fresh_school.id
+      )
+      |> Ash.update()
+
+    # Clear completed_at + step-specific timestamps so the wizard
+    # starts fully clean. Use a direct Repo update since there's
+    # no resource action that resets stamps.
+    Intellispark.Repo.query!(
+      """
+      UPDATE school_onboarding_states
+         SET completed_at = NULL,
+             school_profile_completed_at = NULL,
+             invite_coadmins_completed_at = NULL,
+             starter_tags_completed_at = NULL,
+             sis_provider_completed_at = NULL,
+             pick_tier_completed_at = NULL
+       WHERE school_id = $1
+      """,
+      [Ecto.UUID.dump!(fresh_school.id)]
+    )
+
+  _ ->
+    :ok
 end
 
 unless SchoolTerm
@@ -133,12 +181,14 @@ ensure_user = fn email, memberships ->
   user
 end
 
-# Admin has memberships at BOTH schools so the header school-switcher
-# dropdown is exercised on a fresh boot without manual SQL.
+# Admin has memberships at all three schools so the header school-
+# switcher dropdown is exercised on a fresh boot, and switching to the
+# fresh school surfaces the onboarding wizard.
 admin =
   ensure_user.("admin@sandboxhigh.edu", [
     {school, :admin},
-    {middle_school, :admin}
+    {middle_school, :admin},
+    {fresh_school, :admin}
   ])
 
 curtis = ensure_user.("curtis.murphy@sandboxhigh.edu", [{school, :teacher}])
