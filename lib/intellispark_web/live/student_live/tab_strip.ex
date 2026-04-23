@@ -31,6 +31,14 @@ defmodule IntellisparkWeb.StudentLive.TabStrip do
       />
 
       <.tab_link
+        kind={:about}
+        active?={@active_tab == :about}
+        student={@student}
+        label="About the Student"
+        icon="hero-identification-mini"
+      />
+
+      <.tab_link
         :for={tab <- @open_tabs}
         kind={tab}
         active?={@active_tab == tab}

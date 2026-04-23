@@ -146,7 +146,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   defp ensure_open(open_tabs, :profile), do: open_tabs
-  defp ensure_open(open_tabs, :about), do: dedup_append(open_tabs, :about)
+  defp ensure_open(open_tabs, :about), do: open_tabs
   defp ensure_open(open_tabs, {:flag, _} = tab), do: dedup_append(open_tabs, tab)
   defp ensure_open(open_tabs, {:support, _} = tab), do: dedup_append(open_tabs, tab)
 
