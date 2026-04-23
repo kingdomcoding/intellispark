@@ -223,6 +223,61 @@ defmodule IntellisparkWeb.Layouts do
   defp display_name(%{last_name: l}) when is_binary(l), do: l
   defp display_name(user), do: to_string(user.email)
 
+  attr :flash, :map, default: %{}
+  attr :signed_in?, :boolean, default: false
+  slot :inner_block, required: true
+
+  def public(assigns) do
+    ~H"""
+    <header class="border-b border-abbey/10 bg-white">
+      <div class="container-lg flex items-center justify-between py-sm">
+        <.link navigate={~p"/"} class="flex items-center gap-xs font-semibold text-abbey">
+          <.logo />
+        </.link>
+        <nav class="flex items-center gap-md text-sm text-azure">
+          <.link navigate={~p"/engineering-journal"} class="hover:text-abbey">Journal</.link>
+          <.link navigate={~p"/about"} class="hover:text-abbey">About</.link>
+          <.link
+            :if={@signed_in?}
+            navigate={~p"/students"}
+            class="text-brand font-medium"
+          >
+            Go to app →
+          </.link>
+          <.link
+            :if={!@signed_in?}
+            navigate={~p"/sign-in"}
+            class="hover:text-abbey"
+          >
+            Sign in
+          </.link>
+        </nav>
+      </div>
+      <div class="intellispark-accent-bar"></div>
+    </header>
+
+    <.live_flash_group flash={@flash} />
+
+    <main class="min-h-[calc(100vh-4rem)] bg-whitesmoke">
+      {render_slot(@inner_block)}
+    </main>
+
+    <footer class="mt-2xl border-t border-abbey/10 py-lg text-center text-xs text-azure">
+      <p>
+        Built by Oreoluwa James · source on
+        <a
+          href="https://github.com/kingdomcoding/intellispark"
+          class="text-brand underline"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          GitHub
+        </a>
+      </p>
+    </footer>
+    """
+  end
+
   attr :flash, :map, required: true
   attr :id, :string, default: "flash-group"
 

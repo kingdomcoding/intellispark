@@ -30,6 +30,15 @@ defmodule IntellisparkWeb.Router do
     plug IntellisparkWeb.Plugs.SetAdminActorCookies
   end
 
+  pipeline :public_browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {IntellisparkWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
     plug :load_from_bearer
@@ -99,9 +108,22 @@ defmodule IntellisparkWeb.Router do
   end
 
   scope "/", IntellisparkWeb do
-    pipe_through :browser
+    pipe_through :public_browser
 
-    get "/", PageController, :home
+    live_session :public, on_mount: [] do
+      live "/", LandingLive.Show
+      live "/demo", DemoLive.Show
+      live "/engineering-journal", JournalLive.Index
+      live "/engineering-journal/adr/:id", JournalLive.AdrShow
+      live "/engineering-journal/phase/:slug", JournalLive.PhaseShow
+      live "/about", AboutLive.Show
+    end
+
+    post "/demo/:persona", DemoController, :create_session
+  end
+
+  scope "/", IntellisparkWeb do
+    pipe_through :browser
 
     ash_authentication_live_session :maybe_user,
       on_mount: {IntellisparkWeb.LiveUserAuth, :live_user_optional} do

@@ -1,0 +1,30 @@
+<Layouts.public flash={@flash} signed_in?={@signed_in?}>
+  <section class="mx-auto max-w-4xl px-md py-2xl text-center">
+    <h1 class="text-4xl sm:text-5xl font-bold text-abbey">Intellispark</h1>
+    <p class="mt-sm text-lg text-azure">
+      Student-support platform reconstructed in
+      <span class="font-medium text-brand">Elixir · Phoenix · Ash</span>.
+    </p>
+
+    <p class="mt-md text-azure font-mono text-sm">
+      {@proof.phases} phases · {@proof.tests} tests · {@proof.adrs} ADRs
+    </p>
+
+    <div class="mt-xl flex flex-col sm:flex-row items-center justify-center gap-md">
+      <.link
+        navigate={~p"/demo"}
+        class="inline-flex items-center gap-2 px-lg py-md rounded-md bg-brand text-white font-medium hover:bg-brand-700"
+      >
+        Open the app as a demo admin
+        <span class="hero-arrow-right-mini size-4"></span>
+      </.link>
+
+      <.link
+        navigate={~p"/engineering-journal"}
+        class="inline-flex items-center gap-2 px-lg py-md rounded-md border border-abbey/20 text-abbey hover:bg-white"
+      >
+        Read the engineering journal
+      </.link>
+    </div>
+  </section>
+</Layouts.public>
