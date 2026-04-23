@@ -27,6 +27,7 @@ defmodule Intellispark.Students do
       define :archive_student, action: :archive
       define :unarchive_student, action: :unarchive
       define :mark_student_withdrawn, action: :mark_withdrawn
+      define :transfer_student, action: :transfer, args: [:destination_school_id]
 
       define :set_student_status, action: :set_status, args: [:status_id]
       define :clear_student_status, action: :clear_status

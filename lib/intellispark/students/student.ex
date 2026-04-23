@@ -151,6 +151,8 @@ defmodule Intellispark.Students.Student do
   end
 
   calculations do
+    calculate :district_id, :uuid, expr(school.district_id)
+
     calculate :display_name,
               :string,
               expr(
@@ -346,6 +348,12 @@ defmodule Intellispark.Students.Student do
       require_atomic? false
       change set_attribute(:enrollment_status, :withdrawn)
     end
+
+    update :transfer do
+      argument :destination_school_id, :uuid, allow_nil?: false
+      require_atomic? false
+      change Intellispark.Students.Changes.TransferToSchool
+    end
   end
 
   policies do
@@ -376,6 +384,14 @@ defmodule Intellispark.Students.Student do
 
     policy action(:mark_withdrawn) do
       authorize_if IntellisparkWeb.Policies.AdminOrClinicalRoleInSchool
+    end
+
+    policy action(:transfer) do
+      authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchool
+    end
+
+    policy action(:transfer) do
+      authorize_if {IntellisparkWeb.Policies.RequiresTier, tier: :pro}
     end
   end
 end
