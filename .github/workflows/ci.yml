@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -72,4 +72,35 @@ jobs:
         run: mix ash.migrate
 
       - name: Run tests
-        run: mix test
+        run: mix test 2>&1 | tee test_output.log
+        shell: bash
+
+      - name: Record test stats
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()
+        run: |
+          PASSING=$(grep -oE "[0-9]+ tests?" test_output.log | tail -1 | awk '{print $1}')
+          FAILING=$(grep -oE "[0-9]+ failures?" test_output.log | tail -1 | awk '{print $1}')
+          PROPS=$(grep -oE "[0-9]+ propert(y|ies)" test_output.log | tail -1 | awk '{print $1}')
+          cat > priv/test_stats.json <<EOF
+          {
+            "passing": ${PASSING:-0},
+            "failing": ${FAILING:-0},
+            "properties": ${PROPS:-0},
+            "commit_sha": "${GITHUB_SHA:0:7}",
+            "recorded_at": $(date +%s)
+          }
+          EOF
+          cat priv/test_stats.json
+
+      - name: Commit test stats back to main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add priv/test_stats.json
+          if git diff --cached --quiet; then
+            echo "No test_stats.json changes to commit"
+          else
+            git commit -m "ci: update test_stats.json [skip ci]"
+            git push
+          fi

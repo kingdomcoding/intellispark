@@ -94,6 +94,12 @@
         <span class="text-abbey">{s.detail}</span>
       </li>
     </ul>
+    <p :if={@resource_count > 0} class="mt-md text-xs text-azure font-mono">
+      {@resource_count} Ash resources · {@loc_count} lines of Elixir across lib/
+    </p>
+    <p :if={@last_commit != "unknown"} class="mt-xs text-xs text-azure font-mono">
+      Last commit: <code class="text-brand">{@last_commit}</code> — {@commit_subject}
+    </p>
   </section>
 
   <section class="bg-white/50 border-y border-abbey/10">

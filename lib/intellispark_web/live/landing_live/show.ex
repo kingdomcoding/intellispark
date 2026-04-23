@@ -171,19 +171,81 @@ defmodule IntellisparkWeb.LandingLive.Show do
     %{name: "GitHub Actions → GHCR → NPM", detail: "Self-hosted auto-deploy on push to main."}
   ]
 
+  alias Intellispark.Landing.{BuildInfo, ResourceCount, TestStats}
+
   @impl true
   def mount(_params, _session, socket) do
+    tags = live_phase_tags() || @phase_rows
+    stats = TestStats.read()
+
     {:ok,
      socket
      |> assign(:page_title, "Intellispark — Elixir/Phoenix/Ash portfolio")
-     |> assign(:phase_rows, @phase_rows)
+     |> assign(:phase_rows, tags)
      |> assign(:domains, @domains)
      |> assign(:stack, @stack)
-     |> assign(:proof, %{tests: 554, phases: length(@phase_rows), adrs: adr_count()})
+     |> assign(:proof, %{
+       tests: stats["passing"] || length_or_default(@phase_rows, 554),
+       phases: length(tags),
+       adrs: adr_count()
+     })
+     |> assign(:last_commit, BuildInfo.last_commit_short())
+     |> assign(:commit_subject, BuildInfo.commit_subject())
+     |> assign(:resource_count, safe_resource_count())
+     |> assign(:loc_count, safe_loc_count())
      |> assign(:signed_in?, false)}
   end
 
+  defp live_phase_tags do
+    case BuildInfo.phase_tags() do
+      tags when is_list(tags) and tags != [] ->
+        Enum.map(tags, fn t ->
+          %{
+            tag: t["tag"],
+            date: DateTime.from_unix!(t["timestamp"]) |> DateTime.to_date(),
+            summary: summary_from_tag(t["tag"], t["subject"]),
+            slug: slug_from_tag(t["tag"])
+          }
+        end)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp summary_from_tag(tag, subject) do
+    case Enum.find(@phase_rows, fn r -> r.tag == tag end) do
+      %{summary: s} -> s
+      _ -> subject || tag
+    end
+  end
+
+  defp slug_from_tag(tag) do
+    case Enum.find(@phase_rows, fn r -> r.tag == tag end) do
+      %{slug: s} -> s
+      _ -> nil
+    end
+  end
+
+  defp length_or_default(_list, default), do: default
+
   defp adr_count do
     Path.wildcard("docs/architecture/decisions/*.md") |> length()
+  end
+
+  defp safe_resource_count do
+    ResourceCount.resources()
+  rescue
+    _ -> 0
+  catch
+    :exit, _ -> 0
+  end
+
+  defp safe_loc_count do
+    ResourceCount.loc()
+  rescue
+    _ -> 0
+  catch
+    :exit, _ -> 0
   end
 end

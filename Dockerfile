@@ -35,12 +35,15 @@ ENV MIX_ENV=prod
 COPY priv priv
 COPY lib lib
 COPY assets assets
+# Needed for mix landing.record_build_info (git log, git tag) during build.
+COPY .git .git
 
 # Compile first so Phoenix 1.8 can generate the colocated-hooks
 # directory (phoenix-colocated/intellispark) that esbuild needs to
 # resolve when bundling js/app.js.
 COPY config/runtime.exs config/
 RUN mix compile
+RUN mix landing.record_build_info
 RUN mix assets.deploy
 RUN mix release
 

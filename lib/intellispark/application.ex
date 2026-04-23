@@ -13,6 +13,7 @@ defmodule Intellispark.Application do
       {Phoenix.PubSub, name: Intellispark.PubSub},
       {Finch, name: Intellispark.Finch},
       {Oban, Application.fetch_env!(:intellispark, Oban)},
+      Intellispark.Landing.ResourceCount,
       IntellisparkWeb.Endpoint
     ]
 
