@@ -483,7 +483,7 @@ defmodule IntellisparkWeb.StudentLive.Index do
           save_label={save_label(@from_list)}
         />
 
-        <div class="bg-white rounded-card shadow-card overflow-hidden">
+        <div class="bg-white rounded-card shadow-card">
           <table class="w-full text-sm text-left text-abbey">
             <thead class="border-b border-abbey/10 text-xs uppercase tracking-wide text-azure">
               <tr>
