@@ -115,6 +115,12 @@ defmodule IntellisparkWeb.Router do
     get "/healthz", HealthController, :check
   end
 
+  scope "/api", IntellisparkWeb do
+    pipe_through [:api, IntellisparkWeb.Plugs.LoadXelloProvider]
+
+    post "/xello/webhook", XelloWebhookController, :receive
+  end
+
   if Application.compile_env(:intellispark, :dev_routes) do
     scope "/dev" do
       pipe_through :browser
