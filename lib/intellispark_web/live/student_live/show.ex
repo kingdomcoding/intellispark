@@ -100,7 +100,10 @@ defmodule IntellisparkWeb.StudentLive.Show do
          new_connection_open?: false,
          new_strength_open?: false,
          active_tab: :profile,
-         open_tabs: []
+         open_tabs: [],
+         confirm_modal: nil,
+         transfer_schools: [],
+         can_transfer?: can_transfer?(actor, school)
        )
        |> allow_upload(:photo,
          accept: ~w(.png .jpg .jpeg .webp),
@@ -196,18 +199,90 @@ defmodule IntellisparkWeb.StudentLive.Show do
     {:noreply, assign(socket, edit_modal_open?: false, edit_form: nil)}
   end
 
-  # Phase 3 retrofit B — student-level lifecycle actions are stubbed pending Phase 11.5.
-  def handle_event("student_action_attempt", %{"action" => action}, socket) do
-    label =
-      case action do
-        "archive" -> "Archive"
-        "transfer" -> "Transfer"
-        "withdraw" -> "Mark withdrawn"
-        "report" -> "Generate report"
-        _ -> "Action"
-      end
+  def handle_event("student_action_attempt", %{"action" => "archive"}, socket) do
+    {:noreply, assign(socket, :confirm_modal, :archive)}
+  end
 
-    {:noreply, put_flash(socket, :info, "#{label} — coming in Phase 11.5 (student lifecycle).")}
+  def handle_event("student_action_attempt", %{"action" => "withdraw"}, socket) do
+    {:noreply, assign(socket, :confirm_modal, :withdraw)}
+  end
+
+  def handle_event("student_action_attempt", %{"action" => "transfer"}, socket) do
+    %{current_user: actor, current_school: school} = socket.assigns
+
+    {:noreply,
+     assign(socket,
+       confirm_modal: :transfer,
+       transfer_schools: sibling_schools_for(actor, school.id)
+     )}
+  end
+
+  def handle_event("student_action_attempt", %{"action" => "report"}, socket) do
+    {:noreply, put_flash(socket, :info, "Reports ship in a future release.")}
+  end
+
+  def handle_event("student_action_attempt", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("confirm_cancel", _params, socket) do
+    {:noreply, assign(socket, :confirm_modal, nil)}
+  end
+
+  def handle_event("confirm_archive", _params, socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    case Students.archive_student(student, actor: actor, tenant: school.id) do
+      {:ok, _archived} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Student archived.")
+         |> push_navigate(to: ~p"/students")}
+
+      {:error, error} ->
+        {:noreply,
+         socket
+         |> assign(:confirm_modal, nil)
+         |> put_flash(:error, humanize_error(error))}
+    end
+  end
+
+  def handle_event("confirm_withdraw", _params, socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    case Students.mark_student_withdrawn(student, actor: actor, tenant: school.id) do
+      {:ok, updated} ->
+        {:ok, reloaded} = load_student(updated, actor, school)
+
+        {:noreply,
+         socket
+         |> assign(student: reloaded, confirm_modal: nil)
+         |> put_flash(:info, "Marked as withdrawn.")}
+
+      {:error, error} ->
+        {:noreply,
+         socket
+         |> assign(:confirm_modal, nil)
+         |> put_flash(:error, humanize_error(error))}
+    end
+  end
+
+  def handle_event("confirm_transfer", %{"destination_school_id" => dest_id}, socket) do
+    %{current_user: actor, current_school: school, student: student} = socket.assigns
+
+    case Students.transfer_student(student, dest_id, actor: actor, tenant: school.id) do
+      {:ok, _archived_source} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Student transferred. Redirecting…")
+         |> push_navigate(to: ~p"/students")}
+
+      {:error, error} ->
+        {:noreply,
+         socket
+         |> assign(:confirm_modal, nil)
+         |> put_flash(:error, humanize_error(error))}
+    end
   end
 
   def handle_event("open_new_flag_modal", _params, socket) do
@@ -1003,7 +1078,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       onboarding_incomplete?={@onboarding_incomplete?}
     >
       <section class="container-lg py-xl space-y-md">
-        <.header_card student={@student} uploads={@uploads} />
+        <.header_card student={@student} uploads={@uploads} can_transfer?={@can_transfer?} />
 
         <IntellisparkWeb.StudentLive.TabStrip.tab_strip
           student={@student}
@@ -1199,6 +1274,76 @@ defmodule IntellisparkWeb.StudentLive.Show do
         student={@student}
         actor={@current_user}
       />
+
+      <.modal
+        :if={@confirm_modal == :archive}
+        id="archive-confirm-modal"
+        show
+        on_cancel={JS.push("confirm_cancel")}
+      >
+        <:title>Archive {@student.display_name}?</:title>
+        <p class="text-sm text-abbey">
+          Archiving hides this student from all rosters and lists. History and audit
+          records are preserved and can be restored by a district admin.
+        </p>
+        <:footer>
+          <.button variant={:ghost} phx-click="confirm_cancel">Cancel</.button>
+          <.button variant={:danger} phx-click="confirm_archive">Archive student</.button>
+        </:footer>
+      </.modal>
+
+      <.modal
+        :if={@confirm_modal == :withdraw}
+        id="withdraw-confirm-modal"
+        show
+        on_cancel={JS.push("confirm_cancel")}
+      >
+        <:title>Mark {@student.display_name} as withdrawn?</:title>
+        <p class="text-sm text-abbey">
+          This updates the enrollment status to <strong>Withdrawn</strong>. The student
+          stays in lists but is annotated as no longer enrolled.
+        </p>
+        <:footer>
+          <.button variant={:ghost} phx-click="confirm_cancel">Cancel</.button>
+          <.button variant={:primary} phx-click="confirm_withdraw">Mark withdrawn</.button>
+        </:footer>
+      </.modal>
+
+      <.modal
+        :if={@confirm_modal == :transfer}
+        id="transfer-confirm-modal"
+        show
+        on_cancel={JS.push("confirm_cancel")}
+      >
+        <:title>Transfer {@student.display_name} to another school</:title>
+        <form phx-submit="confirm_transfer" class="space-y-sm">
+          <p class="text-sm text-abbey">
+            A new student record will be created at the destination school with the same
+            demographics. This student will be archived here. Flags, notes, and team
+            memberships stay with this school for audit purposes.
+          </p>
+          <div :if={@transfer_schools == []} class="text-sm italic text-azure">
+            No other schools are available in your district for transfer.
+          </div>
+          <label :if={@transfer_schools != []} class="block">
+            <span class="text-xs text-abbey">Destination school</span>
+            <select
+              name="destination_school_id"
+              required
+              class="mt-xs w-full rounded border border-abbey/20 p-xs text-sm"
+            >
+              <option value="">Select a school…</option>
+              <option :for={s <- @transfer_schools} value={s.id}>{s.name}</option>
+            </select>
+          </label>
+          <div class="flex justify-end gap-sm pt-md">
+            <.button type="button" variant={:ghost} phx-click="confirm_cancel">Cancel</.button>
+            <.button type="submit" variant={:primary} disabled={@transfer_schools == []}>
+              Transfer student
+            </.button>
+          </div>
+        </form>
+      </.modal>
     </Layouts.app>
     """
   end
@@ -1536,6 +1681,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   attr :id, :string, required: true
+  attr :can_transfer?, :boolean, default: false
 
   defp actions_menu(assigns) do
     ~H"""
@@ -1551,12 +1697,13 @@ defmodule IntellisparkWeb.StudentLive.Show do
       >
         Actions <span class="hero-chevron-down-mini"></span>
       </button>
-      <.student_action_items id={@id} />
+      <.student_action_items id={@id} can_transfer?={@can_transfer?} />
     </div>
     """
   end
 
   attr :id, :string, required: true
+  attr :can_transfer?, :boolean, default: false
 
   defp status_overflow_menu(assigns) do
     ~H"""
@@ -1573,14 +1720,30 @@ defmodule IntellisparkWeb.StudentLive.Show do
       >
         <span class="hero-ellipsis-horizontal-mini"></span>
       </button>
-      <.student_action_items id={@id} />
+      <.student_action_items id={@id} can_transfer?={@can_transfer?} />
     </div>
     """
   end
 
   attr :id, :string, required: true
+  attr :can_transfer?, :boolean, default: false
 
   defp student_action_items(assigns) do
+    base_items = [
+      {"Archive", "archive"},
+      {"Mark withdrawn", "withdraw"},
+      {"Generate report", "report"}
+    ]
+
+    items =
+      if assigns.can_transfer? do
+        [Enum.at(base_items, 0), {"Transfer", "transfer"} | Enum.drop(base_items, 1)]
+      else
+        base_items
+      end
+
+    assigns = assign(assigns, :items, items)
+
     ~H"""
     <div
       id={@id}
@@ -1588,14 +1751,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       role="menu"
     >
       <button
-        :for={
-          {label, action} <- [
-            {"Archive", "archive"},
-            {"Transfer", "transfer"},
-            {"Mark withdrawn", "withdraw"},
-            {"Generate report", "report"}
-          ]
-        }
+        :for={{label, action} <- @items}
         type="button"
         phx-click={
           JS.push("student_action_attempt", value: %{action: action})
@@ -1612,6 +1768,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
   attr :student, :map, required: true
   attr :uploads, :map, required: true
+  attr :can_transfer?, :boolean, default: false
 
   defp header_card(assigns) do
     ~H"""
@@ -1653,7 +1810,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
             >
               Edit profile
             </button>
-            <.actions_menu id="student-actions-menu" />
+            <.actions_menu id="student-actions-menu" can_transfer?={@can_transfer?} />
           </div>
         </div>
 
@@ -1662,6 +1819,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
           <.status_overflow_menu
             :if={@student.current_status}
             id="student-status-overflow"
+            can_transfer?={@can_transfer?}
           />
           <.tag_chip :for={tag <- @student.tags || []} label={tag.name} />
         </div>
@@ -2392,6 +2550,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp humanize_team_role(:guardian), do: "Guardian"
   defp humanize_team_role(:sibling), do: "Sibling"
   defp humanize_team_role(:other), do: "Other"
+
   defp humanize_team_role(atom) when is_atom(atom),
     do: atom |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
 
@@ -2458,4 +2617,47 @@ defmodule IntellisparkWeb.StudentLive.Show do
     </div>
     """
   end
+
+  defp district_admin?(user) do
+    case user do
+      %{district_id: id} when not is_nil(id) ->
+        user
+        |> Map.get(:school_memberships, [])
+        |> List.wrap()
+        |> Enum.any?(&(&1.role == :admin))
+
+      _ ->
+        false
+    end
+  end
+
+  defp can_transfer?(user, %{subscription: %{tier: :pro}}), do: district_admin?(user)
+  defp can_transfer?(_user, _school), do: false
+
+  defp sibling_schools_for(user, exclude_school_id) do
+    user
+    |> Map.get(:school_memberships, [])
+    |> List.wrap()
+    |> Enum.map(&Map.get(&1, :school))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.reject(&(&1.id == exclude_school_id))
+    |> Enum.uniq_by(& &1.id)
+  end
+
+  defp humanize_error(%Ash.Error.Forbidden{}),
+    do: "You are not authorized to perform this action."
+
+  defp humanize_error(%{errors: [first | _]}) do
+    cond do
+      is_binary(first) -> first
+      is_exception(first) -> Exception.message(first)
+      true -> to_string(first)
+    end
+  end
+
+  defp humanize_error(error) when is_binary(error), do: error
+
+  defp humanize_error(error) when is_exception(error), do: Exception.message(error)
+
+  defp humanize_error(_), do: "Something went wrong."
 end

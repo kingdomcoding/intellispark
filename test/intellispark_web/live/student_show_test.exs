@@ -101,7 +101,7 @@ defmodule IntellisparkWeb.StudentShowTest do
   end
 
   describe "Phase 3 retrofit B — Actions menu + status overflow" do
-    test "Actions header button renders four stub items", %{
+    test "Actions header button renders base lifecycle items", %{
       conn: conn,
       school: school,
       admin: admin
@@ -111,12 +111,11 @@ defmodule IntellisparkWeb.StudentShowTest do
 
       assert html =~ ~s(id="student-actions-menu")
       assert html =~ "Archive"
-      assert html =~ "Transfer"
       assert html =~ "Mark withdrawn"
       assert html =~ "Generate report"
     end
 
-    test "stub action click flashes Phase 11.5 message", %{
+    test "report action click flashes 'future release' message", %{
       conn: conn,
       school: school,
       admin: admin
@@ -125,10 +124,9 @@ defmodule IntellisparkWeb.StudentShowTest do
       {:ok, lv, _html} = conn |> log_in_user(admin) |> live(~p"/students/#{student.id}")
 
       html =
-        render_hook(lv, "student_action_attempt", %{"action" => "archive"})
+        render_hook(lv, "student_action_attempt", %{"action" => "report"})
 
-      assert html =~ "Archive"
-      assert html =~ "Phase 11.5"
+      assert html =~ "Reports ship in a future release"
     end
 
     test "status overflow menu renders only when student has a current_status", %{
