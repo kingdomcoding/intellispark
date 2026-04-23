@@ -230,6 +230,18 @@ defmodule Intellispark.Students.Student do
     calculate :well_being,
               :atom,
               {Intellispark.Students.Calculations.IndicatorLevel, dimension: :well_being}
+
+    calculate :academic_risk_index,
+              :atom,
+              Intellispark.Students.Calculations.AcademicRiskIndex do
+      public? true
+    end
+
+    calculate :contributing_factors,
+              {:array, :atom},
+              Intellispark.Students.Calculations.ContributingFactors do
+      public? true
+    end
   end
 
   actions do
