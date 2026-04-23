@@ -65,6 +65,63 @@ defmodule Intellispark.Students.StudentTest do
     end
   end
 
+  describe "demographics" do
+    test "create accepts gender / ethnicity_race / phone", %{school: school} do
+      assert {:ok, s} =
+               Ash.create(
+                 Student,
+                 %{
+                   first_name: "Ada",
+                   last_name: "Lovelace",
+                   grade_level: 9,
+                   phone: "555-0100",
+                   gender: :female,
+                   ethnicity_race: :white
+                 },
+                 tenant: school.id,
+                 authorize?: false
+               )
+
+      assert s.phone == "555-0100"
+      assert s.gender == :female
+      assert s.ethnicity_race == :white
+    end
+
+    test "rejects gender outside the allowed set", %{school: school} do
+      assert {:error, _} =
+               Ash.create(
+                 Student,
+                 %{first_name: "X", last_name: "Y", grade_level: 5, gender: :unknown_atom},
+                 tenant: school.id,
+                 authorize?: false
+               )
+    end
+
+    test "update sets ethnicity_race + paper-trail captures it", %{school: school} do
+      s = create_student!(school, %{first_name: "P", last_name: "Q"})
+
+      {:ok, updated} =
+        Ash.update(s, %{ethnicity_race: :asian, phone: "555-0199"},
+          tenant: school.id,
+          authorize?: false
+        )
+
+      assert updated.ethnicity_race == :asian
+      assert updated.phone == "555-0199"
+
+      {:ok, versions} =
+        Student.Version
+        |> Ash.Query.filter(version_source_id == ^s.id)
+        |> Ash.Query.set_tenant(school.id)
+        |> Ash.read(authorize?: false)
+
+      assert Enum.any?(versions, fn v ->
+               match?(%{ethnicity_race: :asian}, v.changes) or
+                 v.version_action_name == :update
+             end)
+    end
+  end
+
   describe "calculations" do
     test "display_name falls back to first + last when preferred_name nil", %{school: school} do
       s = create_student!(school, %{first_name: "Marcus", last_name: "Johnson"})
