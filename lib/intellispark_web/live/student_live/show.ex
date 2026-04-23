@@ -1262,6 +1262,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
 
           <.team_members_panel
             memberships={@outer.student.team_memberships || []}
+            connections={@outer.student.key_connections || []}
             student={@outer.student}
           />
 
@@ -2243,11 +2244,31 @@ defmodule IntellisparkWeb.StudentLive.Show do
   end
 
   attr :memberships, :list, required: true
+  attr :connections, :list, default: []
   attr :student, :map, required: true
 
   defp team_members_panel(assigns) do
     grouped = Enum.group_by(assigns.memberships, &team_group_key(&1.role))
-    assigns = assign(assigns, grouped: grouped, count: length(assigns.memberships))
+
+    family_from_connections =
+      for c <- assigns.connections,
+          match?(%Intellispark.Teams.ExternalPerson{}, c.connected_external_person) do
+        %{
+          id: c.id,
+          role: c.connected_external_person.relationship_kind,
+          user: c.connected_external_person,
+          from_connection?: true
+        }
+      end
+
+    family = (grouped[:family] || []) ++ family_from_connections
+
+    assigns =
+      assign(assigns,
+        grouped: grouped,
+        family: family,
+        count: length(assigns.memberships) + length(family_from_connections)
+      )
 
     ~H"""
     <div class="bg-white rounded-card shadow-card p-md space-y-md">
@@ -2270,7 +2291,7 @@ defmodule IntellisparkWeb.StudentLive.Show do
       <.role_group
         title="Family"
         empty="No family members added."
-        memberships={@grouped[:family] || []}
+        memberships={@family}
       />
       <.role_group
         title="Other Staff"
@@ -2367,7 +2388,12 @@ defmodule IntellisparkWeb.StudentLive.Show do
   defp humanize_team_role(:clinician), do: "Clinician"
   defp humanize_team_role(:family), do: "Family member"
   defp humanize_team_role(:community_partner), do: "Community partner"
+  defp humanize_team_role(:parent), do: "Parent"
+  defp humanize_team_role(:guardian), do: "Guardian"
+  defp humanize_team_role(:sibling), do: "Sibling"
   defp humanize_team_role(:other), do: "Other"
+  defp humanize_team_role(atom) when is_atom(atom),
+    do: atom |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
 
   attr :connections, :list, required: true
 
