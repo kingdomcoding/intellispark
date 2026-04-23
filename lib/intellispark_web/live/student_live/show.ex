@@ -1030,6 +1030,37 @@ defmodule IntellisparkWeb.StudentLive.Show do
             label="Enrollment status"
           />
           <.input field={@edit_form[:external_id]} label="External ID" />
+          <.input field={@edit_form[:email]} type="email" label="Email" />
+          <.input field={@edit_form[:phone]} type="tel" label="Phone" />
+          <.input
+            field={@edit_form[:gender]}
+            type="select"
+            prompt="—"
+            options={[
+              {"Male", "male"},
+              {"Female", "female"},
+              {"Non-binary", "non_binary"},
+              {"Prefer not to say", "prefer_not_to_say"},
+              {"Other", "other"}
+            ]}
+            label="Gender"
+          />
+          <.input
+            field={@edit_form[:ethnicity_race]}
+            type="select"
+            prompt="—"
+            options={[
+              {"American Indian or Alaska Native", "american_indian_or_alaska_native"},
+              {"Asian", "asian"},
+              {"Black or African American", "black_or_african_american"},
+              {"Hispanic or Latino", "hispanic_or_latino"},
+              {"Native Hawaiian or Pacific Islander", "native_hawaiian_or_pacific_islander"},
+              {"White", "white"},
+              {"Two or more races", "two_or_more_races"},
+              {"Prefer not to say", "prefer_not_to_say"}
+            ]}
+            label="Ethnicity / race"
+          />
 
           <div class="flex justify-end gap-sm pt-md">
             <.button type="button" variant={:ghost} phx-click="close_edit_modal">Cancel</.button>
@@ -1459,9 +1490,34 @@ defmodule IntellisparkWeb.StudentLive.Show do
           <dt class="text-azure">External ID</dt>
           <dd class="text-abbey">{@student.external_id || "—"}</dd>
         </div>
+        <div class="flex justify-between gap-sm">
+          <dt class="text-azure">Email</dt>
+          <dd class="text-abbey">{@student.email || "—"}</dd>
+        </div>
+        <div class="flex justify-between gap-sm">
+          <dt class="text-azure">Phone</dt>
+          <dd class="text-abbey">{@student.phone || "—"}</dd>
+        </div>
+        <div class="flex justify-between gap-sm">
+          <dt class="text-azure">Gender</dt>
+          <dd class="text-abbey">{humanize_demographic(@student.gender)}</dd>
+        </div>
+        <div class="flex justify-between gap-sm">
+          <dt class="text-azure">Ethnicity / race</dt>
+          <dd class="text-abbey">{humanize_demographic(@student.ethnicity_race)}</dd>
+        </div>
       </dl>
     </div>
     """
+  end
+
+  defp humanize_demographic(nil), do: "—"
+
+  defp humanize_demographic(value) when is_atom(value) do
+    value
+    |> Atom.to_string()
+    |> String.split("_")
+    |> Enum.map_join(" ", &String.capitalize/1)
   end
 
   attr :student, :map, required: true
