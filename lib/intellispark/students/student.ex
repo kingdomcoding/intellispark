@@ -86,6 +86,7 @@ defmodule Intellispark.Students.Student do
                     :two_or_more_races,
                     :prefer_not_to_say
                   ]
+
       public? true
     end
 

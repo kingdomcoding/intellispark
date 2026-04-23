@@ -444,5 +444,4 @@ defmodule IntellisparkWeb.OnboardingLive.Show do
     user.district_id != nil and
       Enum.any?(user.school_memberships || [], &(&1.role == :admin))
   end
-
 end

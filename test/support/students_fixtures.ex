@@ -44,7 +44,9 @@ defmodule Intellispark.StudentsFixtures do
         authorize?: false
       )
 
-    {:ok, updated} = Intellispark.Billing.set_tier(sub, tier, tenant: school.id, authorize?: false)
+    {:ok, updated} =
+      Intellispark.Billing.set_tier(sub, tier, tenant: school.id, authorize?: false)
+
     updated
   end
 
