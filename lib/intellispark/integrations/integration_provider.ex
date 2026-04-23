@@ -18,6 +18,21 @@ defmodule Intellispark.Integrations.IntegrationProvider do
     repo Intellispark.Repo
   end
 
+  oban do
+    triggers do
+      trigger :scheduled_sync do
+        action :run_now
+        queue :ingestion
+        scheduler_cron "0 */6 * * *"
+        where expr(active? == true)
+
+        worker_module_name Intellispark.Integrations.IntegrationProvider.AshOban.Worker.ScheduledSync
+
+        scheduler_module_name Intellispark.Integrations.IntegrationProvider.AshOban.Scheduler.ScheduledSync
+      end
+    end
+  end
+
   multitenancy do
     strategy :attribute
     attribute :school_id
@@ -99,6 +114,12 @@ defmodule Intellispark.Integrations.IntegrationProvider do
       require_atomic? false
       change Intellispark.Integrations.Changes.StampSyncFinished
     end
+
+    update :run_now do
+      accept []
+      require_atomic? false
+      change {Intellispark.Integrations.Changes.EnqueueSyncRun, trigger_source: :manual}
+    end
   end
 
   policies do
@@ -113,6 +134,10 @@ defmodule Intellispark.Integrations.IntegrationProvider do
     end
 
     policy action_type(:update) do
+      authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchool
+    end
+
+    policy action(:run_now) do
       authorize_if IntellisparkWeb.Policies.DistrictAdminOfSchool
     end
   end

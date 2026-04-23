@@ -273,6 +273,39 @@ defmodule Intellispark.Students.Student do
       require_atomic? false
     end
 
+    create :upsert_from_sis do
+      accept [
+        :first_name,
+        :last_name,
+        :preferred_name,
+        :date_of_birth,
+        :grade_level,
+        :enrollment_status,
+        :external_id,
+        :email,
+        :phone,
+        :gender,
+        :ethnicity_race
+      ]
+
+      upsert? true
+      upsert_identity :unique_external_id_per_school
+
+      upsert_fields [
+        :first_name,
+        :last_name,
+        :preferred_name,
+        :date_of_birth,
+        :grade_level,
+        :enrollment_status,
+        :email,
+        :phone,
+        :gender,
+        :ethnicity_race,
+        :updated_at
+      ]
+    end
+
     update :set_status do
       argument :status_id, :uuid, allow_nil?: false
       require_atomic? false

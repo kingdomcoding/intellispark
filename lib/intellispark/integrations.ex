@@ -22,6 +22,7 @@ defmodule Intellispark.Integrations do
       define :update_provider_credentials, action: :update_credentials
       define :activate_provider, action: :activate
       define :deactivate_provider, action: :deactivate
+      define :run_sync_now, action: :run_now
     end
 
     resource Intellispark.Integrations.IntegrationProvider.Version
