@@ -29,11 +29,23 @@ defmodule IntellisparkWeb.AdminLive.Integrations.Index do
          |> push_navigate(to: ~p"/students")}
 
       true ->
+        if connected?(socket) do
+          Phoenix.PubSub.subscribe(
+            Intellispark.PubSub,
+            "sync_runs:school:#{school.id}"
+          )
+        end
+
         {:ok,
          socket
          |> assign(page_title: "Integrations")
          |> load_data()}
     end
+  end
+
+  @impl true
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "sync_runs:school:" <> _}, socket) do
+    {:noreply, load_data(socket)}
   end
 
   defp load_data(socket) do

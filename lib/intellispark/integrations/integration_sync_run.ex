@@ -14,6 +14,13 @@ defmodule Intellispark.Integrations.IntegrationSyncRun do
     attributes_as_attributes [:school_id, :provider_id]
   end
 
+  pub_sub do
+    module IntellisparkWeb.Endpoint
+    prefix ""
+    publish_all :create, ["sync_runs:school", :school_id]
+    publish_all :update, ["sync_runs:school", :school_id]
+  end
+
   postgres do
     table "integration_sync_runs"
     repo Intellispark.Repo
