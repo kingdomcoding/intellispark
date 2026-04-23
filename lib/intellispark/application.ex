@@ -8,6 +8,7 @@ defmodule Intellispark.Application do
     children = [
       IntellisparkWeb.Telemetry,
       Intellispark.Repo,
+      Intellispark.Vault,
       {DNSCluster, query: Application.get_env(:intellispark, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Intellispark.PubSub},
       {Finch, name: Intellispark.Finch},

@@ -6,6 +6,11 @@ System.put_env(
     "test-token-signing-secret-deterministic-and-not-for-production-use"
 )
 
+config :intellispark,
+  cloak_key_fallback:
+    <<87, 12, 45, 98, 177, 23, 214, 56, 201, 88, 9, 143, 61, 219, 99, 12, 44, 55, 201, 72, 180,
+      14, 251, 6, 109, 88, 162, 33, 219, 199, 44, 76>>
+
 config :intellispark, Intellispark.Repo,
   username: System.get_env("POSTGRES_USER", "postgres"),
   password: System.get_env("POSTGRES_PASSWORD", "postgres"),

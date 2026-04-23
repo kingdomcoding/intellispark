@@ -1,5 +1,10 @@
 import Config
 
+config :intellispark,
+  cloak_key_fallback:
+    <<228, 69, 14, 38, 147, 111, 237, 225, 8, 9, 172, 59, 243, 121, 14, 172, 33, 115, 73, 8, 172,
+      47, 141, 240, 79, 24, 146, 96, 247, 223, 211, 152>>
+
 config :intellispark, Intellispark.Repo,
   username: System.get_env("POSTGRES_USER", "postgres"),
   password: System.get_env("POSTGRES_PASSWORD", "postgres"),
