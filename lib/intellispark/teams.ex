@@ -42,6 +42,10 @@ defmodule Intellispark.Teams do
         action: :create,
         args: [:student_id, :connected_user_id]
 
+      define :create_key_connection_for_external_person,
+        action: :create_for_external_person,
+        args: [:student_id, :connected_external_person_id]
+
       define :update_key_connection, action: :update
       define :destroy_key_connection, action: :destroy
     end
@@ -61,5 +65,19 @@ defmodule Intellispark.Teams do
     end
 
     resource Intellispark.Teams.Strength.Version
+
+    resource Intellispark.Teams.ExternalPerson do
+      define :list_external_persons, action: :read
+      define :get_external_person, action: :read, get_by: [:id]
+
+      define :create_external_person,
+        action: :create,
+        args: [:first_name, :last_name, :relationship_kind]
+
+      define :update_external_person, action: :update
+      define :destroy_external_person, action: :destroy
+    end
+
+    resource Intellispark.Teams.ExternalPerson.Version
   end
 end

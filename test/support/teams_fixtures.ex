@@ -29,6 +29,44 @@ defmodule Intellispark.TeamsFixtures do
     kc
   end
 
+  def create_external_person!(actor, school, attrs \\ %{}) do
+    merged =
+      Map.merge(
+        %{
+          first_name: "Pat",
+          last_name: "Parent#{System.unique_integer([:positive])}",
+          relationship_kind: :parent
+        },
+        attrs
+      )
+
+    extras = Map.drop(merged, [:first_name, :last_name, :relationship_kind])
+
+    {:ok, ep} =
+      Teams.create_external_person(
+        merged.first_name,
+        merged.last_name,
+        merged.relationship_kind,
+        extras,
+        actor: actor,
+        tenant: school.id,
+        authorize?: false
+      )
+
+    ep
+  end
+
+  def create_key_connection_for_external_person!(actor, school, student, ep, attrs \\ %{}) do
+    {:ok, kc} =
+      Teams.create_key_connection_for_external_person(student.id, ep.id, attrs,
+        actor: actor,
+        tenant: school.id,
+        authorize?: false
+      )
+
+    kc
+  end
+
   def create_strength!(actor, school, student, description) do
     {:ok, s} =
       Teams.create_strength(student.id, description,

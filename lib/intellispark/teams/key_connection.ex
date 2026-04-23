@@ -15,7 +15,12 @@ defmodule Intellispark.Teams.KeyConnection do
   end
 
   paper_trail do
-    attributes_as_attributes [:school_id, :student_id, :connected_user_id]
+    attributes_as_attributes [
+      :school_id,
+      :student_id,
+      :connected_user_id,
+      :connected_external_person_id
+    ]
   end
 
   pub_sub do
@@ -29,6 +34,10 @@ defmodule Intellispark.Teams.KeyConnection do
   postgres do
     table "key_connections"
     repo Intellispark.Repo
+
+    identity_wheres_to_sql unique_per_student_user: "connected_user_id IS NOT NULL",
+                           unique_per_student_external_person:
+                             "connected_external_person_id IS NOT NULL"
   end
 
   multitenancy do
@@ -53,13 +62,21 @@ defmodule Intellispark.Teams.KeyConnection do
   end
 
   identities do
-    identity :unique_per_student_user, [:student_id, :connected_user_id]
+    identity :unique_per_student_user, [:student_id, :connected_user_id],
+      where: expr(not is_nil(connected_user_id))
+
+    identity :unique_per_student_external_person,
+             [:student_id, :connected_external_person_id],
+             where: expr(not is_nil(connected_external_person_id))
   end
 
   relationships do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
     belongs_to :student, Intellispark.Students.Student, allow_nil?: false
-    belongs_to :connected_user, Intellispark.Accounts.User, allow_nil?: false
+    belongs_to :connected_user, Intellispark.Accounts.User, allow_nil?: true
+
+    belongs_to :connected_external_person, Intellispark.Teams.ExternalPerson, allow_nil?: true
+
     belongs_to :added_by, Intellispark.Accounts.User, allow_nil?: true
   end
 
@@ -70,6 +87,13 @@ defmodule Intellispark.Teams.KeyConnection do
       primary? true
       accept [:student_id, :connected_user_id, :note, :source]
       change Intellispark.Teams.Changes.StampAddedBy
+      change Intellispark.Teams.Changes.ValidateConnectedTarget
+    end
+
+    create :create_for_external_person do
+      accept [:student_id, :connected_external_person_id, :note, :source]
+      change Intellispark.Teams.Changes.StampAddedBy
+      change Intellispark.Teams.Changes.ValidateConnectedTarget
     end
 
     update :update do
