@@ -46,8 +46,7 @@ defmodule Intellispark.Assessments.Resiliency.Response do
   relationships do
     belongs_to :school, Intellispark.Accounts.School, allow_nil?: false
 
-    belongs_to :assessment, Intellispark.Assessments.Resiliency.Assessment,
-      allow_nil?: false
+    belongs_to :assessment, Intellispark.Assessments.Resiliency.Assessment, allow_nil?: false
   end
 
   actions do

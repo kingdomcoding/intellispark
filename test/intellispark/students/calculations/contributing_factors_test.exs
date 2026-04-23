@@ -57,7 +57,14 @@ defmodule Intellispark.Students.Calculations.ContributingFactorsTest do
   test "returns [] when all skills are :high and index is :low", %{school: school} do
     student = create_student!(school, %{first_name: "Al", last_name: "LHigh"})
 
-    for skill <- [:confidence, :persistence, :organization, :getting_along, :resilience, :curiosity] do
+    for skill <- [
+          :confidence,
+          :persistence,
+          :organization,
+          :getting_along,
+          :resilience,
+          :curiosity
+        ] do
       seed!(school, student, skill, 4.5, :high)
     end
 

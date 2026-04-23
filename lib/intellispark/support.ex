@@ -39,6 +39,10 @@ defmodule Intellispark.Support do
         action: :create,
         args: [:student_id, :title]
 
+      define :create_support_from_intervention,
+        action: :create_from_intervention,
+        args: [:student_id, :title]
+
       define :update_support, action: :update
       define :accept_support, action: :accept
       define :decline_support, action: :decline
@@ -47,6 +51,20 @@ defmodule Intellispark.Support do
     end
 
     resource Intellispark.Support.Support.Version
+
+    resource Intellispark.Support.InterventionLibraryItem do
+      define :list_intervention_library_items, action: :read
+      define :get_intervention_library_item, action: :read, get_by: [:id]
+
+      define :create_intervention_library_item,
+        action: :create,
+        args: [:title, :mtss_tier]
+
+      define :update_intervention_library_item, action: :update
+      define :archive_intervention_library_item, action: :destroy
+    end
+
+    resource Intellispark.Support.InterventionLibraryItem.Version
 
     resource Intellispark.Support.Note do
       define :list_notes, action: :read

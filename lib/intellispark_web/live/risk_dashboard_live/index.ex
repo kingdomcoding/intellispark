@@ -70,7 +70,10 @@ defmodule IntellisparkWeb.RiskDashboardLive.Index do
           </.link>
         </header>
 
-        <form phx-change="filter" class="bg-white rounded-card shadow-card p-md flex flex-wrap gap-md items-end">
+        <form
+          phx-change="filter"
+          class="bg-white rounded-card shadow-card p-md flex flex-wrap gap-md items-end"
+        >
           <label class="block">
             <span class="text-xs text-azure">Risk band</span>
             <select name="band" class="mt-xs rounded border border-abbey/20 p-xs text-sm">
@@ -236,5 +239,4 @@ defmodule IntellisparkWeb.RiskDashboardLive.Index do
   end
 
   defp factors_join(_), do: "—"
-
 end

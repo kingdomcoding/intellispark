@@ -38,8 +38,14 @@ defmodule Intellispark.Assessments.Resiliency.SkillScore do
     attribute :skill, :atom do
       allow_nil? false
 
-      constraints one_of:
-                    [:confidence, :persistence, :organization, :getting_along, :resilience, :curiosity]
+      constraints one_of: [
+                    :confidence,
+                    :persistence,
+                    :organization,
+                    :getting_along,
+                    :resilience,
+                    :curiosity
+                  ]
 
       public? true
     end
@@ -79,7 +85,16 @@ defmodule Intellispark.Assessments.Resiliency.SkillScore do
       accept [:student_id, :skill, :score_value, :level, :answered_count, :assessment_id]
       upsert? true
       upsert_identity :unique_per_student_skill
-      upsert_fields [:score_value, :level, :answered_count, :last_computed_at, :assessment_id, :updated_at]
+
+      upsert_fields [
+        :score_value,
+        :level,
+        :answered_count,
+        :last_computed_at,
+        :assessment_id,
+        :updated_at
+      ]
+
       change set_attribute(:last_computed_at, &DateTime.utc_now/0)
     end
   end

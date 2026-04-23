@@ -14,12 +14,19 @@ defmodule Intellispark.Support.SupportCreateFromInterventionTest do
   end
 
   defp seed_library_item(school, admin, attrs \\ %{}) do
-    defaults = %{title: "Check & Connect", mtss_tier: :tier_3, default_duration_days: 90,
-                 description: "Daily mentor check-in"}
+    defaults = %{
+      title: "Check & Connect",
+      mtss_tier: :tier_3,
+      default_duration_days: 90,
+      description: "Daily mentor check-in"
+    }
+
     merged = Map.merge(defaults, attrs)
 
     {:ok, item} =
-      Support.create_intervention_library_item(merged.title, merged.mtss_tier,
+      Support.create_intervention_library_item(
+        merged.title,
+        merged.mtss_tier,
         %{description: merged.description, default_duration_days: merged.default_duration_days},
         actor: admin,
         tenant: school.id

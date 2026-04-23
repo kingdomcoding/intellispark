@@ -14,8 +14,14 @@ defmodule Intellispark.Support.Changes.PrefillFromIntervention do
         tenant = changeset.tenant
 
         case Ash.get(InterventionLibraryItem, id, tenant: tenant, authorize?: false) do
-          {:ok, item} -> apply_prefill(changeset, item)
-          {:error, _} -> Ash.Changeset.add_error(changeset, field: :intervention_library_item_id, message: "not found")
+          {:ok, item} ->
+            apply_prefill(changeset, item)
+
+          {:error, _} ->
+            Ash.Changeset.add_error(changeset,
+              field: :intervention_library_item_id,
+              message: "not found"
+            )
         end
     end
   end

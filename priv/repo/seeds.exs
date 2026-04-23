@@ -1091,6 +1091,153 @@ else
   Logger.info("  embed URL:     http://localhost:4800/embed/student/#{existing_embed.token}")
 end
 
+for pro_school <- [school, middle_school] do
+  library_seeds = [
+    %{
+      title: "Flex Time Pass",
+      mtss_tier: :tier_2,
+      default_duration_days: 30,
+      description: "Twice-weekly mentor check-in during flex block."
+    },
+    %{
+      title: "Tier 2 Reading Group",
+      mtss_tier: :tier_2,
+      default_duration_days: 60,
+      description: "Small-group phonics + comprehension, 3x/week."
+    },
+    %{
+      title: "Check & Connect",
+      mtss_tier: :tier_3,
+      default_duration_days: 90,
+      description: "Daily student-mentor relationship + attendance monitoring."
+    },
+    %{
+      title: "Counseling Referral",
+      mtss_tier: :tier_3,
+      default_duration_days: 60,
+      description: "Weekly individual counseling session with school counselor."
+    },
+    %{
+      title: "Attendance Contract",
+      mtss_tier: :tier_2,
+      default_duration_days: 45,
+      description: "Attendance goal tracker signed by student + parent + advisor."
+    },
+    %{
+      title: "Academic Coaching",
+      mtss_tier: :tier_1,
+      default_duration_days: 30,
+      description: "Weekly study-skills coaching session."
+    }
+  ]
+
+  for attrs <- library_seeds do
+    existing =
+      case Intellispark.Support.InterventionLibraryItem
+           |> Ash.Query.filter(title == ^attrs.title)
+           |> Ash.Query.set_tenant(pro_school.id)
+           |> Ash.read_one(authorize?: false) do
+        {:ok, item} -> item
+        _ -> nil
+      end
+
+    if is_nil(existing) do
+      Ash.create!(
+        Intellispark.Support.InterventionLibraryItem,
+        attrs,
+        tenant: pro_school.id,
+        authorize?: false
+      )
+    end
+  end
+
+  Logger.info("  interventions: #{pro_school.name} — 6 library items")
+end
+
+existing_xello =
+  case Intellispark.Integrations.XelloProfile
+       |> Ash.Query.filter(student_id == ^ava.id)
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, xp} -> xp
+    _ -> nil
+  end
+
+if is_nil(existing_xello) do
+  {:ok, _} =
+    Intellispark.Integrations.upsert_xello_profile(
+      %{
+        student_id: ava.id,
+        personality_style: %{"helper" => 0.5, "organizer" => 0.3, "persuader" => 0.2},
+        learning_style: %{"visual" => 55, "auditory" => 25, "tactile" => 20},
+        education_goals: "Go to college",
+        favorite_career_clusters: ["STEM", "Healthcare", "Human Services"],
+        skills: ["Communication", "Problem solving", "Teamwork"],
+        interests: ["Biology", "Art", "Music"],
+        birthplace: "California",
+        live_in: "Massachusetts",
+        family_roots: "Indian",
+        suggested_clusters: ["Healthcare", "Education"],
+        completed_lessons: ["L1", "L2", "L3"]
+      },
+      tenant: school.id,
+      authorize?: false
+    )
+
+  Logger.info("  xello:         Ava Patel — profile synced")
+end
+
+existing_resiliency =
+  case Intellispark.Assessments.Resiliency.Assessment
+       |> Ash.Query.filter(student_id == ^ava.id and state == :submitted)
+       |> Ash.Query.set_tenant(school.id)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, a} -> a
+    _ -> nil
+  end
+
+if is_nil(existing_resiliency) do
+  {:ok, assignment} =
+    Intellispark.Assessments.assign_resiliency(ava.id, :grades_9_12,
+      actor: admin_with_memberships,
+      tenant: school.id
+    )
+
+  skill_values = %{
+    confidence: 2,
+    persistence: 3,
+    organization: 4,
+    getting_along: 4,
+    resilience: 3,
+    curiosity: 4
+  }
+
+  for q <- Intellispark.Assessments.Resiliency.QuestionBank.questions_for(:grades_9_12) do
+    value = Map.get(skill_values, q.skill, 3)
+
+    {:ok, _} =
+      Intellispark.Assessments.upsert_resiliency_response(
+        assignment.id,
+        q.id,
+        value,
+        tenant: school.id,
+        authorize?: false
+      )
+  end
+
+  {:ok, _} =
+    Intellispark.Assessments.submit_resiliency(assignment,
+      actor: admin_with_memberships,
+      tenant: school.id
+    )
+
+  Intellispark.Assessments.Resiliency.Workers.SkillScoreWorker.perform(%Oban.Job{
+    args: %{"assessment_id" => assignment.id, "tenant" => school.id}
+  })
+
+  Logger.info("  resiliency:    Ava Patel — 6 skills scored")
+end
+
 Logger.info("Seed complete.")
 Logger.info("  admin login:   admin@sandboxhigh.edu / phase1-demo-pass")
 Logger.info("  teacher login: curtis.murphy@sandboxhigh.edu / phase1-demo-pass")
