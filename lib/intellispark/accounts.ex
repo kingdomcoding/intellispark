@@ -21,6 +21,7 @@ defmodule Intellispark.Accounts do
     resource Intellispark.Accounts.Token
 
     resource Intellispark.Accounts.DemoSession
+    resource Intellispark.Accounts.DemoResetLog
 
     resource Intellispark.Accounts.District do
       define :create_district, action: :create, args: [:name, :slug]

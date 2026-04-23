@@ -180,3 +180,11 @@
   .container-md { @apply w-full max-w-(--container-md) mx-auto px-xs; }
   .container-lg { @apply w-full max-w-(--container-lg) mx-auto px-xs; }
 }
+
+@media print {
+  header, footer, nav, form, [phx-click] { display: none !important; }
+  body { background: white !important; color: black !important; font-size: 11pt; line-height: 1.5; }
+  article, .prose { max-width: 100% !important; }
+  a::after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; }
+  a:where([href^="#"])::after { content: ""; }
+}

@@ -8,6 +8,17 @@
     <.live_title default="Intellispark" suffix=" · Intellispark">
       {assigns[:page_title]}
     </.live_title>
+    <meta
+      property="og:title"
+      content={assigns[:page_title] || "Intellispark"}
+    />
+    <meta
+      property="og:description"
+      content="Student-support platform rebuilt in Elixir / Phoenix / Ash. 560+ tests, 24 ADRs, 22 phase plans. Read the engineering journal or click in as a demo admin."
+    />
+    <meta property="og:image" content={~p"/images/og-card.png"} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/png" href={~p"/images/logo-square.png"} />
     <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
