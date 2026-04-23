@@ -119,10 +119,29 @@ defmodule Intellispark.Integrations.Workers.IngestionWorker do
     :ok
   end
 
-  defp get_error_input(%{changeset: %{params: params}}) when is_map(params), do: params
+  defp get_error_input(%{changeset: %Ash.Changeset{params: params}}) when is_map(params),
+    do: params
+
   defp get_error_input(%{input: input}) when is_map(input), do: input
   defp get_error_input(_), do: %{}
 
+  defp format_error(%{errors: errors}) when is_list(errors) and errors != [] do
+    errors
+    |> Enum.map(&format_single_error/1)
+    |> Enum.uniq()
+    |> Enum.join("; ")
+  end
+
   defp format_error(err) when is_exception(err), do: Exception.message(err)
   defp format_error(err), do: inspect(err)
+
+  defp format_single_error(%{field: field, message: message})
+       when is_atom(field) and is_binary(message),
+       do: "#{field}: #{message}"
+
+  defp format_single_error(%{field: field}) when is_atom(field),
+    do: "#{field}: is invalid"
+
+  defp format_single_error(err) when is_exception(err), do: Exception.message(err)
+  defp format_single_error(err), do: inspect(err)
 end
