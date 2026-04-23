@@ -270,15 +270,16 @@ defmodule IntellisparkWeb.OnboardingLive.Show do
   def handle_event("skip_step", _params, socket), do: advance(socket)
 
   def handle_event("submit_school_profile", %{"school" => params}, socket) do
-    case Ash.update(socket.assigns.form.source, params,
-           actor: socket.assigns.current_user,
-           domain: Accounts
-         ) do
+    case AshPhoenix.Form.submit(socket.assigns.form, params: params) do
       {:ok, _school} ->
         advance(socket)
 
-      {:error, error} ->
-        {:noreply, assign(socket, error_message: error_summary(error))}
+      {:error, form} ->
+        {:noreply,
+         assign(socket,
+           form: form,
+           error_message: "Could not save — check the fields and try again."
+         )}
     end
   end
 
@@ -444,6 +445,4 @@ defmodule IntellisparkWeb.OnboardingLive.Show do
       Enum.any?(user.school_memberships || [], &(&1.role == :admin))
   end
 
-  defp error_summary(%Ash.Error.Invalid{} = err), do: Exception.message(err)
-  defp error_summary(_), do: "Could not save — try again."
 end
