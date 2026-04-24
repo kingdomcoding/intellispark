@@ -98,10 +98,16 @@ defmodule Intellispark.Integrations.EmbedToken do
       filter expr(token == ^arg(:token))
       multitenancy :bypass
     end
+
+    read :demo_latest do
+      filter expr(audience == :xello and is_nil(revoked_at))
+      prepare build(sort: [inserted_at: :desc], limit: 1)
+      multitenancy :bypass
+    end
   end
 
   policies do
-    policy action(:by_token) do
+    policy action([:by_token, :demo_latest]) do
       authorize_if always()
     end
 

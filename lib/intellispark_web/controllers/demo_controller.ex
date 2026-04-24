@@ -5,8 +5,9 @@ defmodule IntellisparkWeb.DemoController do
 
   alias Intellispark.Accounts.{DemoSession, User}
 
+  alias Intellispark.Integrations.EmbedToken
+
   @session_ttl_minutes 120
-  @xello_embed_token "lMTWIUzOLQJlAZL7P_NgU7W23ubE8ZpSZxKd7FpT2Yw"
 
   def create_session(conn, %{"persona" => persona})
       when persona in ~w(district_admin counselor xello_embed) do
@@ -37,8 +38,17 @@ defmodule IntellisparkWeb.DemoController do
   end
 
   defp do_create(:xello_embed, conn) do
-    token = Application.get_env(:intellispark, :demo_xello_token, @xello_embed_token)
-    redirect(conn, to: ~p"/embed/student/#{token}")
+    case EmbedToken
+         |> Ash.Query.for_read(:demo_latest)
+         |> Ash.read_one(authorize?: false) do
+      {:ok, %{token: token}} ->
+        redirect(conn, to: ~p"/embed/student/#{token}")
+
+      _ ->
+        conn
+        |> put_flash(:error, "Xello embed demo isn't available yet.")
+        |> redirect(to: ~p"/")
+    end
   end
 
   defp put_user_token(conn, user) do

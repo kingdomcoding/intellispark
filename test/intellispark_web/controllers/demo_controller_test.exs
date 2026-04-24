@@ -3,10 +3,12 @@ defmodule IntellisparkWeb.DemoControllerTest do
 
   import Intellispark.StudentsFixtures
 
+  alias Intellispark.Integrations
+
   setup tags do
     Intellispark.DataCase.setup_sandbox(tags)
 
-    %{district: _district, school: school, admin: _admin} = setup_world()
+    %{district: _district, school: school, admin: world_admin} = setup_world()
 
     admin =
       register!("admin@sandboxhigh.edu", "phase1-demo-pass")
@@ -17,7 +19,7 @@ defmodule IntellisparkWeb.DemoControllerTest do
       register!("counselor@sandboxhigh.edu", "phase1-demo-pass")
       |> with_membership!(school.id, :counselor)
 
-    %{school: school, admin: admin, counselor: counselor}
+    %{school: school, admin: admin, counselor: counselor, world_admin: world_admin}
   end
 
   describe "POST /demo/:persona" do
@@ -36,12 +38,30 @@ defmodule IntellisparkWeb.DemoControllerTest do
       assert get_session(conn, :demo_session_id)
     end
 
-    test "xello_embed redirects directly to /embed/student/...", %{conn: conn} do
+    test "xello_embed redirects directly to /embed/student/...", %{
+      conn: conn,
+      school: school,
+      world_admin: world_admin
+    } do
+      student = create_student!(school)
+
+      {:ok, embed} =
+        Integrations.mint_embed_token(%{student_id: student.id, audience: :xello},
+          actor: world_admin,
+          tenant: school.id
+        )
+
       conn = post(conn, ~p"/demo/xello_embed")
 
-      location = redirected_to(conn)
-      assert String.starts_with?(location, "/embed/student/")
+      assert redirected_to(conn) == ~p"/embed/student/#{embed.token}"
       refute get_session(conn, :demo_session_id)
+    end
+
+    test "xello_embed falls back to / with a flash when no token exists", %{conn: conn} do
+      conn = post(conn, ~p"/demo/xello_embed")
+
+      assert redirected_to(conn) == ~p"/"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "Xello embed demo"
     end
 
     test "unknown persona returns 404", %{conn: conn} do

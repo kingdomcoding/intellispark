@@ -50,6 +50,7 @@ defmodule IntellisparkWeb.Router do
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {IntellisparkWeb.Layouts, :root}
+    plug :protect_from_forgery
     plug :put_embed_csp
   end
 
