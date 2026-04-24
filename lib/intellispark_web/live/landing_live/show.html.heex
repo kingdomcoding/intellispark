@@ -35,41 +35,38 @@
         </div>
       </div>
 
-      <form action={~p"/demo/district_admin"} method="post" class="mt-xl">
-        <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-        <button
-          type="submit"
-          class="inline-flex items-center gap-xs px-xl py-md rounded-md bg-brand text-white font-medium hover:bg-brand-700 transition-colors"
-        >
-          Sign in as a demo admin
-          <span class="hero-arrow-right-mini size-4"></span>
-        </button>
-      </form>
+      <div class="mt-xl max-w-[28rem] space-y-sm">
+        <form action={~p"/demo/district_admin"} method="post">
+          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+          <button
+            type="submit"
+            class="w-full inline-flex items-center justify-center gap-xs px-xl py-md rounded-md bg-brand text-white font-medium hover:bg-brand-700 transition-colors"
+          >
+            Sign in as a demo admin
+            <span class="hero-arrow-right-mini size-4"></span>
+          </button>
+        </form>
 
-      <div class="mt-md flex flex-wrap items-baseline gap-x-xs gap-y-xs text-sm text-azure">
-        <span>or explore as</span>
-        <form action={~p"/demo/counselor"} method="post" class="inline">
-          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-          <button
-            type="submit"
-            title="Scoped view at one school. Sees only their team's students; can't transfer students or manage integrations."
-            class="text-brand hover:text-brand-700 underline underline-offset-2"
-          >
-            a counselor
-          </button>
-        </form>
-        <span>or</span>
-        <form action={~p"/demo/xello_embed"} method="post" class="inline">
-          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-          <button
-            type="submit"
-            title="The public-iframe surface a Xello partner sees. No auth chrome; just the embedded student profile."
-            class="text-brand hover:text-brand-700 underline underline-offset-2"
-          >
-            a Xello embed partner
-          </button>
-        </form>
-        <span>.</span>
+        <div class="grid grid-cols-2 gap-sm">
+          <form action={~p"/demo/counselor"} method="post">
+            <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+            <button
+              type="submit"
+              class="w-full inline-flex items-center justify-center px-md py-sm rounded-md border border-brand/40 text-brand text-sm font-medium hover:bg-brand/5 transition-colors"
+            >
+              Counselor
+            </button>
+          </form>
+          <form action={~p"/demo/xello_embed"} method="post">
+            <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+            <button
+              type="submit"
+              class="w-full inline-flex items-center justify-center px-md py-sm rounded-md border border-brand/40 text-brand text-sm font-medium hover:bg-brand/5 transition-colors"
+            >
+              Xello embed
+            </button>
+          </form>
+        </div>
       </div>
     </div>
 

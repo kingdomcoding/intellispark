@@ -23,7 +23,7 @@ defmodule IntellisparkWeb.LandingLive.ShowTest do
     {:ok, _lv, html} = live(conn, ~p"/")
     assert html =~ ~s|action="/demo/counselor"|
     assert html =~ ~s|action="/demo/xello_embed"|
-    assert html =~ "a counselor"
-    assert html =~ "a Xello embed partner"
+    assert html =~ "Counselor"
+    assert html =~ "Xello embed"
   end
 end
