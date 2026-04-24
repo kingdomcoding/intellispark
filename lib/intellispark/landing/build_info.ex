@@ -11,6 +11,7 @@ defmodule Intellispark.Landing.BuildInfo do
   def commit_subject, do: Map.get(info(), "commit_subject", "")
   def commit_timestamp, do: Map.get(info(), "commit_timestamp", 0)
   def phase_tags, do: Map.get(info(), "phase_tags", [])
+  def adr_count, do: Map.get(info(), "adr_count", 0)
   def built_at, do: Map.get(info(), "built_at", 0)
 
   def info do
