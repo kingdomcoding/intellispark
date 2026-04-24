@@ -257,7 +257,7 @@ defmodule IntellisparkWeb.Layouts do
 
     <.live_flash_group flash={@flash} />
 
-    <main class="min-h-[calc(100vh-4rem)] bg-whitesmoke">
+    <main class="bg-whitesmoke">
       {render_slot(@inner_block)}
     </main>
 

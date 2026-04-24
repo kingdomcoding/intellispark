@@ -1,153 +1,160 @@
 {
-  "commit_sha": "aa840aa2aa9cc6aff57dfd650933eef0ac83d24d",
   "phase_tags": [
     {
       "tag": "v0.0.0-phase-0-complete",
       "timestamp": 1776427836,
-      "commit_sha": "82629cd",
-      "subject": "docs: README + ADR 001 'Build on the Ash Framework'"
+      "subject": "docs: README + ADR 001 'Build on the Ash Framework'",
+      "commit_sha": "82629cd"
     },
     {
       "tag": "v0.1.0-phase-1-complete",
       "timestamp": 1776435861,
-      "commit_sha": "866db6d",
-      "subject": "Phase 1: Authentication & Multi-Tenant Foundations"
+      "subject": "Phase 1: Authentication & Multi-Tenant Foundations",
+      "commit_sha": "866db6d"
     },
     {
       "tag": "v0.1.5-school-invitations",
       "timestamp": 1776635875,
-      "commit_sha": "531e60c",
-      "subject": "Phase 1.5 — admin-driven school invitations + invite-only onboarding"
+      "subject": "Phase 1.5 — admin-driven school invitations + invite-only onboarding",
+      "commit_sha": "531e60c"
     },
     {
       "tag": "v0.2.0-phase-2-complete",
       "timestamp": 1776673391,
-      "commit_sha": "366d30d",
-      "subject": "Phase 2 — Students, Tags, Custom Lists"
+      "subject": "Phase 2 — Students, Tags, Custom Lists",
+      "commit_sha": "366d30d"
     },
     {
       "tag": "v0.2.1-phase-2-patch",
       "timestamp": 1776678638,
-      "commit_sha": "f34bb5f",
-      "subject": "Phase 2 patch — UX + realtime fixes"
+      "subject": "Phase 2 patch — UX + realtime fixes",
+      "commit_sha": "f34bb5f"
     },
     {
       "tag": "v0.3.0-phase-3-complete",
       "timestamp": 1776681755,
-      "commit_sha": "b11a785",
-      "subject": "Phase 3 — Student Hub"
+      "subject": "Phase 3 — Student Hub",
+      "commit_sha": "b11a785"
     },
     {
       "tag": "v0.4.0-phase-4-complete",
       "timestamp": 1776694406,
-      "commit_sha": "53c3a0d",
-      "subject": "Phase 4 — Flags (with AshStateMachine + AshOban)"
+      "subject": "Phase 4 — Flags (with AshStateMachine + AshOban)",
+      "commit_sha": "53c3a0d"
     },
     {
       "tag": "v0.5.0-phase-5-complete",
       "timestamp": 1776723590,
-      "commit_sha": "252fd33",
-      "subject": "Phase 5 — Actions, Supports & Notes. 185 tests green. Three new resources, two state machines, two Oban digest workers, three new Hub panels + modals + detail sheet, Notes timeline merge, open_supports_count aggregate, ADR-007."
+      "subject": "Phase 5 — Actions, Supports & Notes. 185 tests green. Three new resources, two state machines, two Oban digest workers, three new Hub panels + modals + detail sheet, Notes timeline merge, open_supports_count aggregate, ADR-007.",
+      "commit_sha": "252fd33"
     },
     {
       "tag": "v0.6.0-phase-6-complete",
       "timestamp": 1776771304,
-      "commit_sha": "da77011",
-      "subject": "Phase 6 — High 5s. 224 tests green. Three new Recognition resources, 128-bit token-based public view at /high-fives/:token, bulk send via Ash.bulk_create with partial-failure reporting, notifier + Oban email delivery, recent + previous panels + bulk modal, roster + header count wiring + no-high-five-in-30-days filter, timeline extension, ADR-008."
+      "subject": "Phase 6 — High 5s. 224 tests green. Three new Recognition resources, 128-bit token-based public view at /high-fives/:token, bulk send via Ash.bulk_create with partial-failure reporting, notifier + Oban email delivery, recent + previous panels + bulk modal, roster + header count wiring + no-high-five-in-30-days filter, timeline extension, ADR-008.",
+      "commit_sha": "da77011"
     },
     {
       "tag": "v0.7.0-phase-7-complete",
       "timestamp": 1776799916,
-      "commit_sha": "d525b59",
-      "subject": "Phase 7 — Surveys Framework + Get to Know Me. 280 tests green. 5 new Assessments resources, 22-character token-based student-facing LiveView at /surveys/:token with orange gradient, auto-save upsert via :save_progress, bulk assign via Ash.bulk_create with two modes, AshOban hourly expiry trigger + daily reminder scanner, Forms & Surveys hub panel between Notes and Activity, 9 seeded Get to Know Me questions, ADR-009."
+      "subject": "Phase 7 — Surveys Framework + Get to Know Me. 280 tests green. 5 new Assessments resources, 22-character token-based student-facing LiveView at /surveys/:token with orange gradient, auto-save upsert via :save_progress, bulk assign via Ash.bulk_create with two modes, AshOban hourly expiry trigger + daily reminder scanner, Forms & Surveys hub panel between Notes and Activity, 9 seeded Get to Know Me questions, ADR-009.",
+      "commit_sha": "d525b59"
     },
     {
       "tag": "v0.8.0-phase-8-complete",
       "timestamp": 1776841776,
-      "commit_sha": "5846296",
-      "subject": "Phase 8 — Insightfull Survey + 13 SEL Dimensions + Indicator Scoring. 314 tests + 2 properties green. New Intellispark.Indicators domain with IndicatorScore resource (paper-trailed, upsert by student+dimension), pure Scoring module with 2.5/3.75 thresholds + property-based monotonicity tests, submit->Oban pipeline via EnqueueIndicatorScoring after_action + ComputeIndicatorScoresWorker on :indicators queue, 13 compile-time-unrolled Student calculations (student.belonging, ..., student.well_being), Hub Key SEL & Well-Being Indicators panel with 2-column chip grid + PubSub reload, 13 per-dimension custom-list filters via exists() SQL pushdown, mix indicators.recompute idempotent backfill task, 26-item Insightfull seed (2 per dim), timeline integration tagged :indicator_event, ADR-010."
+      "subject": "Phase 8 — Insightfull Survey + 13 SEL Dimensions + Indicator Scoring. 314 tests + 2 properties green. New Intellispark.Indicators domain with IndicatorScore resource (paper-trailed, upsert by student+dimension), pure Scoring module with 2.5/3.75 thresholds + property-based monotonicity tests, submit->Oban pipeline via EnqueueIndicatorScoring after_action + ComputeIndicatorScoresWorker on :indicators queue, 13 compile-time-unrolled Student calculations (student.belonging, ..., student.well_being), Hub Key SEL & Well-Being Indicators panel with 2-column chip grid + PubSub reload, 13 per-dimension custom-list filters via exists() SQL pushdown, mix indicators.recompute idempotent backfill task, 26-item Insightfull seed (2 per dim), timeline integration tagged :indicator_event, ADR-010.",
+      "commit_sha": "5846296"
     },
     {
       "tag": "v0.9.0-phase-9-complete",
       "timestamp": 1776850189,
-      "commit_sha": "be84918",
-      "subject": "Phase 9 — Insights view. 335 tests + 2 properties green. Full-screen /insights LiveView with 13-dimension sidebar, individual breakdown table, pure-SVG donut chart + legend, three cohort modes (student_ids CSV / list_id / school-wide), dimension switching via push_patch, CSV export controller at /insights/export.csv with NimbleCSV, bulk-toolbar Insights icon enabled on /students, 'View insights' header link on /lists/:id, Donut styleguide section, ADR-013."
+      "subject": "Phase 9 — Insights view. 335 tests + 2 properties green. Full-screen /insights LiveView with 13-dimension sidebar, individual breakdown table, pure-SVG donut chart + legend, three cohort modes (student_ids CSV / list_id / school-wide), dimension switching via push_patch, CSV export controller at /insights/export.csv with NimbleCSV, bulk-toolbar Insights icon enabled on /students, 'View insights' header link on /lists/:id, Donut styleguide section, ADR-013.",
+      "commit_sha": "be84918"
     },
     {
       "tag": "v0.10.0-phase-10-complete",
       "timestamp": 1776860355,
-      "commit_sha": "9b9f717",
-      "subject": "Phase 10 — Teams, Key Connections, Strengths. 363 tests green. Three new resources (TeamMembership, KeyConnection, Strength) under Intellispark.Teams domain, teacher-class read scoping via TeacherOnlySeesTeamStudents FilterCheck + AdminOrClinicalRoleInSchool SimpleCheck, three Hub panels (role-grouped Team Members, 2-column Strengths + Key Connections), three add modals, bulk 'Assign team members' toolbar action, Phase-11-ready add_members_from_roster bulk upsert, timeline integration with 3 new event kinds, seed block for Marcus, ADR-014."
+      "subject": "Phase 10 — Teams, Key Connections, Strengths. 363 tests green. Three new resources (TeamMembership, KeyConnection, Strength) under Intellispark.Teams domain, teacher-class read scoping via TeacherOnlySeesTeamStudents FilterCheck + AdminOrClinicalRoleInSchool SimpleCheck, three Hub panels (role-grouped Team Members, 2-column Strengths + Key Connections), three add modals, bulk 'Assign team members' toolbar action, Phase-11-ready add_members_from_roster bulk upsert, timeline integration with 3 new event kinds, seed block for Marcus, ADR-014.",
+      "commit_sha": "9b9f717"
     },
     {
       "tag": "v0.10.5-phase-10.5-complete",
       "timestamp": 1776864357,
-      "commit_sha": "67c335f",
-      "subject": "Phase 10.5 — CustomList Composer UI. 375 tests green. Filter bar grows tag/status/grade/enrollment controls + Save view. /lists grows ⋯ menu with Rename/Edit filters/Delete. Shared <.list_composer> LiveComponent + AshArchival on CustomList + OwnerOrAdminForCustomList SimpleCheck (admin override). ADR-012."
+      "subject": "Phase 10.5 — CustomList Composer UI. 375 tests green. Filter bar grows tag/status/grade/enrollment controls + Save view. /lists grows ⋯ menu with Rename/Edit filters/Delete. Shared <.list_composer> LiveComponent + AshArchival on CustomList + OwnerOrAdminForCustomList SimpleCheck (admin override). ADR-012.",
+      "commit_sha": "67c335f"
     },
     {
       "tag": "v0.10.5.1-phase-3.5-complete",
       "timestamp": 1776868550,
-      "commit_sha": "2784100",
-      "subject": "Phase 3.5 — Hub tab framework. 387 tests green. URL-driven tab strip replaces side-sheets on desktop; mobile keeps sheet pattern. New parser, strip component, FlagDetailPane + SupportDetailPane extraction. ADR-015."
+      "subject": "Phase 3.5 — Hub tab framework. 387 tests green. URL-driven tab strip replaces side-sheets on desktop; mobile keeps sheet pattern. New parser, strip component, FlagDetailPane + SupportDetailPane extraction. ADR-015.",
+      "commit_sha": "2784100"
     },
     {
       "tag": "v0.10.5.2-phase-6.5-complete",
       "timestamp": 1776872287,
-      "commit_sha": "70af7c5",
-      "subject": "Phase 6.5 — Branded email templates + weekly digest. 411 tests green. EmailLayout polish (logo, gradient, branded footer, pill_green title); per-event template refresh with first-name salutation; User.email_preferences JSONB + EmailPreferences.opted_in?/2 + /me/email-preferences LV; WeeklyDigestComposer + Email + Worker (cron Mon 7AM UTC, unique 24h); HighFive :resend action with resent_at audit. ADR-016."
+      "subject": "Phase 6.5 — Branded email templates + weekly digest. 411 tests green. EmailLayout polish (logo, gradient, branded footer, pill_green title); per-event template refresh with first-name salutation; User.email_preferences JSONB + EmailPreferences.opted_in?/2 + /me/email-preferences LV; WeeklyDigestComposer + Email + Worker (cron Mon 7AM UTC, unique 24h); HighFive :resend action with resent_at audit. ADR-016.",
+      "commit_sha": "70af7c5"
     },
     {
       "tag": "v0.10.5.3-phase-4-retrofit-complete",
       "timestamp": 1776882081,
-      "commit_sha": "b55c71b",
-      "subject": "Phase 4 retrofit — close-flow restructure. 416 tests green. Inline Check-up date input + red Close Flag button replaces old Close-button-then-expand pattern. resolution_note becomes optional; followup_at added as optional arg to :close_with_resolution. Phase 3.5 deprecated sheet-event shims removed. ADR-017."
+      "subject": "Phase 4 retrofit — close-flow restructure. 416 tests green. Inline Check-up date input + red Close Flag button replaces old Close-button-then-expand pattern. resolution_note becomes optional; followup_at added as optional arg to :close_with_resolution. Phase 3.5 deprecated sheet-event shims removed. ADR-017.",
+      "commit_sha": "b55c71b"
     },
     {
       "tag": "v0.10.5.4-phase-6-retrofit-complete",
       "timestamp": 1776896053,
-      "commit_sha": "e4b6a12",
-      "subject": "Phase 6 retrofit: rich-text High 5 editor + Re-send modal + per-row icon + 425 tests green"
+      "subject": "Phase 6 retrofit: rich-text High 5 editor + Re-send modal + per-row icon + 425 tests green",
+      "commit_sha": "e4b6a12"
     },
     {
       "tag": "v0.10.5.5-phase-18.5-complete",
       "timestamp": 1776900215,
-      "commit_sha": "e443af0",
-      "subject": "Phase 18.5: tiers + onboarding wizard + billing stub + 442 tests green"
+      "subject": "Phase 18.5: tiers + onboarding wizard + billing stub + 442 tests green",
+      "commit_sha": "e443af0"
     },
     {
       "tag": "v0.10.5.4-phase-3-10-retrofit-complete",
       "timestamp": 1776905982,
-      "commit_sha": "893f340",
-      "subject": "docs(readme): add test-count line to Phase 3+10 retrofit section"
+      "subject": "docs(readme): add test-count line to Phase 3+10 retrofit section",
+      "commit_sha": "893f340"
     },
     {
       "tag": "v0.11.0-phase-11-complete",
       "timestamp": 1776909428,
-      "commit_sha": "39696bd",
-      "subject": "Phase 11: SIS ingestion + Xello bidirectional embed + 495 tests green"
+      "subject": "Phase 11: SIS ingestion + Xello bidirectional embed + 495 tests green",
+      "commit_sha": "39696bd"
     },
     {
       "tag": "v0.11.5-student-lifecycle-complete",
       "timestamp": 1776945182,
-      "commit_sha": "5069e49",
-      "subject": "Phase 11.5 — Student Lifecycle Actions (508 tests green)"
+      "subject": "Phase 11.5 — Student Lifecycle Actions (508 tests green)",
+      "commit_sha": "5069e49"
     },
     {
       "tag": "v0.14.0-scholarcentric-complete",
       "timestamp": 1776950161,
-      "commit_sha": "ed3d9c6",
-      "subject": "Phase 14 — ScholarCentric + Academic Risk Index + About-the-Student tab (552 tests green)"
+      "subject": "Phase 14 — ScholarCentric + Academic Risk Index + About-the-Student tab (552 tests green)",
+      "commit_sha": "ed3d9c6"
     },
     {
       "tag": "v0.15.0-deployment-complete",
       "timestamp": 1776962884,
-      "commit_sha": "a1d32d2",
-      "subject": "Phase 18 — Deployment, CI/CD & Infrastructure"
+      "subject": "Phase 18 — Deployment, CI/CD & Infrastructure",
+      "commit_sha": "a1d32d2"
+    },
+    {
+      "tag": "v0.16.0-landing-page-complete",
+      "timestamp": 1776987398,
+      "subject": "Landing page",
+      "commit_sha": "e743c8d"
     }
   ],
-  "built_at": 1776981468,
-  "commit_short_sha": "aa840aa",
-  "commit_subject": "feat(landing): scrolled content layers — phase timeline + architecture + stack + why Ash (LP-3)",
-  "commit_timestamp": 1776981367
+  "adr_count": 23,
+  "commit_subject": "revert(landing): drop engineering journal + about page + restore 'What is this?'",
+  "commit_timestamp": 1776987354,
+  "built_at": 1776989366,
+  "commit_sha": "99cbf18bce509c25224cd83d72e4636b1d8d4025",
+  "commit_short_sha": "99cbf18"
 }

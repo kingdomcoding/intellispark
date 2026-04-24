@@ -11,6 +11,7 @@ defmodule Mix.Tasks.Landing.RecordBuildInfo do
       commit_subject: cmd(["git", "log", "-1", "--format=%s"]),
       commit_timestamp: to_integer(cmd(["git", "log", "-1", "--format=%ct"])),
       phase_tags: phase_tags(),
+      adr_count: adr_count(),
       built_at: System.os_time(:second)
     }
 
@@ -49,6 +50,12 @@ defmodule Mix.Tasks.Landing.RecordBuildInfo do
       _ ->
         nil
     end
+  end
+
+  defp adr_count do
+    "docs/architecture/decisions/*.md"
+    |> Path.wildcard()
+    |> length()
   end
 
   defp to_integer(""), do: 0
