@@ -111,7 +111,7 @@ defmodule IntellisparkWeb.Router do
   scope "/", IntellisparkWeb do
     pipe_through :public_browser
 
-    live_session :public, on_mount: [] do
+    live_session :public, on_mount: [{IntellisparkWeb.LiveUserAuth, :assign_signed_in}] do
       live "/", LandingLive.Show
       live "/demo", DemoLive.Show
     end

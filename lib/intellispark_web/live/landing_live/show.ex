@@ -36,7 +36,6 @@ defmodule IntellisparkWeb.LandingLive.Show do
      |> assign(:proof, %{tests: test_count, phases: phase_count, adrs: adr_count})
      |> assign(:last_commit, BuildInfo.last_commit_short())
      |> assign(:commit_subject, BuildInfo.commit_subject())
-     |> assign(:commit_timestamp, BuildInfo.commit_timestamp())
-     |> assign(:signed_in?, false)}
+     |> assign(:commit_timestamp, BuildInfo.commit_timestamp())}
   end
 end

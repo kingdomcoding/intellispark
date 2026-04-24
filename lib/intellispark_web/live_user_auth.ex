@@ -37,6 +37,11 @@ defmodule IntellisparkWeb.LiveUserAuth do
     end
   end
 
+  def on_mount(:assign_signed_in, _params, session, socket) do
+    signed_in? = match?({:ok, _}, session_user(session))
+    {:cont, Phoenix.Component.assign(socket, :signed_in?, signed_in?)}
+  end
+
   def on_mount(:require_district_admin, _params, _session, socket) do
     user = socket.assigns[:current_user]
 

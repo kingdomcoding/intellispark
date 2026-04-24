@@ -27,8 +27,7 @@ defmodule IntellisparkWeb.DemoLive.Show do
     {:ok,
      socket
      |> assign(:page_title, "Pick a demo persona — Intellispark")
-     |> assign(:personas, @personas)
-     |> assign(:signed_in?, false)}
+     |> assign(:personas, @personas)}
   end
 
   @impl true
