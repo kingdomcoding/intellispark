@@ -226,27 +226,35 @@ defmodule IntellisparkWeb.Layouts do
 
   attr :flash, :map, default: %{}
   attr :signed_in?, :boolean, default: false
+  attr :last_commit, :string, default: nil
+  attr :commit_timestamp, :integer, default: nil
+  attr :commit_subject, :string, default: nil
   slot :inner_block, required: true
 
   def public(assigns) do
     ~H"""
     <header class="border-b border-abbey/10 bg-white">
-      <div class="container-lg flex items-center justify-between py-sm">
+      <div class="container-lg grid grid-cols-3 items-center py-sm">
         <.link navigate={~p"/"} class="flex items-center gap-xs font-semibold text-abbey">
           <.logo />
         </.link>
-        <nav class="flex items-center gap-md text-sm text-azure">
+
+        <p class="hidden sm:block text-center text-sm text-azure">
+          A K-12 student-support platform, rebuilt.
+        </p>
+
+        <nav class="flex items-center justify-end gap-md text-sm">
           <.link
             :if={@signed_in?}
             navigate={~p"/students"}
-            class="text-brand font-medium"
+            class="text-brand font-medium hover:text-brand-700"
           >
             Go to app →
           </.link>
           <.link
             :if={!@signed_in?}
             navigate={~p"/sign-in"}
-            class="hover:text-abbey"
+            class="text-azure hover:text-abbey"
           >
             Sign in
           </.link>
@@ -261,20 +269,77 @@ defmodule IntellisparkWeb.Layouts do
       {render_slot(@inner_block)}
     </main>
 
-    <footer class="mt-2xl border-t border-abbey/10 py-lg text-center text-xs text-azure">
-      <p>
-        Built by Oreoluwa James · source on
-        <a
-          href="https://github.com/kingdomcoding/intellispark"
-          class="text-brand underline"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          GitHub
-        </a>
-      </p>
+    <.public_footer
+      last_commit={@last_commit}
+      commit_timestamp={@commit_timestamp}
+      commit_subject={@commit_subject}
+    />
+    """
+  end
+
+  attr :last_commit, :string, default: nil
+  attr :commit_timestamp, :integer, default: nil
+  attr :commit_subject, :string, default: nil
+
+  defp public_footer(assigns) do
+    ~H"""
+    <footer class="bg-white border-t border-abbey/10">
+      <div class="container-lg grid grid-cols-1 md:grid-cols-3 gap-lg py-xl text-sm">
+        <div>
+          <p class="font-semibold text-abbey">Built by Oreoluwa James</p>
+          <p class="mt-xs text-azure">Elixir backend engineer.</p>
+        </div>
+
+        <div class="space-y-xs">
+          <p class="text-xs uppercase tracking-wider text-azure">Contact</p>
+          <p>
+            <span class="text-azure w-20 inline-block">Email</span>
+            <a
+              href="mailto:oreoluwajames@gmail.com"
+              class="text-brand hover:text-brand-700"
+            >
+              oreoluwajames@gmail.com
+            </a>
+          </p>
+          <p>
+            <span class="text-azure w-20 inline-block">GitHub</span>
+            <a
+              href="https://github.com/kingdomcoding/intellispark"
+              class="text-brand hover:text-brand-700"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              kingdomcoding/intellispark
+            </a>
+          </p>
+        </div>
+
+        <div :if={@last_commit} class="md:text-right">
+          <p class="text-xs uppercase tracking-wider text-azure">Deployed</p>
+          <p class="mt-xs">
+            <code class="font-mono text-xs text-brand">{@last_commit}</code>
+            <span class="text-azure">· {relative_time(@commit_timestamp)}</span>
+          </p>
+          <p class="mt-xs text-xs text-azure truncate">{@commit_subject}</p>
+        </div>
+      </div>
     </footer>
     """
+  end
+
+  defp relative_time(nil), do: "just now"
+
+  defp relative_time(ts) when is_integer(ts) do
+    now = System.os_time(:second)
+    diff = max(now - ts, 0)
+
+    cond do
+      diff < 60 -> "just now"
+      diff < 3600 -> "#{div(diff, 60)}m ago"
+      diff < 86_400 -> "#{div(diff, 3600)}h ago"
+      diff < 604_800 -> "#{div(diff, 86_400)}d ago"
+      true -> "#{div(diff, 604_800)}w ago"
+    end
   end
 
   attr :flash, :map, required: true

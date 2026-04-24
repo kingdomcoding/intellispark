@@ -1,48 +1,90 @@
-<Layouts.public flash={@flash} signed_in?={@signed_in?}>
-  <div class="md:hidden bg-cream/40 border-b border-abbey/10 px-md py-xs text-xs text-abbey">
-    Intellispark's app is desktop-first. Open on a laptop for the best demo experience.
-  </div>
+<Layouts.public
+  flash={@flash}
+  signed_in?={@signed_in?}
+  last_commit={@last_commit}
+  commit_timestamp={@commit_timestamp}
+  commit_subject={@commit_subject}
+>
+  <section class="container-lg grid grid-cols-1 md:grid-cols-2 gap-xl items-center py-2xl">
+    <div>
+      <p class="text-xs uppercase tracking-[0.1em] text-azure font-medium">
+        Portfolio project · live demo
+      </p>
 
-  <section class="mx-auto max-w-4xl px-md py-2xl text-center">
-    <h1 class="text-4xl sm:text-5xl font-bold text-abbey">Intellispark</h1>
-    <p class="mt-sm text-lg text-azure">
-      Student-support platform reconstructed in
-      <span class="font-medium text-brand">Elixir · Phoenix · Ash</span>.
-    </p>
+      <h1 class="mt-sm text-5xl md:text-6xl font-bold text-abbey tracking-tight">
+        Intellispark
+      </h1>
 
-    <p class="mt-md text-azure font-mono text-sm">
-      {@proof.phases} phases · {@proof.tests} tests · {@proof.adrs} ADRs
-    </p>
+      <p class="mt-md text-xl text-abbey leading-snug max-w-lg">
+        A K-12 student-support platform, reconstructed in
+        <span class="text-brand font-medium">Elixir · Phoenix · Ash</span>.
+      </p>
 
-    <div class="mt-xl flex flex-col sm:flex-row items-center justify-center gap-md">
-      <.link
-        navigate={~p"/demo"}
-        class="inline-flex items-center gap-2 px-lg py-md rounded-md bg-brand text-white font-medium hover:bg-brand-700"
-      >
-        Open the app as a demo admin
-        <span class="hero-arrow-right-mini size-4"></span>
-      </.link>
+      <div class="mt-xl grid grid-cols-3 gap-sm max-w-md">
+        <div class="border border-abbey/10 rounded-md px-md py-sm">
+          <p class="text-2xl font-bold text-abbey">{@proof.phases}</p>
+          <p class="mt-1 text-xs text-azure">tagged releases</p>
+        </div>
+        <div class="border border-abbey/10 rounded-md px-md py-sm">
+          <p class="text-2xl font-bold text-abbey">{@proof.tests}</p>
+          <p class="mt-1 text-xs text-azure">tests green</p>
+        </div>
+        <div class="border border-abbey/10 rounded-md px-md py-sm">
+          <p class="text-2xl font-bold text-abbey">{@proof.adrs}</p>
+          <p class="mt-1 text-xs text-azure">architecture decisions</p>
+        </div>
+      </div>
+
+      <form action={~p"/demo/district_admin"} method="post" class="mt-xl">
+        <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+        <button
+          type="submit"
+          class="inline-flex items-center gap-xs px-xl py-md rounded-md bg-brand text-white font-medium hover:bg-brand-700 transition-colors"
+        >
+          Sign in as a demo admin
+          <span class="hero-arrow-right-mini size-4"></span>
+        </button>
+      </form>
+
+      <p class="mt-md text-sm text-azure">
+        or
+        <.link navigate={~p"/demo"} class="text-brand hover:text-brand-700 underline">
+          pick a persona first
+        </.link>
+        (counselor or Xello embed).
+      </p>
     </div>
 
-    <form action={~p"/demo/district_admin"} method="post" class="mt-md">
-      <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-      <button type="submit" class="text-xs text-azure underline hover:text-abbey">
-        Skip the picker → sign me in as district admin
-      </button>
-    </form>
-
-    <div class="mt-2xl text-left space-y-md max-w-2xl mx-auto">
-      <h2 class="text-2xl font-semibold text-abbey">What is this?</h2>
-      <p class="text-abbey">
-        Intellispark is a faithful reconstruction of a K-12 student-support platform,
-        rebuilt from public screenshots and documentation as a portfolio project.
-        It runs here as a live demo — click the button above to sign in as a district
-        admin and explore.
+    <div class="order-first md:order-last">
+      <div class="aspect-[16/10] w-full max-w-[560px] mx-auto rounded-lg border border-abbey/10 bg-abbey/5 shadow-[0_10px_40px_rgba(0,0,0,0.08)] flex items-center justify-center">
+        <p class="text-xs text-azure">Hero screenshot placeholder</p>
+      </div>
+      <p class="mt-xs text-xs text-azure text-center max-w-[560px] mx-auto">
+        About-the-Student tab — Xello donut, six SEL skill scores, academic risk index, intervention library.
       </p>
-      <p class="text-abbey">
-        The stack is Elixir / Phoenix / LiveView / Ash. The product surface is 10
-        domains, 48+ Ash resources, and {@proof.tests} tests across 22+ phase
-        releases.
+    </div>
+  </section>
+
+  <section class="container-lg py-2xl">
+    <div class="max-w-prose space-y-md">
+      <h2 class="text-2xl font-semibold text-abbey">What is this?</h2>
+
+      <p class="text-abbey leading-relaxed">
+        Intellispark is a K-12 student-support platform I rebuilt from public screenshots
+        and documentation. It runs here as a live demo — the button up the page signs you
+        in as a district admin with full PRO-tier access.
+      </p>
+
+      <p class="text-abbey leading-relaxed">
+        The stack is Elixir 1.18, Phoenix 1.8, LiveView 1.1, Ash 3.24. The product is 10
+        domains, 48 Ash resources, and {@proof.tests} tests across {@proof.phases} tagged
+        phase releases. The prod deploy is self-hosted — Dockerised release, GitHub Actions
+        CI/CD to GHCR, Nginx Proxy Manager with Let's Encrypt.
+      </p>
+
+      <p class="text-abbey leading-relaxed">
+        None of the data is real. There are no billing hooks. The demo sandbox resets daily.
+        Every non-obvious decision has a committed ADR alongside the code.
       </p>
     </div>
   </section>

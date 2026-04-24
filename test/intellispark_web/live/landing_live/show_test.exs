@@ -2,17 +2,20 @@ defmodule IntellisparkWeb.LandingLive.ShowTest do
   use IntellisparkWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
 
-  test "renders identity + proof + CTAs", %{conn: conn} do
+  test "renders identity + proof + primary CTA", %{conn: conn} do
     {:ok, _lv, html} = live(conn, ~p"/")
 
     assert html =~ "Intellispark"
-    assert html =~ "Open the app as a demo admin"
-    assert html =~ "Read the engineering journal"
-    assert html =~ ~r/\d+ phases · \d+ tests · \d+ ADRs/
+    assert html =~ ~r/Elixir.*Phoenix.*Ash/
+    assert html =~ ~r/tagged releases/
+    assert html =~ ~r/tests green/
+    assert html =~ ~r/architecture decisions/
+    assert html =~ "Sign in as a demo admin"
   end
 
-  test "primary CTA link points at /demo", %{conn: conn} do
-    {:ok, lv, _html} = live(conn, ~p"/")
-    assert lv |> element("a", "Open the app as a demo admin") |> render() =~ ~s|href="/demo"|
+  test "primary CTA posts to /demo/district_admin", %{conn: conn} do
+    {:ok, _lv, html} = live(conn, ~p"/")
+    assert html =~ ~s|action="/demo/district_admin"|
+    assert html =~ ~s|method="post"|
   end
 end
