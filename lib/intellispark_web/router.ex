@@ -113,7 +113,6 @@ defmodule IntellisparkWeb.Router do
 
     live_session :public, on_mount: [{IntellisparkWeb.LiveUserAuth, :assign_signed_in}] do
       live "/", LandingLive.Show
-      live "/demo", DemoLive.Show
     end
 
     post "/demo/:persona", DemoController, :create_session

@@ -46,13 +46,31 @@
         </button>
       </form>
 
-      <p class="mt-md text-sm text-azure">
-        or
-        <.link navigate={~p"/demo"} class="text-brand hover:text-brand-700 underline">
-          pick a persona first
-        </.link>
-        (counselor or Xello embed).
-      </p>
+      <div class="mt-md flex flex-wrap items-baseline gap-x-xs gap-y-xs text-sm text-azure">
+        <span>or explore as</span>
+        <form action={~p"/demo/counselor"} method="post" class="inline">
+          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+          <button
+            type="submit"
+            title="Scoped view at one school. Sees only their team's students; can't transfer students or manage integrations."
+            class="text-brand hover:text-brand-700 underline underline-offset-2"
+          >
+            a counselor
+          </button>
+        </form>
+        <span>or</span>
+        <form action={~p"/demo/xello_embed"} method="post" class="inline">
+          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+          <button
+            type="submit"
+            title="The public-iframe surface a Xello partner sees. No auth chrome; just the embedded student profile."
+            class="text-brand hover:text-brand-700 underline underline-offset-2"
+          >
+            a Xello embed partner
+          </button>
+        </form>
+        <span>.</span>
+      </div>
     </div>
 
     <div class="order-first md:order-last">

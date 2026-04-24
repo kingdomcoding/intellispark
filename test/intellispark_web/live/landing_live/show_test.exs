@@ -18,4 +18,12 @@ defmodule IntellisparkWeb.LandingLive.ShowTest do
     assert html =~ ~s|action="/demo/district_admin"|
     assert html =~ ~s|method="post"|
   end
+
+  test "secondary CTAs post to counselor + xello_embed personas", %{conn: conn} do
+    {:ok, _lv, html} = live(conn, ~p"/")
+    assert html =~ ~s|action="/demo/counselor"|
+    assert html =~ ~s|action="/demo/xello_embed"|
+    assert html =~ "a counselor"
+    assert html =~ "a Xello embed partner"
+  end
 end
