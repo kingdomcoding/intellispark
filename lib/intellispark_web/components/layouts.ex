@@ -235,9 +235,9 @@ defmodule IntellisparkWeb.Layouts do
     ~H"""
     <header class="border-b border-abbey/10 bg-white">
       <div class="container-lg grid grid-cols-3 items-center py-sm">
-        <.link navigate={~p"/"} class="flex items-center gap-xs font-semibold text-abbey">
+        <div class="flex items-center">
           <.logo />
-        </.link>
+        </div>
 
         <p class="hidden sm:block text-center text-sm text-azure">
           A K-12 student-support platform, rebuilt.
